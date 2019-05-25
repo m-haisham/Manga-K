@@ -9,6 +9,6 @@ ___
 ```
 
 ---
-### features:
+### Features:
 * Download manga from mangakakalot or manganel
-* composite each chapter into a single image
+* Composite each chapter into a single image
