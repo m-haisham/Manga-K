@@ -3,6 +3,7 @@ import os
 
 if __name__ == '__main__':
     dm = MangaDownloader()
+    save_file_exists = os.path.exists(dm.settings_path)
     while(True):
         manga_url = input('Input full url to manga from mangakakalot.com|manganel.com\nURl: ')
 
@@ -22,19 +23,20 @@ if __name__ == '__main__':
 
         if manga_url[-1] == '/':
             manga_url = manga_url[0:-1]
-        
-        while True:
-            make_settings = input("Change Settings (Y/N): ")
-            if make_settings.lower() == 'y':
-                make_settings = True
-                break
-            elif make_settings.lower() == 'n':
-                make_settings = False
-                break
-            else:
-                print('pick a valid choice')
 
-        if os.path.exists(dm.settings_path) and not make_settings:
+        if save_file_exists:
+            while True:
+                make_settings = input("Change Settings (Y/N): ")
+                if make_settings.lower() == 'y':
+                    make_settings = True
+                    break
+                elif make_settings.lower() == 'n':
+                    make_settings = False
+                    break
+                else:
+                    print('pick a valid choice')
+
+        if save_file_exists and not make_settings:
             dm.load_settings()
         else:        
             while True:
