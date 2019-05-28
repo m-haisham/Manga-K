@@ -4,9 +4,6 @@ This is a program written in python and serves its purpose on console
 ___
 ### To Start:
 > run main.py
-```bash
-  py main.py
-```
 
 ---
 ### Features:
