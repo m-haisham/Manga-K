@@ -1,0 +1,47 @@
+import requests
+from bs4 import BeautifulSoup
+
+
+class MKCodec():
+    def __init__(self):
+        self.search_prefix = 'https://mangakakalot.com/search/'
+        self.search_postfix = '?page='
+
+        self.search_result = []
+        self.page_prefix = ''
+        self.current_page = 0
+        self.max_page = -1
+
+    def search(self, keyword):
+
+        if len(keyword) < len(self.search_prefix) + 3:
+            return
+
+        r = requests.get(keyword)
+        soup = BeautifulSoup(r.content, 'html.parser')
+
+        if '=' in keyword:
+            url_fragments = keyword.split('=')
+            self.current_page = int(url_fragments[-1])
+        else:
+            self.current_page = 1
+        self.populate(soup)
+
+    def populate(self, dish):
+        result_list = dish.find('div', {'class': 'panel_story_list'}).find_all('div', {'class': 'story_item'})
+        self.search_result = []
+        for result in result_list:
+            self.search_result.append({
+                'name': result.find('h3', {'class': 'story_name'}).text,
+                'href': result.find('a')['href']
+                })
+
+        try:
+            page_list = dish.find('div', {'class': 'group_page'}).find_all('a')
+        except AttributeError:
+            self.page_prefix = ''
+            self.max_page = -1
+            return
+
+        self.page_prefix = page_list[0]['href'][:-1]
+        self.max_page = int(page_list[-1].text[-2:-1])

@@ -8,14 +8,15 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
-from ImageStacking import VerticalStack
+from modules.ImageStacking import VerticalStack
 
 
 class MangaDownloader:
     def __init__(self):
         self.image_stacker = VerticalStack()
         self.settings_path = 'config.json'
-        self.settings = None
+        if self.settings_exists():
+            self.load_settings()
 
     def download_init(self):
         while(True):
@@ -233,7 +234,7 @@ class MangaDownloader:
             "keep_originals": keep_originals
         }
         with open(self.settings_path, 'w') as f:
-                json.dump(self.settings, f)
+            json.dump(self.settings, f)
     
     def load_settings(self):
         '''
@@ -241,3 +242,9 @@ class MangaDownloader:
         '''
         with open(self.settings_path, 'r') as f:
             self.settings = json.load(f)
+
+    def settings_exists(self):
+        '''
+        checks if save file exists
+        '''
+        return os.path.exists(self.settings_path)
