@@ -1,4 +1,4 @@
-# Manga Downloader
+# Manga K
 
 This is a program written in python and serves its purpose on console
 ___
@@ -8,4 +8,5 @@ ___
 ---
 ### Features:
 * Download manga from mangakakalot or manganel
+* Search for manga
 * Composite each chapter into a single image
