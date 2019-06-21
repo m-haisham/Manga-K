@@ -1,3 +1,13 @@
 # Visual Studio code files
 *.rpy
 *.pyc
+
+# Images
+*.jpg
+*.png
+
+# HTML
+*.html
+
+# other
+*.json

@@ -8,8 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
+from modules.static import Const
 from modules.ImageStacking import VerticalStack
-
 
 class MangaDownloader:
     def __init__(self):
@@ -174,15 +174,17 @@ class MangaDownloader:
 
         returns None
         """
+        
+        manga_dir = os.path.join(Const.MangaSavePath, self.get_manga_name(url))
+        composite_save_dir = os.path.join(manga_dir, 'Composites')
 
-        manga_name = self.get_manga_name(url)
-        composite_save_dir = os.path.join(manga_name, 'Composites')
-
-        if not os.path.exists(manga_name):
-            os.mkdir(manga_name)
+        if not os.path.exists(Const.MangaSavePath):
+            os.mkdir(Const.MangaSavePath)
+        if not os.path.exists(manga_dir):
+            os.mkdir(manga_dir)
         if self.settings['make_composite']:
-            if not os.path.exists(os.path.join(manga_name, 'composites')):
-                os.mkdir(os.path.join(manga_name, 'composites'))
+            if not os.path.exists(composite_save_dir):
+                os.mkdir(composite_save_dir)
 
         if chapter_list is None:
             chapter_list = self.get_chapter_list(url)
@@ -195,7 +197,7 @@ class MangaDownloader:
 
         for i in range(starting_chapter - 1, ending_chapter - 1, 1): # loop through every chapter in range
             chapter_name = chapter_list[i].split('/')[-1]
-            chapter_directory = os.path.join(manga_name, chapter_name)
+            chapter_directory = os.path.join(manga_dir, chapter_name)
             print("\nDownloading " + chapter_name)
             if not os.path.exists(chapter_directory):
                 os.mkdir(chapter_directory) # create chapter_directory

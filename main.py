@@ -1,5 +1,6 @@
 from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
+from modules.manager import MangaManager, HtmlManager
 import os
 
 def search():
@@ -130,7 +131,9 @@ def settings(dmanager):
 if __name__ == '__main__':
     dm = MangaDownloader()
     codec = MKCodec()
-    
+    manga_manager = MangaManager()
+    html_manager = HtmlManager()
+
     if not dm.settings_exists():
         settings(dm)
     
@@ -138,8 +141,9 @@ if __name__ == '__main__':
     print('')
     print('1. Search')
     print('2. Direct URL')
-    print('3. Settings')
-    print('4. Exit')
+    print('3. View')
+    print('4. Settings')
+    print('5. Exit')
     while True:
         res = input('\n//> ')
 
@@ -148,8 +152,13 @@ if __name__ == '__main__':
         elif res == '2':
             download_link(direct())
         elif res == '3':
-            settings(dm)
+            manga_manager.generate_tree()
+            html_manager.generate_web(manga_manager.tree)
+            html_manager.open()
+            break
         elif res == '4':
+            settings(dm)
+        elif res == '5':
             break
         else:
             print('Pick a valid choice')
