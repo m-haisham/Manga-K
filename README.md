@@ -12,5 +12,12 @@ ___
 * View download manga in the default browser
 * Composite each chapter into a single image
 
+### Compiling
+* Run
+```batch
+    py -m PyInstaller main.py --onefile --clean
+```
+
 ### Additional info:
-* style.css should be in same directory as main.py/exe for styling to apply
+* In case ```style.css``` has been modified, run ```stgen.py``` before compiling to update ```modules/styles.py```
+* If ```style.css``` is missing, it is generated upon running main program

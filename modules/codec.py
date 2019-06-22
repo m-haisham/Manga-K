@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-
 class MKCodec():
     def __init__(self):
         ''' 

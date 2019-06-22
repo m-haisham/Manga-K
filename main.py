@@ -1,7 +1,11 @@
-from modules.MangaDownloader import MangaDownloader
-from modules.codec import MKCodec
-from modules.manager import MangaManager, HtmlManager
 import os
+
+from modules.codec import MKCodec
+from modules.conversions import create_py_list, list_to_file
+from modules.manager import HtmlManager, MangaManager
+from modules.MangaDownloader import MangaDownloader
+from modules.static import Const
+from modules.styles import style
 
 def search():
     search = input('Enter here to search: ')
@@ -51,8 +55,7 @@ def search():
 
 def direct():
     return input('Input full url to manga from mangakakalot.com|manganel.com\nURl: ')
-
-        
+    
 def download_link(manga_url):
     while True:
         dm.print_info(manga_url)
@@ -127,16 +130,23 @@ def settings(dmanager):
             print('pick a valid choice')
     dm.save_settings(make_composites, keep_originals)
 
+def check_files(download_manager):
+    '''
+    Checks for existance of neccesary files
+    '''
+    if not os.path.exists(Const.StyleSaveFile):
+        list_to_file(style, Const.StyleSaveFile)
+    if not dm.settings_exists():
+        settings(download_manager)
 
 if __name__ == '__main__':
     dm = MangaDownloader()
     codec = MKCodec()
     manga_manager = MangaManager()
     html_manager = HtmlManager()
-
-    if not dm.settings_exists():
-        settings(dm)
     
+    check_files(dm)
+
     print('- - - Manga K - - -')
     print('')
     print('1. Search')
