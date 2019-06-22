@@ -3,6 +3,7 @@ import shutil
 import json
 import sys
 from io import BytesIO
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,6 +11,9 @@ from PIL import Image
 
 from modules.static import Const
 from modules.ImageStacking import VerticalStack
+
+def make_valid(path):
+    return re.sub(r'[/\\:*"<>|]', '', path)
 
 class MangaDownloader:
     def __init__(self):
@@ -175,7 +179,7 @@ class MangaDownloader:
         returns None
         """
         
-        manga_dir = os.path.join(Const.MangaSavePath, self.get_manga_name(url))
+        manga_dir = os.path.join(Const.MangaSavePath, make_valid(self.get_manga_name(url)))
         composite_save_dir = os.path.join(manga_dir, 'Composites')
 
         if not os.path.exists(Const.MangaSavePath):
