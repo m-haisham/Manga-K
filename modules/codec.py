@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 
 class MKCodec():
     def __init__(self):
+        ''' 
+        initialize the object
+        '''
         self.search_prefix = 'https://mangakakalot.com/search/'
         self.search_postfix = '?page='
 
@@ -13,7 +16,14 @@ class MKCodec():
         self.max_page = -1
 
     def search(self, keyword):
+        '''
+        keyword (string): word or phrase no less than three characters
 
+        returns none
+
+        Searches for the (keyword) on mangakakalot database and updates the variables
+        Search result can be accessed as MKCodec.search_result (list)
+        '''
         if len(keyword) < len(self.search_prefix) + 3:
             return
 
@@ -25,9 +35,14 @@ class MKCodec():
             self.current_page = int(url_fragments[-1])
         else:
             self.current_page = 1
-        self.populate(soup)
+        self._populate(soup)
 
-    def populate(self, dish):
+    def _populate(self, dish):
+        '''
+        dish (BeautifulSoup): Beautiful soup object
+
+        Parses the data (dish) and extracts information and updates object
+        '''
         result_list = dish.find('div', {'class': 'panel_story_list'}).find_all('div', {'class': 'story_item'})
         self.search_result = []
         for result in result_list:

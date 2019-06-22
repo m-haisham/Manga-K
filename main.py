@@ -152,10 +152,11 @@ if __name__ == '__main__':
         elif res == '2':
             download_link(direct())
         elif res == '3':
+            # View
             manga_manager.generate_tree()
             html_manager.generate_web(manga_manager.tree)
-            html_manager.open()
-            break
+            if(html_manager.open()):
+                break
         elif res == '4':
             settings(dm)
         elif res == '5':
