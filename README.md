@@ -5,8 +5,12 @@ ___
 ### To Start:
 > run main.py
 
----
+___
 ### Features:
-* Download manga from mangakakalot or manganel
 * Search for manga
+* Download manga from mangakakalot or manganel
+* View download manga in the default browser
 * Composite each chapter into a single image
+
+### Additional info:
+* style.css should be in same directory as main.py/exe for styling to apply
