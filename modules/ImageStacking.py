@@ -54,8 +54,8 @@ class VerticalStack:
         composite_image = Image.fromarray(composite_array)
         print('done!')
 
-        composite_image.save(os.path.join(save_path, self.get_last_directory(folder_path)) + end)
-        print('composite saved as', os.path.join(save_path, self.get_last_directory(folder_path)) + end)
+        composite_image.save(os.path.join(save_path, get_last_directory(folder_path)) + end)
+        print('composite saved as', os.path.join(save_path, get_last_directory(folder_path)) + end)
 
     def disect(self, image_paths, directory, key='name'):
         '''
@@ -113,17 +113,30 @@ class VerticalStack:
         returns (int): the new height keeping the aspect_ratio
         '''
         return int((height * new_width) / width)
-    
-    def get_last_directory(self, full_dir):
-        '''
-        full_dir (string): relative of absolute path
 
-        returns (string): last directory of (full_dir)
-        '''
-        full_dir = full_dir if full_dir[-1] != '/' else full_dir[:-1]
-        if '/' in full_dir:
-            dir_lst = full_dir.split('/')
-        else:
-            dir_lst = full_dir.split('\\')
-        return dir_lst[len(dir_lst) - 1]
+def get_last_directory(full_dir):
+    '''
+    full_dir (string): relative of absolute path
 
+    returns (string): last directory of (full_dir)
+    '''
+    full_dir = full_dir if full_dir[-1] != '/' else full_dir[:-1]
+    if '/' in full_dir:
+        dir_lst = full_dir.split('/')
+    else:
+        dir_lst = full_dir.split('\\')
+    return dir_lst[len(dir_lst) - 1]
+
+def dir_to_pdf(path, save_path):
+
+    # get all directory paths
+    dirs = os.listdir(path)
+
+    # first image
+    img = Image.open(os.path.join(path, dirs[0]))
+
+    # rest of the images
+    rest_list = [Image.open(os.path.join(path, directory)) for directory in dirs[1:]]
+
+    # save as pdf
+    img.save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', save_all=True, append_images=rest_list)

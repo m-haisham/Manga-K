@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from modules.codec import MKCodec
 from modules.conversions import create_py_list, list_to_file
@@ -84,51 +85,82 @@ def download_link(manga_url):
 
     dm.download_manga(manga_url, int_start, int_end, ch_lst)
 
-def settings(dmanager):
-    if dmanager.settings_exists():
-        print('- - - Settings - - -')
+def settings(dmanager, skip_check = False):
+    if not skip_check and dmanager.settings_exists():
+        # load save file
         dmanager.load_settings()
-        print('Make Composite: '+str(dmanager.settings['make_composite']))
-        print('Keep Originals: '+str(dmanager.settings['keep_originals']))
 
+        # load settings
+        settings_keys = dmanager.settings.keys()
+
+        # print page title to console
+        print('- - - Settings - - -')
+
+        # print settings to console
+        for key in settings_keys:
+            print('%s: %s' % (key, str(dmanager.settings[key])))
+
+        # ask whether to change settings
         while True:
             make_settings = input("Change Settings (Y/N): ")
             if make_settings.lower() == 'y':
                 make_settings = True
-                break
             elif make_settings.lower() == 'n':
                 make_settings = False
-                break
             else:
                 print('pick a valid choice')
+                continue
+            break
+        # exit function, not changing settings
         if not make_settings:
             return
+    # no settings saved or promted to skip, run rest of function
     else:
-        print('No Settings Saved')
+        if not skip_check:
+            print('No Settings Saved')
 
+    # create settings
     while True:
+        # whether to make composites
         make_composites = input("\nMake Composites (Y/N): ")
         if make_composites.lower() == 'y':
             make_composites = True
+            # which composition type
+            while True:
+                print('Composition types')
+                print('1: pdf')
+                print('2: jpg')
+                composition_index = input('Pick type: ')
+                if composition_index == '1':
+                    composition_type = 'pdf'
+                elif composition_index == '2':
+                    composition_type = 'image'
+                else:
+                    print('pick a valid choice')
+                    continue
+                break
+            # whether to keep seperate images
             while True:
                 keep_originals = input("Keep originals (Y/N): ")
                 if keep_originals.lower() == 'y':
-                    keep_originals = False
-                    break
-                elif keep_originals.lower() == 'n':
                     keep_originals = True
-                    break
+                elif keep_originals.lower() == 'n':
+                    keep_originals = False
                 else:
                     print('pick a valid choice')
+                    continue
+                break
             break
+        # default rest of settings
         elif make_composites.lower() == 'n':
             make_composites = False
             keep_originals = True
+            composition_type = 'pdf'
             print('Keep_originals: True')
             break
         else:
             print('pick a valid choice')
-    dm.save_settings(make_composites, keep_originals)
+    dm.save_settings(make_composites, keep_originals, composition_type)
 
 def check_files(download_manager):
     '''
@@ -136,8 +168,12 @@ def check_files(download_manager):
     '''
     if not os.path.exists(Const.StyleSaveFile):
         list_to_file(style, Const.StyleSaveFile)
-    if not dm.settings_exists():
+    if not download_manager.settings_exists():
         settings(download_manager)
+    else:
+        if not download_manager.verify_settings():
+            print('Imported settings unsupported')
+            settings(download_manager, skip_check=True)
 
 if __name__ == '__main__':
     dm = MangaDownloader()
@@ -145,7 +181,10 @@ if __name__ == '__main__':
     manga_manager = MangaManager()
     html_manager = HtmlManager()
     
+
     check_files(dm)
+
+    print(dm.settings['composition_type'])
 
     print('- - - Manga K - - -')
     print('')
@@ -158,9 +197,15 @@ if __name__ == '__main__':
         res = input('\n//> ')
 
         if res == '1':
-            download_link(search())
+            try:
+                download_link(search())
+            except Exception:
+                traceback.print_exc()
         elif res == '2':
-            download_link(direct())
+            try:
+                download_link(direct())
+            except Exception:
+                traceback.print_exc()
         elif res == '3':
             # View
             manga_manager.generate_tree()

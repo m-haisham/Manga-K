@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from PIL import Image
 
 from modules.static import Const
-from modules.ImageStacking import VerticalStack
+from modules.ImageStacking import VerticalStack, dir_to_pdf
 
 def make_valid(path):
     return re.sub(r'[/\\:*"<>|]', '', path)
@@ -210,7 +210,10 @@ class MangaDownloader:
 
             if self.settings['make_composite']:
                 print('Starting composition of', chapter_directory)
-                self.image_stacker.stack(chapter_directory, composite_save_dir)
+                if self.settings['composition_type'] == 'pdf':
+                    dir_to_pdf(chapter_directory, composite_save_dir)
+                elif self.settings['composition_type'] == 'image':
+                    self.image_stacker.stack(chapter_directory, composite_save_dir)
                 if not self.settings['keep_originals']:
                     shutil.rmtree(chapter_directory)
                     print(chapter_directory, 'removed')
@@ -231,13 +234,14 @@ class MangaDownloader:
             iter_number = len(rows) - i
             print("{0}) {1}".format(iter_number, rows[i].find("a", href=True).text))
 
-    def save_settings(self, make_composites, keep_originals):
+    def save_settings(self, make_composites, keep_originals, composition_type):
         '''
         saves the current settings
         '''
         self.settings = {
             'make_composite': make_composites,
-            "keep_originals": keep_originals
+            'keep_originals': keep_originals,
+            'composition_type': composition_type
         }
         with open(self.settings_path, 'w') as f:
             json.dump(self.settings, f)
@@ -254,3 +258,17 @@ class MangaDownloader:
         checks if save file exists
         '''
         return os.path.exists(self.settings_path)
+
+    def verify_settings(self):
+        '''
+        check validity of loaded settings
+
+        returns True if valid
+        '''
+        keys = self.settings.keys()
+        if len(keys) != 3:
+            return False
+        for key in keys:
+            if key == None:
+                return False
+        return True
