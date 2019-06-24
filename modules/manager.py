@@ -126,7 +126,7 @@ class HtmlManager:
                 # loop through the page list
                 for page in page_list:
                     # add img tag
-                    doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page')
+                    doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page', style="margin:10px auto;")
 
                 with tag('div', klass='chapter-bar'):
                     doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')

@@ -209,11 +209,12 @@ class MangaDownloader:
                 self.save_image(j, chapter_directory) # save image
 
             if self.settings['make_composite']:
-                print('Starting composition of', chapter_directory)
+                print('Attempting composition of...', chapter_directory, end="")
                 if self.settings['composition_type'] == 'pdf':
                     dir_to_pdf(chapter_directory, composite_save_dir)
                 elif self.settings['composition_type'] == 'image':
                     self.image_stacker.stack(chapter_directory, composite_save_dir)
+                print("done!")
                 if not self.settings['keep_originals']:
                     shutil.rmtree(chapter_directory)
                     print(chapter_directory, 'removed')

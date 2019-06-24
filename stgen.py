@@ -11,3 +11,4 @@ if __name__ == "__main__":
     else:
         create_py_list(Const.StyleSaveFile, os.path.join('modules', 'styles.py'))
         print('{0} regenerated'.format(Const.StyleSaveFile))
+        input('Enter to continue . . .')
