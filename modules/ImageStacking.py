@@ -1,5 +1,6 @@
 import os
 import tempfile
+import traceback
 
 import numpy as np
 from PIL import Image
@@ -132,11 +133,21 @@ def dir_to_pdf(path, save_path):
     # get all directory paths
     dirs = sorted(os.listdir(path), key=numericalSort)
 
-    # first image
-    img = Image.open(os.path.join(path, dirs[0]))
+    img_list = []
 
-    # rest of the images
-    rest_list = [Image.open(os.path.join(path, directory)) for directory in dirs[1:]]
+    # all of the files tested and opened
+    for directory in dirs:
+        try:
+            new_img = Image.open(os.path.join(path, directory))
+        except Exception as ex:
+            # if any error occurs skip the file
+            print('[ERROR] [%s] Cant open %s as image!' % (type(ex).__name__, os.path.join(path, directory)))
+        else:
+            img_list.append(new_img)
+
+    # if no images exit
+    if len(img_list) == 0:
+        return
 
     # save as pdf
-    img.save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', save_all=True, append_images=rest_list)
+    img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', save_all=True, append_images=img_list[1:])
