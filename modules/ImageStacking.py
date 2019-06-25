@@ -3,7 +3,7 @@ import tempfile
 
 import numpy as np
 from PIL import Image
-
+from modules.manager import numericalSort
 
 class VerticalStack:
     def stack(self, folder_path, save_path, end='.jpg', new_width=None):
@@ -130,7 +130,7 @@ def get_last_directory(full_dir):
 def dir_to_pdf(path, save_path):
 
     # get all directory paths
-    dirs = os.listdir(path)
+    dirs = sorted(os.listdir(path), key=numericalSort)
 
     # first image
     img = Image.open(os.path.join(path, dirs[0]))

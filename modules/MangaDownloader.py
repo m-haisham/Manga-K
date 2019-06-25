@@ -209,7 +209,7 @@ class MangaDownloader:
                 self.save_image(j, chapter_directory) # save image
 
             if self.settings['make_composite']:
-                print('Attempting composition of...', chapter_directory, end="")
+                print('Attempting composition of %s ... ' % chapter_directory, end="")
                 if self.settings['composition_type'] == 'pdf':
                     dir_to_pdf(chapter_directory, composite_save_dir)
                 elif self.settings['composition_type'] == 'image':
