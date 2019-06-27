@@ -150,4 +150,4 @@ def dir_to_pdf(path, save_path):
         return
 
     # save as pdf
-    img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', save_all=True, append_images=img_list[1:])
+    img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', resolution=100.0, save_all=True, append_images=img_list[1:])
