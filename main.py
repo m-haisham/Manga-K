@@ -98,7 +98,7 @@ def settings(dmanager, skip_check = False):
 
         # print settings to console
         for key in settings_keys:
-            print('%s: %s' % (key, str(dmanager.settings[key])))
+            print('[SETTING] [%s] set to %s' % (key.upper(), str(dmanager.settings[key])))
 
         # ask whether to change settings
         while True:
@@ -184,16 +184,14 @@ if __name__ == '__main__':
 
     check_files(dm)
 
-    print(dm.settings['composition_type'])
-
-    print('- - - Manga K - - -')
-    print('')
-    print('1. Search')
-    print('2. Direct URL')
-    print('3. View')
-    print('4. Settings')
-    print('5. Exit')
     while True:
+        print('- - - Manga K - - -')
+        print('')
+        print('1. Search')
+        print('2. Direct URL')
+        print('3. View')
+        print('4. Settings')
+        print('5. Exit')
         res = input('\n//> ')
 
         if res == '1':

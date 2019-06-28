@@ -134,8 +134,6 @@ def dir_to_pdf(path, save_path):
     # get all directory paths
     dirs = sorted(os.listdir(path), key=numericalSort)
 
-    img_list = []
-
     file_path_list = []
 
     # all of the files tested and opened
@@ -145,7 +143,7 @@ def dir_to_pdf(path, save_path):
             new_img = Image.open(os.path.join(path, directory))
         except Exception as ex:
             # if any error occurs skip the file
-            print('[ERROR] [%s] Cant open %s as image!' % (type(ex).__name__, os.path.join(path, directory)))
+            print('[ERROR] [%s] Cant open %s as image!' % (type(ex).__name__.upper(), os.path.join(path, directory)))
         else:
 
             file_path = os.path.join(path, directory)
@@ -153,7 +151,8 @@ def dir_to_pdf(path, save_path):
             # if image mode is RGBA
             if(new_img.mode == 'RGBA'):
                 # convert image to RGB
-                
+                print('[CONVERT] [%s] RGBA to RGB' % os.path.basename(os.path.normpath(directory)).upper())
+
                 # create RGB image with white background of same size
                 rgb = Image.new('RGB', new_img.size, (255, 255, 255))
 
@@ -175,8 +174,6 @@ def dir_to_pdf(path, save_path):
     if len(file_path_list) == 0:
         return
 
+    # save as pdf using img2pdf
     with open(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'wb') as f:
         f.write(img2pdf.convert(file_path_list, dpi=300.0))
-
-    # # save as pdf
-    # img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', subsampling=0, quality=100, save_all=True, append_images=img_list[1:])
