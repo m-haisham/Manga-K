@@ -1,6 +1,7 @@
 import os
 import tempfile
 import traceback
+import img2pdf
 
 import numpy as np
 from PIL import Image
@@ -135,6 +136,8 @@ def dir_to_pdf(path, save_path):
 
     img_list = []
 
+    file_path_list = []
+
     # all of the files tested and opened
     for directory in dirs:
         try:
@@ -144,25 +147,36 @@ def dir_to_pdf(path, save_path):
             # if any error occurs skip the file
             print('[ERROR] [%s] Cant open %s as image!' % (type(ex).__name__, os.path.join(path, directory)))
         else:
+
+            file_path = os.path.join(path, directory)
+
             # if image mode is RGBA
             if(new_img.mode == 'RGBA'):
                 # convert image to RGB
-
+                
                 # create RGB image with white background of same size
                 rgb = Image.new('RGB', new_img.size, (255, 255, 255))
 
                 # paste using alpha as mask
                 rgb.paste(new_img, new_img.split()[3])
 
-                # assign RGB image to variable
-                new_img = rgb
+                # get temporary path
+                temp = tempfile.NamedTemporaryFile().name + '.jpg'
+                print(temp)
+                # save image as temporary
+                rgb.save(temp)
 
-            # add image to list
-            img_list.append(new_img)
+                # overrite file_path
+                file_path = temp
+
+            file_path_list.append(file_path)
 
     # if no images exit
-    if len(img_list) == 0:
+    if len(file_path_list) == 0:
         return
 
-    # save as pdf
-    img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', resolution=100.0, subsampling=0, quality=100, save_all=True, append_images=img_list[1:])
+    with open(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'wb') as f:
+        f.write(img2pdf.convert(file_path_list, dpi=300.0))
+
+    # # save as pdf
+    # img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', subsampling=0, quality=100, save_all=True, append_images=img_list[1:])
