@@ -138,11 +138,26 @@ def dir_to_pdf(path, save_path):
     # all of the files tested and opened
     for directory in dirs:
         try:
+            # open image using PIL library
             new_img = Image.open(os.path.join(path, directory))
         except Exception as ex:
             # if any error occurs skip the file
             print('[ERROR] [%s] Cant open %s as image!' % (type(ex).__name__, os.path.join(path, directory)))
         else:
+            # if image mode is RGBA
+            if(new_img.mode == 'RGBA'):
+                # convert image to RGB
+
+                # create RGB image with white background of same size
+                rgb = Image.new('RGB', new_img.size, (255, 255, 255))
+
+                # paste using alpha as mask
+                rgb.paste(new_img, new_img.split()[3])
+
+                # assign RGB image to variable
+                new_img = rgb
+
+            # add image to list
             img_list.append(new_img)
 
     # if no images exit
@@ -150,4 +165,4 @@ def dir_to_pdf(path, save_path):
         return
 
     # save as pdf
-    img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', resolution=100.0, save_all=True, append_images=img_list[1:])
+    img_list[0].save(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'PDF', resolution=100.0, subsampling=0, quality=100, save_all=True, append_images=img_list[1:])
