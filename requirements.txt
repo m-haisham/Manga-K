@@ -1,3 +1,4 @@
+img2pdf==0.3.3
 numpy==1.16.4
 requests==2.22.0
 yattag==1.11.2
