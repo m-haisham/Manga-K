@@ -8,6 +8,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from PIL import Image
+from tqdm import tqdm
 
 from modules.static import Const
 from modules.ImageStacking import VerticalStack, dir_to_pdf
@@ -105,7 +106,6 @@ class MangaDownloader:
         This function downloads [url] and prints the progress of the download to the console and save the file to [directory]
         """
         filename = url.split('/')[-1]
-        print('Downloading ' + url)
         with open(directory + '/' + filename, 'wb') as f:
             response = requests.get(url, stream=True)
 
@@ -113,20 +113,18 @@ class MangaDownloader:
             if total_length is None:  # no content length header
                 f.write(response.content)
             else:
-                dl = 0
                 total_length = int(total_length)
                 length_kb = round(total_length / 1024, 2)
                 chunksize = int(total_length / 50)
-                for data in response.iter_content(chunk_size=chunksize):
-                    dl += len(data)
-                    f.write(data)
-                    done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s] %.2f/%.2f kb" % ('=' * done, ' ' * (50 - done), round(dl / 1024, 2), length_kb))
-                    sys.stdout.flush()
 
-        print(' Done.')
-        print('to path -> ' + os.getcwd() + "\\" + directory + '\\' + filename)
-        print()
+                with tqdm(desc=f'{filename:<8}',
+                          total=total_length,
+                          unit='b',
+                          unit_scale=True) as pbar:
+
+                    for data in response.iter_content(chunk_size=chunksize):
+                        pbar.update(len(data))
+                        f.write(data)
 
     def get_manga_name(self, manga_path):
         """
