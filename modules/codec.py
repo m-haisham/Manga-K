@@ -1,5 +1,8 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
+
 
 class MKCodec():
     def __init__(self):
@@ -42,13 +45,14 @@ class MKCodec():
 
         Parses the data (dish) and extracts information and updates object
         '''
-        result_list = dish.find('div', {'class': 'panel_story_list'}).find_all('div', {'class': 'story_item'})
+        result_list = dish.find('div', {'class': 'panel_story_list'}).find_all(
+            'div', {'class': 'story_item'})
         self.search_result = []
         for result in result_list:
             self.search_result.append({
                 'name': result.find('h3', {'class': 'story_name'}).text,
                 'href': result.find('a')['href']
-                })
+            })
 
         try:
             page_list = dish.find('div', {'class': 'group_page'}).find_all('a')

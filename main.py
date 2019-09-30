@@ -1,6 +1,8 @@
 import os
 import traceback
 
+from whaaaaat import prompt, Separator
+
 from modules.codec import MKCodec
 from modules.conversions import create_py_list, list_to_file
 from modules.manager import HtmlManager, MangaManager
@@ -8,8 +10,18 @@ from modules.MangaDownloader import MangaDownloader
 from modules.static import Const
 from modules.styles import style
 
+
 def search():
-    search = input('Enter here to search: ')
+
+    search_question = {
+        'type': 'input',
+        'name': 'search',
+        'message': 'Enter here to search: '
+    }
+
+    search_answer = prompt(search_question)
+
+    search = search_answer['search']
     url = codec.search_prefix+search
     complete = False
     while not complete:
@@ -46,7 +58,8 @@ def search():
                         print('Same Page Selected')
                         continue
                     else:
-                        url = codec.search_prefix+search+codec.search_postfix+str(page)
+                        url = codec.search_prefix+search + \
+                            codec.search_postfix+str(page)
                     break
             else:
                 complete = True
@@ -54,9 +67,20 @@ def search():
 
     return codec.search_result[index]['href']
 
+
 def direct():
-    return input('Input full url to manga from mangakakalot.com|manganel.com\nURl: ')
-    
+
+    direct_question = {
+        'type': 'input',
+        'name': 'direct',
+        'message': 'Enter the url: ',
+    }
+
+    answer = prompt(direct_question)
+
+    return answer['direct']
+
+
 def download_link(manga_url):
     while True:
         dm.print_info(manga_url)
@@ -85,7 +109,8 @@ def download_link(manga_url):
 
     dm.download_manga(manga_url, int_start, int_end, ch_lst)
 
-def settings(dmanager, skip_check = False):
+
+def settings(dmanager, skip_check=False):
     if not skip_check and dmanager.settings_exists():
         # load save file
         dmanager.load_settings()
@@ -98,69 +123,82 @@ def settings(dmanager, skip_check = False):
 
         # print settings to console
         for key in settings_keys:
-            print('[SETTING] [%s] set to %s' % (key.upper(), str(dmanager.settings[key])))
+            print('[SETTING] %s set to %s' %
+                  (key.capitalize(), str(dmanager.settings[key])))
 
         # ask whether to change settings
-        while True:
-            make_settings = input("Change Settings (Y/N): ")
-            if make_settings.lower() == 'y':
-                make_settings = True
-            elif make_settings.lower() == 'n':
-                make_settings = False
-            else:
-                print('pick a valid choice')
-                continue
-            break
+
+        setting_change = {
+            'type': 'confirm',
+            'name': 'setting_change',
+            'message': 'Would you like to change settings',
+            'default': False
+        }
+
+        change_settings_answer = prompt(setting_change)
+
+        make_settings = change_settings_answer['setting_change']
+
         # exit function, not changing settings
         if not make_settings:
             return
+
     # no settings saved or promted to skip, run rest of function
     else:
         if not skip_check:
             print('No Settings Saved')
 
     # create settings
-    while True:
-        # whether to make composites
-        make_composites = input("\nMake Composites (Y/N): ")
-        if make_composites.lower() == 'y':
-            make_composites = True
-            # which composition type
-            while True:
-                print('Composition types')
-                print('1: pdf')
-                print('2: jpg')
-                composition_index = input('Pick type: ')
-                if composition_index == '1':
-                    composition_type = 'pdf'
-                elif composition_index == '2':
-                    composition_type = 'image'
-                else:
-                    print('pick a valid choice')
-                    continue
-                break
-            # whether to keep seperate images
-            while True:
-                keep_originals = input("Keep originals (Y/N): ")
-                if keep_originals.lower() == 'y':
-                    keep_originals = True
-                elif keep_originals.lower() == 'n':
-                    keep_originals = False
-                else:
-                    print('pick a valid choice')
-                    continue
-                break
-            break
-        # default rest of settings
-        elif make_composites.lower() == 'n':
-            make_composites = False
-            keep_originals = True
-            composition_type = 'pdf'
-            print('Keep_originals: True')
-            break
-        else:
-            print('pick a valid choice')
+
+    # whether to make composites
+    make_composites = {
+        'type': 'confirm',
+        'name': 'make_composites',
+        'message': 'Would you like to make composites',
+        'default': False
+    }
+
+    composite_answer = prompt(make_composites)
+
+    if composite_answer['make_composites'] == True:
+        make_composites = True
+        # which composition type
+        composition_type = {
+            'type': 'list',
+            'name': 'composite',
+            'message': 'which format do do you want to composite to?',
+            'choices': [
+                'pdf',
+                'image'
+            ],
+            'default': 0
+
+        }
+
+        answers = prompt(composition_type)
+
+        composition_type = answers['composite']
+
+        # whether to keep seperate images
+        keep_originals = {
+            'type': 'confirm',
+            'name': 'keep_originals',
+            'message': 'Would you like to keep original downloaded images?',
+            'default': True
+        }
+
+        keep_original_answer = prompt(keep_originals)
+
+        keep_originals = keep_original_answer['keep_originals']
+    # default rest of settings
+    elif composite_answer['make_composites'] == False:
+        make_composites = False
+        keep_originals = True
+        composition_type = 'pdf'
+        print('Keep_originals: True')
+
     dm.save_settings(make_composites, keep_originals, composition_type)
+
 
 def check_files(download_manager):
     '''
@@ -175,44 +213,54 @@ def check_files(download_manager):
             print('Imported settings unsupported')
             settings(download_manager, skip_check=True)
 
+
 if __name__ == '__main__':
     dm = MangaDownloader()
     codec = MKCodec()
     manga_manager = MangaManager()
     html_manager = HtmlManager()
-    
 
     check_files(dm)
 
     while True:
-        print('- - - Manga K - - -')
-        print('')
-        print('1. Search')
-        print('2. Direct URL')
-        print('3. View')
-        print('4. Settings')
-        print('5. Exit')
-        res = input('\n//> ')
+        mainmenu = {
+            'type': 'list',
+            'name': 'menu',
+            'message': 'what do you wanna do?',
+            'choices': [
+                'Search for manga',
+                'Open manga using direct url',
+                'View the manga',
+                Separator(),
+                'Settings',
+                'Exit'
+            ],
+            'filter': lambda val: mainmenu['choices'].index(val),
+            'default': 4
 
-        if res == '1':
+        }
+
+        menuoption = prompt(mainmenu)
+
+        if menuoption['menu'] == 0:
             try:
                 download_link(search())
             except Exception:
                 traceback.print_exc()
-        elif res == '2':
+        elif menuoption['menu'] == 1:
             try:
                 download_link(direct())
             except Exception:
                 traceback.print_exc()
-        elif res == '3':
+        elif menuoption['menu'] == 2:
             # View
             manga_manager.generate_tree()
             html_manager.generate_web(manga_manager.tree)
             if(html_manager.open()):
                 break
-        elif res == '4':
+        elif menuoption['menu'] == 4:
             settings(dm)
-        elif res == '5':
+        elif menuoption['menu'] == 5:
             break
         else:
             print('Pick a valid choice')
