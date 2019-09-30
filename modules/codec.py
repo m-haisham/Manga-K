@@ -12,10 +12,20 @@ class MKCodec():
         self.search_prefix = 'https://mangakakalot.com/search/'
         self.search_postfix = '?page='
 
+        self.keyword = ''
         self.search_result = []
         self.page_prefix = ''
         self.current_page = 0
         self.max_page = -1
+
+    def previous_page_exists(self):
+        return self.current_page != 1
+
+    def next_page_exists(self):
+        return self.max_page != -1 and self.current_page + 1 <= self.max_page
+
+    def get_page(self, page: int):
+        return f'{self.search_prefix}{self.keyword}{self.search_postfix}{page}'
 
     def search(self, keyword):
         '''
@@ -28,6 +38,8 @@ class MKCodec():
         '''
         if len(keyword) < len(self.search_prefix) + 3:
             return
+
+        self.keyword = keyword[len(self.search_prefix):]
 
         r = requests.get(keyword)
         soup = BeautifulSoup(r.content, 'html.parser')
@@ -50,7 +62,7 @@ class MKCodec():
         self.search_result = []
         for result in result_list:
             self.search_result.append({
-                'name': result.find('h3', {'class': 'story_name'}).text,
+                'name': result.find('h3', {'class': 'story_name'}).text.strip(' \n'),
                 'href': result.find('a')['href']
             })
 

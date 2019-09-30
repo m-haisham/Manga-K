@@ -13,8 +13,10 @@ from tqdm import tqdm
 from modules.static import Const
 from modules.ImageStacking import VerticalStack, dir_to_pdf
 
+
 def make_valid(path):
     return re.sub(r'[/\\:*"<>|]', '', path)
+
 
 class MangaDownloader:
     def __init__(self):
@@ -22,79 +24,6 @@ class MangaDownloader:
         self.settings_path = 'config.json'
         if self.settings_exists():
             self.load_settings()
-
-    def download_init(self):
-        while(True):
-            manga_url = input('Input full url to manga from mangakakalot.com|manganel.com\nURl: ')
-
-            self.print_info(manga_url)
-
-            print("\nLeave following field empty to start from beginning chapter")
-            manga_start = input('Start index: ')
-            if manga_start == '':
-                manga_start = 1
-
-            ch_lst = None
-            print("\nLeave following field empty to download till last chapter")
-            manga_end = input('End index: ')
-            if manga_end == '':
-                ch_lst = self.get_chapter_list(manga_url)
-                manga_end = len(ch_lst)
-
-            if manga_url[-1] == '/':
-                manga_url = manga_url[0:-1]
-            
-            while True:
-                make_settings = input("Change Settings (Y/N): ")
-                if make_settings.lower() == 'y':
-                    make_settings = True
-                    break
-                elif make_settings.lower() == 'n':
-                    make_settings = False
-                    break
-                else:
-                    print('pick a valid choice')
-
-            if os.path.exists(self.settings_path) and not make_settings:
-                with open(self.settings_path, 'r') as f:
-                    self.settings = json.load(f)
-            else:        
-                while True:
-                    make_composites = input("\nMake Composites (Y/N): ")
-                    if make_composites.lower() == 'y':
-                        make_composites = True
-                        while True:
-                            keep_originals = input("Delete originals (Y/N): ")
-                            if keep_originals.lower() == 'y':
-                                keep_originals = False
-                                break
-                            elif keep_originals.lower() == 'n':
-                                keep_originals = True
-                                break
-                            else:
-                                print('pick a valid choice')
-                        break
-                    elif make_composites.lower() == 'n':
-                        make_composites = False
-                        keep_originals = True
-                        break
-                    else:
-                        print('pick a valid choice')
-                self.settings = {
-                    'make_composite': make_composites,
-                    "keep_originals": keep_originals
-                }
-                with open(self.settings_path, 'w') as f:
-                    json.dump(self.settings, f)
-            
-            try:
-                int_start = int(manga_start)
-                int_end = int(manga_end) + 1
-                break
-            except ValueError:
-                print('Start or end chapter numbers not numerical')
-
-        self.download_manga(manga_url, int_start, int_end, ch_lst)
 
     def save_image(self, url, directory):
         """
@@ -167,7 +96,7 @@ class MangaDownloader:
             pages.append(row['src'])
         return pages
 
-    def download_manga(self, url, starting_chapter, ending_chapter, chapter_list = None):
+    def download_manga(self, url, chapters):
         """
         url (string): manga path from mangakakalot.com
         starting_chapter (int): download start (inclusive)
@@ -176,8 +105,9 @@ class MangaDownloader:
 
         returns None
         """
-        
-        manga_dir = os.path.join(Const.MangaSavePath, make_valid(self.get_manga_name(url)))
+
+        manga_dir = os.path.join(
+            Const.MangaSavePath, make_valid(self.get_manga_name(url)))
         composite_save_dir = os.path.join(manga_dir, 'Composites')
 
         # Create directories
@@ -189,33 +119,45 @@ class MangaDownloader:
             if not os.path.exists(composite_save_dir):
                 os.mkdir(composite_save_dir)
 
-        if chapter_list is None:
-            chapter_list = self.get_chapter_list(url)
-        print('\nChapter list loaded.')
+        # if chapter_list is None:
+        #     chapter_list = self.get_chapter_list(url)
+        # print('\nChapter list loaded.')
 
-        if starting_chapter - 1 < 0 or ending_chapter > len(chapter_list):
-            print(starting_chapter)
-            print(ending_chapter)
-            print("Out of range.")
+        # if starting_chapter - 1 < 0 or ending_chapter > len(chapter_list):
+        #     print(starting_chapter)
+        #     print(ending_chapter)
+        #     print("Out of range.")
 
-        for i in range(starting_chapter - 1, ending_chapter - 1, 1): # loop through every chapter in range
-            chapter_name = chapter_list[i].split('/')[-1]
-            chapter_directory = os.path.join(manga_dir, chapter_name)
-            print("\nDownloading " + chapter_name)
+        # for i in range(starting_chapter - 1, ending_chapter - 1, 1): # loop through every chapter in range
+        #     chapter_name = chapter_list[i].split('/')[-1]
+        #     chapter_directory = os.path.join(manga_dir, chapter_name)
+        #     print("\nDownloading " + chapter_name)
+        #     if not os.path.exists(chapter_directory):
+        #         os.mkdir(chapter_directory) # create chapter_directory
+        #     for j in self.get_page_list(chapter_list[i]):
+        #         self.save_image(j, chapter_directory) # save image
+
+        for chapter in chapters:
+            chapter_name = chapter['name']
+            chapter_directory = os.path.join(
+                manga_dir, make_valid(chapter_name))
+
+            print(f'\n!{chapter_name}')
             if not os.path.exists(chapter_directory):
-                os.mkdir(chapter_directory) # create chapter_directory
-            for j in self.get_page_list(chapter_list[i]):
-                self.save_image(j, chapter_directory) # save image
+                os.mkdir(chapter_directory)  # create chapter_directory
+            for page in self.get_page_list(chapter['href']):
+                self.save_image(page, chapter_directory)  # save image
 
             if self.settings['make_composite']:
                 print('Attempting composition of %s ... ' % chapter_directory)
                 if self.settings['composition_type'] == 'pdf':
                     dir_to_pdf(chapter_directory, composite_save_dir)
                 elif self.settings['composition_type'] == 'image':
-                    self.image_stacker.stack(chapter_directory, composite_save_dir)
+                    self.image_stacker.stack(
+                        chapter_directory, composite_save_dir)
                 print("Composition done!")
                 if not self.settings['keep_originals']:
-                    shutil.rmtree(chapter_directory) # remove chapter
+                    shutil.rmtree(chapter_directory)  # remove chapter
                     print(chapter_directory, 'removed')
 
     def print_info(self, manga_path):
@@ -232,7 +174,35 @@ class MangaDownloader:
         rows = chapterbox[0].find_all(class_="row")
         for i in range(len(rows) - 1, -1, -1):
             iter_number = len(rows) - i
-            print("{0}) {1}".format(iter_number, rows[i].find("a", href=True).text))
+            print("{0}) {1}".format(iter_number,
+                                    rows[i].find("a", href=True).text))
+
+    def get_info(self, manga_path):
+        """
+        manga_path (string): url of manga from mangakakalot.com
+        returns None
+
+        prints the information of manga
+        """
+
+        info = {
+            'name': '',
+            'chapters': {}
+        }
+
+        r = requests.get(manga_path)
+        soup = BeautifulSoup(r.content, "html.parser")
+        chapterbox = soup.find_all(class_="chapter-list")
+        rows = chapterbox[0].find_all(class_="row")
+
+        info['name'] = self.get_manga_name(manga_path)
+        for i in range(len(rows) - 1, -1, -1):
+            iter_number = len(rows) - i
+            info['chapters'][rows[i].find("a", href=True).text] = {
+                'href': rows[i].find("a", href=True)['href']
+            }
+
+        return info
 
     def save_settings(self, make_composites, keep_originals, composition_type):
         '''
@@ -245,7 +215,7 @@ class MangaDownloader:
         }
         with open(self.settings_path, 'w') as f:
             json.dump(self.settings, f)
-    
+
     def load_settings(self):
         '''
         load the settings from file

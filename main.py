@@ -1,6 +1,7 @@
 import os
 import traceback
 
+from typing import List
 from whaaaaat import prompt, Separator
 
 from modules.codec import MKCodec
@@ -23,49 +24,36 @@ def search():
 
     search = search_answer['search']
     url = codec.search_prefix+search
-    complete = False
-    while not complete:
+    while True:
         codec.search(url)
 
-        for i in range(len(codec.search_result)):
-            result = codec.search_result[i]
-            print(str(i + 1), end=") ")
-            print(result['name'])
+        # mutate options to include page routing
+        choices: List = codec.search_result[:]
+        if codec.previous_page_exists():
+            choices.insert(0, 'PREVIOUS')
+        if codec.next_page_exists():
+            choices.append('NEXT')
 
-        # if only one page is in result
-        if codec.max_page == -1:
-            pass
+        search_question = {
+            'type': 'list',
+            'name': 'search',
+            'message': 'choose',
+            'choices': choices
+        }
+
+        search_answer = prompt(search_question)
+
+        if search_answer['search'] == 'PREVIOUS':
+            url = codec.get_page(codec.current_page - 1)
+            continue
+        elif search_answer['search'] == 'NEXT':
+            url = codec.get_page(codec.current_page + 1)
+            print(url)
+            continue
         else:
-            print('page '+str(codec.current_page)+' of '+str(codec.max_page))
-
-        while True:
-            print('To Pick a page put p followed by page number.')
-            input_key = input('Pick number corresponding to choice: ')
-
-            try:
-                index = int(input_key) - 1
-            except ValueError:
-                if input_key[0].lower() == 'p':
-                    try:
-                        page = int(input_key[1:])
-                    except ValueError:
-                        print("Invalid Input\n")
-                        continue
-                    if page < 1 or page > codec.max_page:
-                        print("Invalid Page Number\n")
-                        continue
-                    if codec.search_prefix+search+codec.search_postfix+str(page) == url:
-                        print('Same Page Selected')
-                        continue
-                    else:
-                        url = codec.search_prefix+search + \
-                            codec.search_postfix+str(page)
-                    break
-            else:
-                complete = True
-                break
-
-    return codec.search_result[index]['href']
+            for result in codec.search_result:
+                if result['name'] == search_answer['search']:
+                    return result['href']
 
 
 def direct():
@@ -82,32 +70,24 @@ def direct():
 
 
 def download_link(manga_url):
-    while True:
-        dm.print_info(manga_url)
+    # dm.print_info(manga_url)
+    info = dm.get_info(manga_url)
 
-        print("\nLeave following field empty to start from beginning chapter")
-        manga_start = input('Start index: ')
-        if manga_start == '':
-            manga_start = 1
+    question = {
+        'type': 'checkbox',
+        'message': 'Select chapters to download',
+        'name': 'chapters',
+        'choices': [{'name': i} for i in list(info['chapters'].keys())],
+    }
 
-        ch_lst = None
-        print("\nLeave following field empty to download till last chapter")
-        manga_end = input('End index: ')
-        if manga_end == '':
-            ch_lst = dm.get_chapter_list(manga_url)
-            manga_end = len(ch_lst)
+    answers = prompt(question)
 
-        if manga_url[-1] == '/':
-            manga_url = manga_url[0:-1]
+    selected_choices = [{
+        'name': val,
+        'href': info['chapters'][val]['href']
+    } for val in answers['chapters']]
 
-        try:
-            int_start = int(manga_start)
-            int_end = int(manga_end) + 1
-            break
-        except ValueError:
-            print('Start or end chapter numbers not numerical')
-
-    dm.download_manga(manga_url, int_start, int_end, ch_lst)
+    dm.download_manga(manga_url, selected_choices)
 
 
 def settings(dmanager, skip_check=False):
@@ -215,10 +195,10 @@ def check_files(download_manager):
 
 
 if __name__ == '__main__':
-    dm = MangaDownloader()
-    codec = MKCodec()
-    manga_manager = MangaManager()
-    html_manager = HtmlManager()
+    dm: MangaDownloader = MangaDownloader()
+    codec: MKCodec = MKCodec()
+    manga_manager: MangaManager = MangaManager()
+    html_manager: HtmlManager = HtmlManager()
 
     check_files(dm)
 
