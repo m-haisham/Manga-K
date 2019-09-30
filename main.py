@@ -48,7 +48,6 @@ def search():
             continue
         elif search_answer['search'] == 'NEXT':
             url = codec.get_page(codec.current_page + 1)
-            print(url)
             continue
         else:
             for result in codec.search_result:
@@ -73,14 +72,20 @@ def download_link(manga_url):
     # dm.print_info(manga_url)
     info = dm.get_info(manga_url)
 
+    if not info['chapters']:
+        return
+
     question = {
         'type': 'checkbox',
-        'message': 'Select chapters to download',
         'name': 'chapters',
+        'message': 'Select chapters to download',
         'choices': [{'name': i} for i in list(info['chapters'].keys())],
     }
 
     answers = prompt(question)
+
+    if not answers['chapters']:
+        return
 
     selected_choices = [{
         'name': val,
