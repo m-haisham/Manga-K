@@ -1,4 +1,4 @@
-def create_py_list(path, destination, plist = 'style'):
+def create_py_list(path, destination, plist='style'):
     '''
     path (string): path of css file
     destination (string): path of file to save
@@ -11,7 +11,8 @@ def create_py_list(path, destination, plist = 'style'):
     with open(destination, 'w') as f:
         f.write(declaration)
         for line in lines:
-            f.write('''%s.append('%s')\n''' % (plist, line))
+            f.write('''%s.append('%s')\n''' % (plist, line.strip()))
+
 
 def list_to_file(_list, destination):
     '''
@@ -23,6 +24,7 @@ def list_to_file(_list, destination):
     with open(destination, 'w') as f:
         for line in _list:
             f.write(line)
+
 
 if __name__ == "__main__":
     create_py_list('keybinding.js', 'keybinding.py', 'keybinding')

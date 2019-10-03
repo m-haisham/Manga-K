@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 from modules.manager import numericalSort
 
+
 class VerticalStack:
     def stack(self, folder_path, save_path, end='.jpg', new_width=None):
         '''
@@ -19,7 +20,7 @@ class VerticalStack:
         This function stacks the images vertically and saves composite in save_path with name of the last folder to path and extenstion (end)
         '''
         images = os.listdir(folder_path)
-        
+
         print('initializing . . .', end=' ')
         image_dictionary_list = self.disect(images, folder_path)
         print('done!')
@@ -33,19 +34,21 @@ class VerticalStack:
             new_width = abs(int(new_width))
             print('using given width of', new_width, 'for resizing')
 
-        #resizing images
+        # resizing images
         print('resizing images . . .', end=' ')
         image_array_list = []
         for image in image_dictionary_list:
-            i = Image.open(os.path.join(image['directory'], str(image['name'])) + image['extension'])
-            width, height = i.size # get size
+            i = Image.open(os.path.join(image['directory'], str(
+                image['name'])) + image['extension'])
+            width, height = i.size  # get size
 
-            #adjust width of images to be constant
+            # adjust width of images to be constant
             adjusted_image = i
             if width != new_width:
                 new_height = self.get_new_height(width, height, new_width)
-                adjusted_image = i.resize((new_width, new_height), Image.LANCZOS)
-            
+                adjusted_image = i.resize(
+                    (new_width, new_height), Image.LANCZOS)
+
             adjusted_image = adjusted_image.convert('RGB')
             array = np.asarray(adjusted_image)
             image_array_list.append(array)
@@ -56,14 +59,16 @@ class VerticalStack:
         composite_image = Image.fromarray(composite_array)
         print('done!')
 
-        composite_image.save(os.path.join(save_path, get_last_directory(folder_path)) + end)
-        print('composite saved as', os.path.join(save_path, get_last_directory(folder_path)) + end)
+        composite_image.save(os.path.join(
+            save_path, get_last_directory(folder_path)) + end)
+        print('composite saved as', os.path.join(
+            save_path, get_last_directory(folder_path)) + end)
 
     def disect(self, image_paths, directory, key='name'):
         '''
         image_paths (string): names of images
         directory (string): path of images
-        
+
         Takes (image_paths) and disects and sorts them according to (key)
 
         returns list of dictionaries
@@ -80,7 +85,7 @@ class VerticalStack:
             }
             sorted_images.append(dictionary)
 
-        sorted_images.sort(key = lambda k: k['name'])
+        sorted_images.sort(key=lambda k: k['name'])
         return sorted_images
 
     def get_width(self, image_list):
@@ -91,13 +96,14 @@ class VerticalStack:
         '''
         size_repeat_dictionary = {}
         for image in image_list:
-            i = Image.open(os.path.join(image['directory'], str(image['name'])) + image['extension'])
+            i = Image.open(os.path.join(image['directory'], str(
+                image['name'])) + image['extension'])
             width = i.size[0]
             if str(width) in size_repeat_dictionary.keys():
                 size_repeat_dictionary[str(width)] += 1
             else:
                 size_repeat_dictionary[str(width)] = 1
-        
+
         highest = 0
         new_width = 0
         for key in size_repeat_dictionary.keys():
@@ -116,6 +122,7 @@ class VerticalStack:
         '''
         return int((height * new_width) / width)
 
+
 def get_last_directory(full_dir):
     '''
     full_dir (string): relative of absolute path
@@ -128,6 +135,7 @@ def get_last_directory(full_dir):
     else:
         dir_lst = full_dir.split('\\')
     return dir_lst[len(dir_lst) - 1]
+
 
 def dir_to_pdf(path, save_path):
 
@@ -143,15 +151,23 @@ def dir_to_pdf(path, save_path):
             new_img = Image.open(os.path.join(path, directory))
         except Exception as ex:
             # if any error occurs skip the file
-            print('[ERROR] [%s] Cant open %s as image!' % (type(ex).__name__.upper(), os.path.join(path, directory)))
+            print(
+                f'[ERROR] [{type(ex).__name__.upper()}] Cant open {os.path.join(path, directory)} as image!')
         else:
 
             file_path = os.path.join(path, directory)
 
+            # if image has transparency
+            if 'transparency' in new_img.info:
+
+                # convert to RGBA mode
+                new_img = new_img.convert('RGBA')
+
             # if image mode is RGBA
             if(new_img.mode == 'RGBA'):
                 # convert image to RGB
-                print('[CONVERT] [%s] RGBA to RGB' % os.path.basename(os.path.normpath(directory)).upper())
+                print(
+                    f'[CONVERT] [{os.path.basename(os.path.normpath(directory)).upper()}] RGBA to RGB')
 
                 # create RGB image with white background of same size
                 rgb = Image.new('RGB', new_img.size, (255, 255, 255))
@@ -161,9 +177,9 @@ def dir_to_pdf(path, save_path):
 
                 # get temporary path
                 temp = tempfile.NamedTemporaryFile().name + '.jpg'
-                print(temp)
+
                 # save image as temporary
-                rgb.save(temp)
+                rgb.save(temp, 'JPEG')
 
                 # overrite file_path
                 file_path = temp
@@ -174,6 +190,9 @@ def dir_to_pdf(path, save_path):
     if len(file_path_list) == 0:
         return
 
-    # save as pdf using img2pdf
-    with open(os.path.join(save_path, get_last_directory(path) + '.pdf'), 'wb') as f:
-        f.write(img2pdf.convert(file_path_list, dpi=300.0))
+    try:
+        # save as pdf using img2pdf
+        with open(os.path.join(save_path, os.path.basename(os.path.normpath(path)) + '.pdf'), 'wb') as f:
+            f.write(img2pdf.convert(file_path_list))
+    except Exception as e:
+        print(f'{type(e).__name__.upper()} - {path} - {e}')
