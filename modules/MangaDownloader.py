@@ -15,7 +15,7 @@ from modules.ImageStacking import VerticalStack, dir_to_pdf
 
 
 def make_valid(path):
-    return re.sub(r'[/\\:*"<>|]', '', path)
+    return re.sub(r'''[/\\:*"'<>|]''', '', path)
 
 
 class MangaDownloader:
