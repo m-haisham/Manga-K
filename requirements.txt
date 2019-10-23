@@ -1,9 +1,9 @@
-tqdm==4.36.1
-numpy==1.17.2
-yattag==1.12.2
 requests==2.22.0
+tqdm==4.36.1
+yattag==1.12.2
 whaaaaat==0.5.2
+numpy==1.17.2
 img2pdf==0.3.3
-Pillow==6.1.0
-beautifulsoup4==4.8.0
-prompt_toolkit==1.0.15
+Pillow==6.2.1
+beautifulsoup4==4.8.1
+typing==3.7.4.1
