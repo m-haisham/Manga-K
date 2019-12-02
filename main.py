@@ -10,7 +10,7 @@ from modules.manager import HtmlManager, MangaManager
 from modules.MangaDownloader import MangaDownloader
 from modules.static import Const
 from modules.styles import style
-
+from modules.composition import compose_menu
 
 def search():
 
@@ -186,9 +186,12 @@ def settings(dmanager, skip_check=False):
 
 
 def check_files(download_manager):
-    '''
-    Checks for existance of neccesary files
-    '''
+    """
+    Checks for existence of necessary files and folders
+    """
+    if not os.path.exists(Const.MangaSavePath):
+        os.mkdir(Const.MangaSavePath)
+
     if not os.path.exists(Const.StyleSaveFile):
         list_to_file(style, Const.StyleSaveFile)
     if not download_manager.settings_exists():
@@ -217,6 +220,7 @@ if __name__ == '__main__':
                 'Open manga using direct url',
                 'View the manga',
                 Separator(),
+                'Compose',
                 'Settings',
                 'Exit'
             ],
@@ -244,8 +248,10 @@ if __name__ == '__main__':
             if(html_manager.open()):
                 break
         elif menuoption['menu'] == 4:
-            settings(dm)
+            compose_menu()
         elif menuoption['menu'] == 5:
+            settings(dm)
+        elif menuoption['menu'] == 6:
             break
         else:
             print('Pick a valid choice')

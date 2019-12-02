@@ -9,8 +9,8 @@ from modules.manager import numericalSort
 
 
 class VerticalStack:
-    def stack(self, folder_path, save_path, end='.jpg', new_width=None):
-        '''
+    def stack(self, folder_path, save_path, end='.jpg', new_width=None, verbose=False):
+        """
         folder_path (string): relative or absolute path to images
         save_path (string): relative or absolute path to save composite
         end (string): extension of the composite image
@@ -18,24 +18,30 @@ class VerticalStack:
 
         Images in (folder_path) must be named as integers
         This function stacks the images vertically and saves composite in save_path with name of the last folder to path and extenstion (end)
-        '''
+        """
         images = os.listdir(folder_path)
 
-        print('initializing . . .', end=' ')
+        if verbose:
+            print('initializing . . .', end=' ')
         image_dictionary_list = self.disect(images, folder_path)
-        print('done!')
+        if verbose:
+            print('done!')
 
         # select width
         if new_width is None:
-            print('Getting most recurring width . . .', end=' ')
+            if verbose:
+                print('Getting most recurring width . . .', end=' ')
             new_width = self.get_width(image_dictionary_list)
-            print(new_width, 'done!')
+            if verbose:
+                print(new_width, 'done!')
         else:
             new_width = abs(int(new_width))
-            print('using given width of', new_width, 'for resizing')
+            if verbose:
+                print('using given width of', new_width, 'for resizing')
 
         # resizing images
-        print('resizing images . . .', end=' ')
+        if verbose:
+            print('resizing images . . .', end=' ')
         image_array_list = []
         for image in image_dictionary_list:
             i = Image.open(os.path.join(image['directory'], str(
@@ -52,17 +58,21 @@ class VerticalStack:
             adjusted_image = adjusted_image.convert('RGB')
             array = np.asarray(adjusted_image)
             image_array_list.append(array)
-        print('done!')
+        if verbose:
+            print('done!')
 
-        print('compositing images . . .', end=' ')
+        if verbose:
+            print('compositing images . . .', end=' ')
         composite_array = np.vstack(image_array_list)
         composite_image = Image.fromarray(composite_array)
-        print('done!')
+        if verbose:
+            print('done!')
 
         composite_image.save(os.path.join(
             save_path, get_last_directory(folder_path)) + end)
-        print('composite saved as', os.path.join(
-            save_path, get_last_directory(folder_path)) + end)
+        if verbose:
+            print('composite saved as', os.path.join(
+                save_path, get_last_directory(folder_path)) + end)
 
     def disect(self, image_paths, directory, key='name'):
         '''
@@ -137,8 +147,11 @@ def get_last_directory(full_dir):
     return dir_lst[len(dir_lst) - 1]
 
 
-def dir_to_pdf(path, save_path):
+def dir_to_img(path, save_path):
+    VerticalStack().stack(path, save_path)
 
+
+def dir_to_pdf(path, save_path):
     # get all directory paths
     dirs = sorted(os.listdir(path), key=numericalSort)
 
@@ -159,12 +172,11 @@ def dir_to_pdf(path, save_path):
 
             # if image has transparency
             if 'transparency' in new_img.info:
-
                 # convert to RGBA mode
                 new_img = new_img.convert('RGBA')
 
             # if image mode is RGBA
-            if(new_img.mode == 'RGBA'):
+            if (new_img.mode == 'RGBA'):
                 # convert image to RGB
                 print(
                     f'[CONVERT] [{os.path.basename(os.path.normpath(directory)).upper()}] RGBA to RGB')

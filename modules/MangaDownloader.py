@@ -108,7 +108,6 @@ class MangaDownloader:
 
         manga_dir = os.path.join(
             Const.MangaSavePath, make_valid(self.get_manga_name(url)))
-        composite_save_dir = os.path.join(manga_dir, 'Composites')
 
         # Create directories
         if not os.path.exists(Const.MangaSavePath):
@@ -116,8 +115,10 @@ class MangaDownloader:
         if not os.path.exists(manga_dir):
             os.mkdir(manga_dir)
         if self.settings['make_composite']:
-            if not os.path.exists(composite_save_dir):
-                os.mkdir(composite_save_dir)
+            if not os.path.exists(os.path.join(manga_dir, Const.PdfDIr)):
+                os.mkdir(os.path.join(manga_dir, Const.PdfDIr))
+            if not os.path.exists(os.path.join(manga_dir, Const.JpgDir)):
+                os.mkdir(os.path.join(manga_dir, Const.JpgDir))
 
         # if chapter_list is None:
         #     chapter_list = self.get_chapter_list(url)
@@ -151,10 +152,10 @@ class MangaDownloader:
             if self.settings['make_composite']:
                 print('Attempting composition of %s ... ' % chapter_directory)
                 if self.settings['composition_type'] == 'pdf':
-                    dir_to_pdf(chapter_directory, composite_save_dir)
+                    dir_to_pdf(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
                 elif self.settings['composition_type'] == 'image':
                     self.image_stacker.stack(
-                        chapter_directory, composite_save_dir)
+                        chapter_directory, os.path.join(manga_dir, Const.JpgDir))
                 print("Composition done!")
                 if not self.settings['keep_originals']:
                     shutil.rmtree(chapter_directory)  # remove chapter
