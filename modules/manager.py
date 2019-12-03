@@ -6,6 +6,7 @@ import webbrowser
 from yattag import Doc
 
 from modules.static import Const
+from .sorting import seperate_alphabetically
 
 numbers = re.compile(r'(\d+)')
 
@@ -89,6 +90,7 @@ class HtmlManager:
         self.manga_path = Const.MangaSavePath
         self.location = 'Web'
         self.main_menu = os.path.join(self.location, 'index.html')
+        print(self.main_menu)
 
     def generate_new_chapter(self, manga_title, chapter_title, page_list, destination, prefix='', previous='#',
                              next='#'):
@@ -106,6 +108,8 @@ class HtmlManager:
         """
         doc, tag, text = Doc().tagtext()
 
+        manga_link = os.path.join('..', manga_title + '.html')
+
         # html
         doc.asis('<!DOCTYPE html>')
         doc.asis('<html lang="en" dir="ltr">')
@@ -115,28 +119,45 @@ class HtmlManager:
             with tag('title'):
                 text(manga_title + ' - ' + chapter_title)
         with tag('body'):
-            with tag('div', klass='container'):
-                # manga title
-                with tag('div', klass='title-container'):
-                    doc.asis('<a class="title manga-title" href="' + os.path.join('..',
-                                                                                  manga_title + '.html') + '" >' + manga_title + '</a>')
-                with tag('div', klass='chapter-bar'):
-                    doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
-                    with tag('h3', klass='title chapter-title'):
-                        text(chapter_title)
-                    doc.asis('<a class="btn btn-right btn-1 btn-1d" href="' + next + '">Next</a>')
+            # with tag('div', klass='container'):
+            #     # manga title
+            #     with tag('div', klass='title-container'):
+            #         doc.asis('<a class="title manga-title" href="' + os.path.join('..',
+            #                                             manga_title + '.html') + '" >' + manga_title + '</a>')
+            #     with tag('div', klass='chapter-bar'):
+            #         doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
+            #         with tag('h3', klass='title chapter-title'):
+            #             text(chapter_title)
+            #         doc.asis('<a class="btn btn-right btn-1 btn-1d" href="' + next + '">Next</a>')
+            #
+            #     # loop through the page list
+            #     for page in page_list:
+            #         # add img tag
+            #         doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
+            #                  style="margin:10px auto;")
+            #
+            #     with tag('div', klass='chapter-bar'):
+            #         doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
+            #         with tag('h3', klass='title chapter-title'):
+            #             text(chapter_title)
+            #         doc.asis('<a class="btn btn-right btn-1 btn-1d" href="' + next + '">Next</a>')
 
-                # loop through the page list
-                for page in page_list:
-                    # add img tag
-                    doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
-                             style="margin:10px auto;")
+            doc.asis(self.header(manga_title, manga_link))
 
-                with tag('div', klass='chapter-bar'):
-                    doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
-                    with tag('h3', klass='title chapter-title'):
-                        text(chapter_title)
-                    doc.asis('<a class="btn btn-right btn-1 btn-1d" href="' + next + '">Next</a>')
+            with tag('div', klass='divider'):
+                pass
+
+            doc.asis(self.chapter_header(chapter_title, next, previous))
+
+            # loop through the page list
+            for page in page_list:
+                # add img tag
+                doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
+                         style="margin:10px auto;")
+
+            doc.asis(self.chapter_header(chapter_title, next, previous))
+            doc.asis(self.footer())
+
         doc.asis('</html>')
 
         # save html doc in (destination)
@@ -156,6 +177,18 @@ class HtmlManager:
 
         doc, tag, text = Doc().tagtext()
 
+        def link_mapper(item):
+            if is_manga_list:
+                link = item + '.html'
+            else:
+                # chapter htmls are stored in folder inside save location named (title)
+                link = os.path.join(title, item + '.html')
+
+            return {
+                'name': item,
+                'link': link
+            }
+
         # html
         doc.asis('<!DOCTYPE html>')
         doc.asis('<html lang="en" dir="ltr">')
@@ -165,33 +198,160 @@ class HtmlManager:
             with tag('title'):
                 text(title if is_manga_list else title + '- Chapter list')
         with tag('body'):
-            with tag('div', klass='container'):
+            # with tag('div', klass='container'):
+            #
+            #     # if is a chapter list generate a button to access main menu
+            #     if not is_manga_list:
+            #         doc.asis('<a class="btn btn-left btn-1 btn-1d" href="index.html">Menu</a>')
+            #
+            #     # manga title
+            #     with tag('div', klass='title-container'):
+            #         with tag('h1', klass='title manga-title'):
+            #             text(title)
+            #
+            #     with tag('ul'):
+            #         # loop through the list
+            #         for item in mlist:
+            #             if is_manga_list:
+            #                 link = item + '.html'
+            #             else:
+            #                 # chapter htmls are stored in folder inside save location named (title)
+            #                 link = os.path.join(title, item + '.html')
+            #             with tag('li', klass='manga'):
+            #                 doc.asis('<a class="btn btn-1 btn-1d" href="' + link + '">' + item + '</a>')
+            doc.asis(self.header(title if is_manga_list else title + ' - Chapter list'))
 
-                # if is a chapter list generate a button to access main menu
-                if not is_manga_list:
-                    doc.asis('<a class="btn btn-left btn-1 btn-1d" href="index.html">Menu</a>')
+            with tag('div', klass='divider'):
+                pass
 
-                # manga title
-                with tag('div', klass='title-container'):
-                    with tag('h1', klass='title manga-title'):
-                        text(title)
+            with tag('div', klass='container list mt-2'):
+                if is_manga_list:
+                    doc.asis(self.list_from_links(
+                        seperate_alphabetically(
+                            list(map(link_mapper, mlist)),
+                            key=lambda val: val['name']
+                        )
+                    ))
+                else:
+                    info = list(map(link_mapper, mlist))
 
-                with tag('ul'):
-                    # loop through the list
-                    for item in mlist:
-                        if is_manga_list:
-                            link = item + '.html'
-                        else:
-                            # chapter htmls are stored in folder inside save location named (title)
-                            link = os.path.join(title, item + '.html')
-                        with tag('li', klass='manga'):
-                            doc.asis('<a class="btn btn-1 btn-1d" href="' + link + '">' + item + '</a>')
+                    names = [i['name'] for i in info]
+                    links = [i['link'] for i in info]
+
+                    doc.asis(self.btns_from_list(names, links))
+
+            doc.asis(self.footer())
 
         doc.asis('</html>')
 
         # save html doc in (destination)
         with open(destination, 'w') as f:
             f.write(doc.getvalue())
+
+    def header(self, title, chapter_list_link = None) -> str:
+        """
+        :param title: title of header
+        :param chapter_list_link: path to chapter list
+        :return: header for the webpage
+        """
+
+        doc, tag, text = Doc().tagtext()
+
+        with tag('nav', klass='nav'):
+            with tag('h3', klass='title'):
+                text(title)
+            with tag('ul', klass='nav_links'):
+                with tag('li'):
+                    with tag('a', href='index.html' if chapter_list_link is None else os.path.join('..', 'index.html')):
+                        text('HOME')
+
+                if not chapter_list_link is None:
+                    with tag('li'):
+                        with tag('a', href=chapter_list_link):
+                            text('CHAPTER LIST')
+
+        return doc.getvalue()
+
+    def chapter_header(self, title, next, previous):
+        doc, tag, text = Doc().tagtext()
+
+        with tag('div', klass='chapter_nav'):
+            with tag('h3', klass='subtitle'):
+                text(title)
+            with tag('ul', klass='chap_links'):
+                with tag('li'):
+                    with tag('a', klass='btn', href=previous):
+                        try:
+                            text(f'PREVIOUS ({numericalSort(previous)[1]})')
+                        except IndexError:
+                            text('PREVIOUS')
+
+                with tag('li'):
+                    with tag('a', klass='btn', href=next):
+                        try:
+                            text(f'NEXT ({numericalSort(next)[1]})')
+                        except IndexError:
+                            text('NEXT')
+
+        return doc.getvalue()
+
+    def btns_from_list(self, names: list, links: list):
+        doc, tag, text = Doc().tagtext()
+
+        if len(links) <= 0:
+            return ''
+
+        if len(names) != len(links):
+            return 'names and links: length does not match'
+
+        for name, link in zip(names, links):
+            with tag('li'):
+                with tag('a', klass='btn', href=link):
+                    text(name)
+
+        return doc.getvalue()
+
+    def list_from_links(self, info: dict):
+        """
+        :param info: {
+            key: [
+                # values
+            ]
+        }
+        :return:
+        """
+        doc, tag, text = Doc().tagtext()
+
+        keys = list(info.keys())
+        keys.sort()
+
+        for key in keys:
+            with tag('li', klass='header'):
+                text(key)
+
+            objects = info[key]
+            objects.sort(key=lambda val: val['name'])
+
+            names = [i['name'] for i in objects]
+            links = [i['link'] for i in objects]
+
+            doc.asis(self.btns_from_list(names, links))
+
+        return doc.getvalue()
+
+    def footer(self):
+        doc, tag, text = Doc().tagtext()
+
+        with tag('div', klass='footer'):
+            with tag('a', href='https://github.com/mhaisham', klass='content'):
+                with tag('div'):
+                    text('mHaisham')
+                with tag('div', id='year'):
+                    text('&copy;')
+                doc.asis('''<script type="text/javascript"> document.getElementById("year").textContent += new Date(
+                ).getFullYear();</script>''')
+
+        return doc.getvalue()
 
     def generate_web(self, dir_tree):
         '''
