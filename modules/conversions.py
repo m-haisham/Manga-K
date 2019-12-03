@@ -5,7 +5,7 @@ def create_py_list(path, destination, plist='style'):
 
     reads all lines from a file and makes a python file which has all of them in a list called style
     '''
-    declaration = plist+' = []\n'
+    declaration = plist + ' = []\n'
     lines = [line for line in open(path)]
 
     with open(destination, 'w') as f:

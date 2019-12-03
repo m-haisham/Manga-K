@@ -1,17 +1,14 @@
-import os
-import shutil
 import json
-import sys
-from io import BytesIO
+import os
 import re
+import shutil
 
 import requests
 from bs4 import BeautifulSoup
-from PIL import Image
 from tqdm import tqdm
 
-from modules.static import Const
 from modules.ImageStacking import VerticalStack, dir_to_pdf
+from modules.static import Const
 
 
 def make_valid(path):
@@ -119,24 +116,6 @@ class MangaDownloader:
                 os.mkdir(os.path.join(manga_dir, Const.PdfDIr))
             if not os.path.exists(os.path.join(manga_dir, Const.JpgDir)):
                 os.mkdir(os.path.join(manga_dir, Const.JpgDir))
-
-        # if chapter_list is None:
-        #     chapter_list = self.get_chapter_list(url)
-        # print('\nChapter list loaded.')
-
-        # if starting_chapter - 1 < 0 or ending_chapter > len(chapter_list):
-        #     print(starting_chapter)
-        #     print(ending_chapter)
-        #     print("Out of range.")
-
-        # for i in range(starting_chapter - 1, ending_chapter - 1, 1): # loop through every chapter in range
-        #     chapter_name = chapter_list[i].split('/')[-1]
-        #     chapter_directory = os.path.join(manga_dir, chapter_name)
-        #     print("\nDownloading " + chapter_name)
-        #     if not os.path.exists(chapter_directory):
-        #         os.mkdir(chapter_directory) # create chapter_directory
-        #     for j in self.get_page_list(chapter_list[i]):
-        #         self.save_image(j, chapter_directory) # save image
 
         for chapter in chapters:
             chapter_name = chapter['name']

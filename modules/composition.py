@@ -3,8 +3,8 @@ from pathlib import Path
 from tqdm import tqdm
 from whaaaaat import prompt
 
-from .static import Const
 from .ImageStacking import dir_to_pdf, dir_to_img
+from .static import Const
 
 composing_options = {
     Const.PdfDIr: dir_to_pdf,

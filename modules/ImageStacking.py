@@ -1,10 +1,10 @@
 import os
 import tempfile
-import traceback
-import img2pdf
 
+import img2pdf
 import numpy as np
 from PIL import Image
+
 from modules.manager import numericalSort
 
 
@@ -151,7 +151,7 @@ def dir_to_img(path, save_path):
     VerticalStack().stack(path, save_path)
 
 
-def dir_to_pdf(path, save_path, verbose = False):
+def dir_to_pdf(path, save_path, verbose=False):
     # get all directory paths
     dirs = sorted(os.listdir(path), key=numericalSort)
 

@@ -1,18 +1,20 @@
-from yattag import Doc
-import webbrowser
-import os
 import json
-
+import os
 import re
+import webbrowser
+
+from yattag import Doc
+
 from modules.static import Const
 
-
 numbers = re.compile(r'(\d+)')
+
 
 def numericalSort(value):
     parts = numbers.split(value)
     parts[1::2] = map(int, parts[1::2])
     return parts
+
 
 class MangaManager():
     def __init__(self):
@@ -30,12 +32,11 @@ class MangaManager():
         # Get all manga directories
         dirs = self.get_dirs(self.manga_path)[0]
 
-
-        for i in range(len(dirs)): 
+        for i in range(len(dirs)):
 
             # get all downloaded chapter directories for the manga
             shallow_dirs = self.get_dirs(os.path.join(self.manga_path, dirs[i]))[0]
-            self.remove_composite_dir(shallow_dirs)
+            self.remove_const_dirs(shallow_dirs)
 
             # sort the chapter dirs to numerical order
             shallow_dirs = sorted(shallow_dirs, key=numericalSort)
@@ -43,7 +44,6 @@ class MangaManager():
             self.tree[dirs[i]] = {}
 
             for j in range(len(shallow_dirs)):
-
                 # get all page files of the chapter
                 deep_files = self.get_dirs(os.path.join(self.manga_path, dirs[i], shallow_dirs[j]))[1]
 
@@ -71,26 +71,28 @@ class MangaManager():
 
         return dir_list, files_list
 
-    def remove_composite_dir(self, dirs):
-        '''
-        dirs (list)
+    def remove_const_dirs(self, dirs):
+        """
+        Remove static dirs from dir
+        """
+        if Const.PdfDIr in dirs:
+            dirs.remove(Const.PdfDIr)
+        if Const.JpgDir in dirs:
+            dirs.remove(Const.JpgDir)
 
-        Remove composite dir from (dirs)
-        '''
-        if 'Composites' in dirs:
-            dirs.remove('Composites')
 
 class HtmlManager:
     def __init__(self):
-        '''
+        """
         Initialize the object
-        '''
+        """
         self.manga_path = Const.MangaSavePath
         self.location = 'Web'
         self.main_menu = os.path.join(self.location, 'index.html')
 
-    def generate_new_chapter(self, manga_title, chapter_title, page_list, destination, prefix='', previous = '#', next = '#'):
-        '''
+    def generate_new_chapter(self, manga_title, chapter_title, page_list, destination, prefix='', previous='#',
+                             next='#'):
+        """
         manga_title (str): title of the manga the chapter belongs to
         chapter_title (str): title of chapter the page belongs to
         page_list (list): list of pages in numerical order
@@ -101,7 +103,7 @@ class HtmlManager:
         next (str): relative path to next chapter html
 
         Creates a new html file containing all pages and named (chapter_title).html
-        '''
+        """
         doc, tag, text = Doc().tagtext()
 
         # html
@@ -116,7 +118,8 @@ class HtmlManager:
             with tag('div', klass='container'):
                 # manga title
                 with tag('div', klass='title-container'):
-                    doc.asis('<a class="title manga-title" href="' + os.path.join('..', manga_title + '.html') + '" >' + manga_title + '</a>')
+                    doc.asis('<a class="title manga-title" href="' + os.path.join('..',
+                                                                                  manga_title + '.html') + '" >' + manga_title + '</a>')
                 with tag('div', klass='chapter-bar'):
                     doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
                     with tag('h3', klass='title chapter-title'):
@@ -126,7 +129,8 @@ class HtmlManager:
                 # loop through the page list
                 for page in page_list:
                     # add img tag
-                    doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page', style="margin:10px auto;")
+                    doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
+                             style="margin:10px auto;")
 
                 with tag('div', klass='chapter-bar'):
                     doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
@@ -139,7 +143,7 @@ class HtmlManager:
         with open(destination, 'w') as f:
             f.write(doc.getvalue())
 
-    def generate_list(self, title, mlist, destination, is_manga_list = True):
+    def generate_list(self, title, mlist, destination, is_manga_list=True):
         '''
         title (string): manga name
         mlist (list): list of manga or chapters
@@ -171,7 +175,7 @@ class HtmlManager:
                 with tag('div', klass='title-container'):
                     with tag('h1', klass='title manga-title'):
                         text(title)
-                
+
                 with tag('ul'):
                     # loop through the list
                     for item in mlist:
@@ -181,9 +185,9 @@ class HtmlManager:
                             # chapter htmls are stored in folder inside save location named (title)
                             link = os.path.join(title, item + '.html')
                         with tag('li', klass='manga'):
-                            doc.asis('<a class="btn btn-1 btn-1d" href="'+link+'">'+item+'</a>')
+                            doc.asis('<a class="btn btn-1 btn-1d" href="' + link + '">' + item + '</a>')
 
-        doc.asis('</html>') 
+        doc.asis('</html>')
 
         # save html doc in (destination)
         with open(destination, 'w') as f:
@@ -209,13 +213,14 @@ class HtmlManager:
             all_chapters_keys = list(dir_tree[manga_key].keys())
 
             # generate chapter list for manga (manga_key)
-            self.generate_list(manga_key, all_chapters_keys, os.path.join(self.location, manga_key+'.html'), is_manga_list=False)
+            self.generate_list(manga_key, all_chapters_keys, os.path.join(self.location, manga_key + '.html'),
+                               is_manga_list=False)
 
             # make chapter html's save path
             save_location = os.path.join(self.location, manga_key)
             if not os.path.exists(save_location):
                 os.mkdir(save_location)
-            
+
             # loop through all chapters
             for i in range(len(all_chapters_keys)):
                 chapter_key = all_chapters_keys[i]
@@ -225,9 +230,9 @@ class HtmlManager:
 
                 # generate chapter html
                 self.generate_new_chapter(manga_key, chapter_key, dir_tree[manga_key][chapter_key],
-                                        os.path.join(save_location, chapter_key + '.html'),
-                                        os.path.join('..', '..', self.manga_path, manga_key, chapter_key),
-                                        next=next_link, previous=previous_link)
+                                          os.path.join(save_location, chapter_key + '.html'),
+                                          os.path.join('..', '..', self.manga_path, manga_key, chapter_key),
+                                          next=next_link, previous=previous_link)
 
     def open(self):
         '''
@@ -236,7 +241,7 @@ class HtmlManager:
         returns True if successful
         '''
         if os.path.exists(self.main_menu):
-            webbrowser.open('file://'+os.path.realpath(self.main_menu))
+            webbrowser.open('file://' + os.path.realpath(self.main_menu))
             return True
         else:
             return False
@@ -254,6 +259,7 @@ class HtmlManager:
         new = re.sub(r'[ ]', '%20', source)
         return new
 
+
 if __name__ == '__main__':
     # Testing purposees
     html = HtmlManager()
@@ -267,5 +273,5 @@ if __name__ == '__main__':
     chapter_dict = manga.tree[manga_title]
     chapter = list(chapter_dict.keys())[0]
     page_list = chapter_dict[chapter]
-    
+
     html.generate_web(manga.tree)

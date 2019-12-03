@@ -1,19 +1,19 @@
 import os
 import traceback
-
 from typing import List
+
 from whaaaaat import prompt, Separator
 
-from modules.codec import MKCodec
-from modules.conversions import create_py_list, list_to_file
-from modules.manager import HtmlManager, MangaManager
 from modules.MangaDownloader import MangaDownloader
+from modules.codec import MKCodec
+from modules.composition import compose_menu
+from modules.conversions import list_to_file
+from modules.manager import HtmlManager, MangaManager
 from modules.static import Const
 from modules.styles import style
-from modules.composition import compose_menu
+
 
 def search():
-
     search_question = {
         'type': 'input',
         'name': 'search',
@@ -23,7 +23,7 @@ def search():
     search_answer = prompt(search_question)
 
     search = search_answer['search']
-    url = codec.search_prefix+search
+    url = codec.search_prefix + search
     while True:
         codec.search(url)
 
@@ -56,7 +56,6 @@ def search():
 
 
 def direct():
-
     direct_question = {
         'type': 'input',
         'name': 'direct',
@@ -245,7 +244,7 @@ if __name__ == '__main__':
             # View
             manga_manager.generate_tree()
             html_manager.generate_web(manga_manager.tree)
-            if(html_manager.open()):
+            if html_manager.open():
                 break
         elif menuoption['menu'] == 4:
             compose_menu()
