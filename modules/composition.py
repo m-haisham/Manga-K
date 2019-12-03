@@ -35,6 +35,7 @@ def compose_menu():
             str(manga / Path(response))
         )
 
+
 def chapterSelection():
     """
     :returns array os strings pointing to chapters to be composed
@@ -68,7 +69,7 @@ def chapterSelection():
         'type': 'checkbox',
         'name': 'chapters',
         'message': 'Select chapters to compose',
-        'choices': [{'name': i.parts[-1]} for i in manga.iterdir() if i.parts[-1] != Const.StructFile],
+        'choices': [{'name': i.parts[-1]} for i in manga.iterdir() if not is_folder_static(i.parts[-1])],
     }
 
     # if no chapters
@@ -84,3 +85,7 @@ def chapterSelection():
         return manga, []
 
     return manga, list(chapters)
+
+
+def is_folder_static(folder_name) -> bool:
+    return folder_name == Const.StructFile or folder_name == Const.JpgDir or folder_name == Const.PdfDIr

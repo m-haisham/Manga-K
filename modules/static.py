@@ -7,7 +7,7 @@ class Const:
     StructFile = 'tree.json'
 
     PdfDIr = 'pdf'
-    JpgDir = 'jpd'
+    JpgDir = 'jpg'
 
     @staticmethod
     def createCompositionDirs(manga_dir):
