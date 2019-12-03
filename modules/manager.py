@@ -96,7 +96,6 @@ class HtmlManager:
         self.manga_path = Const.MangaSavePath
         self.location = 'Web'
         self.main_menu = os.path.join(self.location, 'index.html')
-        print(self.main_menu)
 
     def generate_new_chapter(self, manga_title, chapter_title, page_list, destination, prefix='', previous='#',
                              next='#'):
