@@ -12,8 +12,7 @@ from modules.static import Const
 
 
 def make_valid(path):
-    return re.sub(r'''[/\\:*"'<>|]''', '', path)
-
+    return re.sub('[^A-Za-z0-9 -]+', '', path)
 
 class MangaDownloader:
     def __init__(self):
@@ -61,7 +60,7 @@ class MangaDownloader:
         r = requests.get(manga_path)
         soup = BeautifulSoup(r.content, "html.parser")
         titlebox = soup.find(class_="manga-info-text")
-        return titlebox.find("h1").text
+        return make_valid(titlebox.find("h1").text)
 
     def get_chapter_list(self, manga_path):
         """
@@ -104,7 +103,7 @@ class MangaDownloader:
         """
 
         manga_dir = os.path.join(
-            Const.MangaSavePath, make_valid(self.get_manga_name(url)))
+            Const.MangaSavePath, self.get_manga_name(url))
 
         # Create directories
         if not os.path.exists(Const.MangaSavePath):
