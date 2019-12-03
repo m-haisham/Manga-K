@@ -219,7 +219,7 @@ if __name__ == '__main__':
                 'Search for manga',
                 'Open manga using direct url',
                 'View the manga',
-                Separator(),
+                Separator('-'),
                 'Compose',
                 'Settings',
                 'Exit'

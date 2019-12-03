@@ -184,8 +184,12 @@ def dir_to_pdf(path, save_path, verbose = False):
                 # create RGB image with white background of same size
                 rgb = Image.new('RGB', new_img.size, (255, 255, 255))
 
-                # paste using alpha as mask
-                rgb.paste(new_img, new_img.split()[3])
+                try:
+                    # paste using alpha as mask
+                    rgb.paste(new_img, new_img.split()[3])
+                except OSError as e:
+                    print(f'\n{e}')
+                    continue
 
                 # get temporary path
                 temp = tempfile.NamedTemporaryFile().name + '.jpg'
