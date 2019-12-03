@@ -10,12 +10,18 @@ from .sorting import seperate_alphabetically
 
 numbers = re.compile(r'(\d+)')
 
+floating_numbers = re.compile(r"[-+]?\d*\.\d+|\d+")
+
 
 def numericalSort(value):
     parts = numbers.split(value)
     parts[1::2] = map(int, parts[1::2])
     return parts
 
+
+def floatingSort(value):
+    numbers = floating_numbers.findall(value)
+    return numbers
 
 class MangaManager():
     def __init__(self):
@@ -248,7 +254,7 @@ class HtmlManager:
         with open(destination, 'w') as f:
             f.write(doc.getvalue())
 
-    def header(self, title, chapter_list_link = None) -> str:
+    def header(self, title, chapter_list_link=None) -> str:
         """
         :param title: title of header
         :param chapter_list_link: path to chapter list
@@ -282,14 +288,14 @@ class HtmlManager:
                 with tag('li'):
                     with tag('a', klass='btn', href=previous):
                         try:
-                            text(f'PREVIOUS ({numericalSort(previous)[1]})')
+                            text(f'PREVIOUS ({floatingSort(previous)[0]})')
                         except IndexError:
                             text('PREVIOUS')
 
                 with tag('li'):
                     with tag('a', klass='btn', href=next):
                         try:
-                            text(f'NEXT ({numericalSort(next)[1]})')
+                            text(f'NEXT ({floatingSort(next)[0]})')
                         except IndexError:
                             text('NEXT')
 
