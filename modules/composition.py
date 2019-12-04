@@ -4,7 +4,7 @@ from tqdm import tqdm
 from whaaaaat import prompt
 
 from .ImageStacking import dir_to_pdf, dir_to_img
-from .static import Const
+from .static import Const, is_any_manga_downloaded
 
 composing_options = {
     Const.PdfDIr: dir_to_pdf,
@@ -13,6 +13,10 @@ composing_options = {
 
 
 def compose_menu():
+
+    if not is_any_manga_downloaded(True):
+        return
+
     compose_menu_options = {
         'type': 'list',
         'name': 'compose',
