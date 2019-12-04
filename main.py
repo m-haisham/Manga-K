@@ -1,5 +1,7 @@
 import os
+import sys
 import traceback
+from pathlib import Path
 from typing import List
 
 from whaaaaat import prompt, Separator
@@ -144,7 +146,7 @@ def settings(dmanager, skip_check=False):
 
     composite_answer = prompt(make_composites)
 
-    if composite_answer['make_composites'] == True:
+    if composite_answer['make_composites']:
         make_composites = True
         # which composition type
         composition_type = {
@@ -175,7 +177,7 @@ def settings(dmanager, skip_check=False):
 
         keep_originals = keep_original_answer['keep_originals']
     # default rest of settings
-    elif composite_answer['make_composites'] == False:
+    elif not composite_answer['make_composites']:
         make_composites = False
         keep_originals = True
         composition_type = 'pdf'
@@ -202,6 +204,10 @@ def check_files(download_manager):
 
 
 if __name__ == '__main__':
+
+    # set working directory
+    os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
+
     dm: MangaDownloader = MangaDownloader()
     codec: MKCodec = MKCodec()
     manga_manager: MangaManager = MangaManager()
