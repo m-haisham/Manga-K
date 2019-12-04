@@ -12,7 +12,7 @@ from modules.static import Const
 
 
 def make_valid(path):
-    return re.sub('[^A-Za-z0-9 -]+', '', path)
+    return re.sub('[^A-Za-z0-9 -.]+', '', path)
 
 class MangaDownloader:
     def __init__(self):
