@@ -1,6 +1,7 @@
 import threading
 import time
 
+from .line import delete_line
 from .completer import Completer
 from .item import UItem
 
@@ -8,6 +9,8 @@ from .item import UItem
 class Loader(UItem):
     """
     an indefinite loader
+
+    change message mid execution to change display hint
 
     use
     with Loader(msg) as l:
@@ -40,6 +43,15 @@ class Loader(UItem):
 
         self.thread = DrawingThread(message=s)
         self.thread.daemon = True
+
+    @property
+    def message(self):
+        return self._message
+
+    @message.setter
+    def message(self, val):
+        self.thread.set_message(val)
+        self._message = val
 
     def set_drawing_speed(self, speed):
         self.thread.drawing_speed = speed
@@ -77,6 +89,8 @@ class DrawingThread(threading.Thread):
     def __init__(self, message='', *args, **kwargs):
         super(DrawingThread, self).__init__(*args, **kwargs)
         self.message = message
+        self.message_changed = False
+
         self.error = False
         self.drawing_speed = 0.1
         self._stop_event = threading.Event()
@@ -88,13 +102,22 @@ class DrawingThread(threading.Thread):
     def stopped(self) -> bool:
         return self._stop_event.is_set()
 
+    def set_message(self, message):
+        self.message_changed = True
+        self.message = message
+
     def run(self) -> None:
         index = 0
         while True:
+            if self.message_changed:
+                delete_line()
+                self.message_changed = False
+
             print(f'\r[{Loader.STATES[index]}] {self.message}', end='')
 
             if self.stopped():
-                c = Completer(f'{self.message}    ').init()
+                delete_line()
+                c = Completer(f'{self.message}').init()
                 if not self.error:
                     c.complete()
                 else:

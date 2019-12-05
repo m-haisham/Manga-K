@@ -3,8 +3,16 @@ class UItem:
         if type(s) != str:
             raise TypeError('"s" must be of type str')
 
-        self.message = s
+        self._message = s
         self._done = False
+
+    @property
+    def message(self):
+        return self._message
+
+    @message.setter
+    def message(self, val):
+        self._message = val
 
     def init(self):
         raise NotImplementedError()
