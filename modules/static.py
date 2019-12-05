@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from . import unicode
-from .colorize import red
+from .colorize import red, green
 
 
 class Const:
@@ -21,8 +21,20 @@ class Const:
             os.mkdir(os.path.join(manga_dir, Const.JpgDir))
 
 
-def is_any_manga_downloaded(verbose=False) -> bool:
+def visualize(val) -> str:
+    """
+    :returns appropriate symbol for the input colorized
+    """
+    if type(val) == bool:
+        if val:
+            return green(unicode.CHECK_MARK)
+        else:
+            return red('X')
+    else:
+        return val
 
+
+def is_any_manga_downloaded(verbose=False) -> bool:
     manga_path = Path(Const.MangaSavePath)
 
     is_downloaded = manga_path.exists() and manga_path.is_dir() and len(list(manga_path.iterdir())) > 0

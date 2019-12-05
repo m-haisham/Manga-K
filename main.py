@@ -6,12 +6,13 @@ from typing import List
 
 from whaaaaat import prompt, Separator
 
+from modules import colorize
 from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
 from modules.composition import compose_menu
 from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
-from modules.static import Const
+from modules.static import Const, visualize
 from modules.styles import style
 from modules.ui.decorators import completer, loader
 
@@ -112,8 +113,7 @@ def settings(dmanager, skip_check=False):
 
         # print settings to console
         for key in settings_keys:
-            print('[SETTING] %s set to %s' %
-                  (key.capitalize(), str(dmanager.settings[key])))
+            print(f'[{visualize(dmanager.settings[key])}] {key.capitalize()}')
 
         # ask whether to change settings
 
@@ -265,4 +265,4 @@ if __name__ == '__main__':
         elif menuoption['menu'] == 6:
             break
         else:
-            print('Pick a valid choice')
+            print(colorize.red('Pick a valid choice'))
