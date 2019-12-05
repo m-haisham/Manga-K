@@ -4,46 +4,24 @@ import time
 from .completer import Completer
 from .item import UItem
 
-class DrawingThread(threading.Thread):
-    """Thread class that draws indefinitely until stoppped"""
-
-    def __init__(self, message='', *args, **kwargs):
-        super(DrawingThread, self).__init__(*args, **kwargs)
-        self.message = message
-        self.error = False
-        self.drawing_speed = 0.1
-        self._stop_event = threading.Event()
-
-    def stop(self, error = False):
-        self._stop_event.set()
-        self.error = error
-
-    def stopped(self) -> bool:
-        return self._stop_event.is_set()
-
-    def run(self) -> None:
-        index = 0
-        while True:
-            print(f'\r[{Loader.STATES[index]}] {self.message}', end='')
-
-            if self.stopped():
-                c = Completer(f'{self.message}    ').init()
-                if not self.error:
-                    c.complete()
-                else:
-                    c.fail()
-                return
-
-            time.sleep(0.1)
-            index = (index + 1) % len(Loader.STATES)
-
 
 class Loader(UItem):
+    """
+    an indefinite loader
+
+    use
+    with Loader(msg) as l:
+
+        # to show fail
+        l.fail(*optional_msg)
+
+    or use decorators for functions
+    """
+
     FULL_BLOCK = '\u2588'
     EMPTY_SPACE = ' '
 
-    CLEAR_LINE = "\033[K"
-
+    # this has been left like this for sake of clear understanding
     STATES = [
         (EMPTY_SPACE * 0) + (FULL_BLOCK * 1) + (EMPTY_SPACE * 4),
         (EMPTY_SPACE * 0) + (FULL_BLOCK * 2) + (EMPTY_SPACE * 3),
@@ -62,7 +40,6 @@ class Loader(UItem):
 
         self.thread = DrawingThread(message=s)
         self.thread.daemon = True
-
 
     def set_drawing_speed(self, speed):
         self.thread.drawing_speed = speed
@@ -89,7 +66,40 @@ class Loader(UItem):
         # stop drawing
         self.thread.stop(error=True)
 
-
         # sanity check
         while self.thread.is_alive():
             pass
+
+
+class DrawingThread(threading.Thread):
+    """Thread class that draws indefinitely until stoppped"""
+
+    def __init__(self, message='', *args, **kwargs):
+        super(DrawingThread, self).__init__(*args, **kwargs)
+        self.message = message
+        self.error = False
+        self.drawing_speed = 0.1
+        self._stop_event = threading.Event()
+
+    def stop(self, error=False):
+        self._stop_event.set()
+        self.error = error
+
+    def stopped(self) -> bool:
+        return self._stop_event.is_set()
+
+    def run(self) -> None:
+        index = 0
+        while True:
+            print(f'\r[{Loader.STATES[index]}] {self.message}', end='')
+
+            if self.stopped():
+                c = Completer(f'{self.message}    ').init()
+                if not self.error:
+                    c.complete()
+                else:
+                    c.fail()
+                return
+
+            time.sleep(0.1)
+            index = (index + 1) % len(Loader.STATES)

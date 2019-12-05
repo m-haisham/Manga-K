@@ -4,6 +4,17 @@ from .unicode import CHECK_MARK
 
 
 class Completer(UItem):
+    """
+    check box type completer
+
+    use
+    with Completer(msg) as c:
+
+        # to show fail
+        c.fail(*optional_msg)
+
+    or use decorators for functions
+    """
     def init(self):
         print(f'\r[ ] {self.message}', end='')
         return self
