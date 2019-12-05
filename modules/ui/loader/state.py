@@ -1,5 +1,5 @@
 from .. import unicode
-
+from ..completer.completer_type import CompleterType
 
 class State:
     def __init__(self, bar_width, cursor_width=3, fill=unicode.FULL_BLOCK, empty=' ', prefix='[', postfix=']'):
@@ -59,3 +59,6 @@ class State:
         # print(']')
         #
         # print({'start': fallout_start, 'end': fallout_end, 'width': fallout_end - fallout_start})
+
+    def to_completer_state(self):
+        return CompleterType(prefix=self.prefix, postfix=self.postfix)

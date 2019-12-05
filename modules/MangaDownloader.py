@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from modules.ImageStacking import VerticalStack, dir_to_pdf
 from modules.static import Const
-from modules.ui import decorators
+from modules.ui import decorators, Loader
 
 
 def make_valid(path):
@@ -126,10 +126,13 @@ class MangaDownloader:
                 manga_dir, make_valid(chapter_name))
 
             # download
-            print(f'\n!{chapter_name}')
-            if not os.path.exists(chapter_directory):
-                os.mkdir(chapter_directory)  # create chapter_directory
-            for page in self.get_page_list(chapter['href']):
+            print()
+            with Loader(chapter_name):
+                if not os.path.exists(chapter_directory):
+                    os.mkdir(chapter_directory)  # create chapter_directory
+                page_list = self.get_page_list(chapter['href'])
+
+            for page in page_list:
                 self.save_image(page, chapter_directory)  # save image
 
             # on chapter download complete

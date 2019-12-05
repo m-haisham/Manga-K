@@ -15,11 +15,12 @@ class DrawingThread(threading.Thread):
         self.state = state
 
         self.message = message
-        self.message_changed = False
 
         self.error = False
         self.drawing_speed = 0.1
         self._stop_event = threading.Event()
+
+        self.index = 0
 
     def stop(self, error=False):
         self._stop_event.set()
@@ -29,26 +30,27 @@ class DrawingThread(threading.Thread):
         return self._stop_event.is_set()
 
     def set_message(self, message):
-        self.message_changed = True
         self.message = message
 
-    def run(self) -> None:
-        index = 0
-        while True:
-            if self.message_changed:
-                delete_line()
-                self.message_changed = False
+        delete_line()
+        print(f'\r{self.state.states[self.index]} {self.message}', end='')
 
-            print(f'\r{self.state.states[index]} {self.message}', end='')
+    def run(self) -> None:
+
+        # making sure it is with in limit
+        self.index = self.index % len(self.state.states)
+
+        while True:
+            print(f'\r{self.state.states[self.index]} {self.message}', end='')
 
             if self.stopped():
                 delete_line()
-                c = Completer(f'{self.message}').init()
+                c = Completer(f'{self.message}', self.state.to_completer_state()).init()
                 if not self.error:
                     c.complete()
                 else:
                     c.fail()
                 return
 
-            time.sleep(0.1)
-            index = (index + 1) % len(self.state.states)
+            time.sleep(self.drawing_speed)
+            self.index = (self.index + 1) % len(self.state.states)
