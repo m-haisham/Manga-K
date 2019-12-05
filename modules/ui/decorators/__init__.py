@@ -1,5 +1,6 @@
 from ..completer import Completer as CompleterClass
-from ..loader import Loader as LoaderClass
+from ...ui import Loader as LoaderClass
+from ..loader import State
 
 
 class Completer:
@@ -22,12 +23,13 @@ class Completer:
 
 
 class Loader:
-    def __init__(self, message):
+    def __init__(self, message, state=State(5)):
         self.message = message
+        self.state = state
 
     def __call__(self, func):
         def wrapper(*args, **kwargs):
-            l = LoaderClass(self.message).init()
+            l = LoaderClass(self.message, self.state).init()
             try:
                 r = func(*args, **kwargs)
             except Exception as e:
