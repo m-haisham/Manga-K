@@ -2,12 +2,12 @@ from .. import unicode
 
 
 class State:
-    def __init__(self, bar_width, cursor_width = 3, fill=unicode.FULL_BLOCK, empty=' ', prefix='[', postfix=']'):
+    def __init__(self, bar_width, cursor_width=3, fill=unicode.FULL_BLOCK, empty=' ', prefix='[', postfix=']'):
 
         if type(bar_width) != int:
             raise TypeError('bar width must be of type int')
 
-        if bar_width <= 1:
+        if bar_width <= 0:
             raise ValueError('bar width must be greater that 1')
 
         if type(cursor_width) != int:
@@ -16,13 +16,16 @@ class State:
         if cursor_width <= 0:
             raise ValueError('cursor width must be greater that 0')
 
-        if bar_width <= cursor_width:
+        if bar_width < cursor_width:
             raise ValueError('cursor width must be greater than bar width')
 
         self.width = bar_width
         self.cursor_width = cursor_width
         self.fill = fill
         self.empty = empty
+
+        self.prefix = prefix
+        self.postfix = postfix
 
         # generate states
         self.states = []

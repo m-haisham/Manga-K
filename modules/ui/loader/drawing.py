@@ -2,8 +2,8 @@ import threading
 import time
 
 from .state import State
-from ..completer import Completer
 from ..line import delete_line
+from ..completer import Completer
 
 
 class DrawingThread(threading.Thread):
