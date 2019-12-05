@@ -14,7 +14,7 @@ from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
 from modules.static import Const, visualize
 from modules.styles import style
-from modules.ui import loader, colorize
+from modules.ui import loader, decorators, colorize, Loader, Completer
 
 
 def search():

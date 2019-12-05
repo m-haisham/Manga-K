@@ -2,7 +2,7 @@ import threading
 import time
 
 from .completer import Completer
-
+from .item import UItem
 
 class DrawingThread(threading.Thread):
     """Thread class that draws indefinitely until stoppped"""
@@ -38,7 +38,7 @@ class DrawingThread(threading.Thread):
             index = (index + 1) % len(Loader.STATES)
 
 
-class Loader:
+class Loader(UItem):
     FULL_BLOCK = '\u2588'
     EMPTY_SPACE = ' '
 
@@ -58,15 +58,11 @@ class Loader:
     ]
 
     def __init__(self, s):
-        if type(s) != str:
-            raise TypeError('"s" must be of type str')
-
-        self.message = s
+        super().__init__(s)
 
         self.thread = DrawingThread(message=s)
         self.thread.daemon = True
 
-        self._done = False
 
     def set_drawing_speed(self, speed):
         self.thread.drawing_speed = speed
@@ -78,21 +74,17 @@ class Loader:
         return self
 
     def complete(self):
-        if self._done:
-            raise ValueError('this bar has already ran to completion')
-        self._done = True
+        super().complete()
 
         # stop drawing
         self.thread.stop(error=False)
-        
+
         # sanity check
         while self.thread.is_alive():
             pass
 
     def fail(self):
-        if self._done:
-            raise ValueError('this bar has already ran to completion')
-        self._done = True
+        super().fail()
 
         # stop drawing
         self.thread.stop(error=True)
@@ -101,10 +93,3 @@ class Loader:
         # sanity check
         while self.thread.is_alive():
             pass
-
-    def __enter__(self):
-        return self.init();
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self._done:
-            self.complete()

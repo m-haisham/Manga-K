@@ -1,29 +1,20 @@
-from modules.ui.colorize import red, green, blue
+from .colorize import red, green, blue
+from .item import UItem
 from .unicode import CHECK_MARK
 
 
-class Completer:
-    def __init__(self, s: str):
-        if type(s) != str:
-            raise TypeError('"s" must be of type str')
-
-        self.message = s
-
+class Completer(UItem):
     def init(self):
         print(f'\r[ ] {self.message}', end='')
         return self
 
     def complete(self):
-        if self._done:
-            raise ValueError('this bar has already ran to completion')
-        self._done = True
+        super().complete()
 
         print(f'\r[{green(CHECK_MARK)}] {self.message}')
 
     def fail(self, s=''):
-        if self._done:
-            raise ValueError('this bar has already ran to completion')
-        self._done = True
+        super().fail()
 
         print(f'\r[{red("X")}] {self.message}')
 
@@ -34,10 +25,3 @@ class Completer:
 
     def __str__(self):
         return self.message
-
-    def __enter__(self):
-        return self.init();
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self._done:
-            self.complete()
