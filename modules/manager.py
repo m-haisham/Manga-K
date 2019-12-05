@@ -10,7 +10,8 @@ from .sorting import seperate_alphabetically
 
 numbers = re.compile(r'(\d+)')
 
-floating_numbers = re.compile(r"[-+]?\d*\.\d+|\d+")
+floating_numbers = re.compile(r"([-+]?\d*\.\d+|\d+)")
+floating = re.compile(r"(?i)chapter ([-+]?\d*\.\d+|\d+)")
 
 
 def numericalSort(value):
@@ -22,6 +23,11 @@ def numericalSort(value):
 def floatingSort(value):
     numbers = floating_numbers.findall(value)
     return numbers
+
+def chapterSort(value):
+    parts = floating.split(value)
+    parts[1::2] = map(float, parts[1::2])
+    return parts[1::2]
 
 class MangaManager():
     def __init__(self):
@@ -375,6 +381,7 @@ class HtmlManager:
         for i in range(len(all_manga_keys)):
             manga_key = all_manga_keys[i]
             all_chapters_keys = list(dir_tree[manga_key].keys())
+            all_chapters_keys.sort(key=chapterSort)
 
             # generate chapter list for manga (manga_key)
             self.generate_list(manga_key, all_chapters_keys, os.path.join(self.location, manga_key + '.html'),
