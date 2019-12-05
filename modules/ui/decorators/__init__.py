@@ -1,15 +1,16 @@
 from ..completer import Completer as CompleterClass
 from ...ui import Loader as LoaderClass
 from ..loader import State
-
+from ..completer import CompleterType
 
 class Completer:
-    def __init__(self, message):
+    def __init__(self, message, ctype=CompleterType()):
         self.message = message
+        self.ctype = ctype
 
     def __call__(self, func):
         def wrapper(*args, **kwargs):
-            c = CompleterClass(self.message).init()
+            c = CompleterClass(self.message, self.ctype).init()
             try:
                 r = func(*args, **kwargs)
             except Exception as e:

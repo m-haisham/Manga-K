@@ -1,9 +1,10 @@
-from .completer import Completer
+from .completer import Completer, CompleterType
 from .loader import Loader, DrawingThread, State
 
-def completer(func, message):
+
+def completer(func, message, ctype=CompleterType()):
     def function_wrapper(*args, **kwargs):
-        c = Completer(message).init()
+        c = Completer(message, ctype).init()
         try:
             r = func(*args, **kwargs)
         except Exception as e:
@@ -31,4 +32,3 @@ def loader(func, message, state=State(5)):
         return r
 
     return function_wrapper
-
