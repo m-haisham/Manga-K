@@ -13,6 +13,9 @@ from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
 from modules.static import Const
 from modules.styles import style
+from modules.ui.decorators import completer, loader
+
+import time
 
 
 def search():
@@ -247,9 +250,12 @@ if __name__ == '__main__':
             except Exception:
                 traceback.print_exc()
         elif menuoption['menu'] == 2:
-            # View
-            manga_manager.generate_tree()
-            html_manager.generate_web(manga_manager.tree)
+            # generate manga tree
+            loader(manga_manager.generate_tree, 'Generating tree.')()
+
+            # generate html pages using the tree
+            loader(html_manager.generate_web, 'Generating html files.')(manga_manager.tree)
+
             if html_manager.open():
                 break
         elif menuoption['menu'] == 4:

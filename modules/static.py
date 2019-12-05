@@ -27,6 +27,6 @@ def is_any_manga_downloaded(verbose=False) -> bool:
 
     is_downloaded = manga_path.exists() and manga_path.is_dir() and len(list(manga_path.iterdir())) > 0
     if verbose and not is_downloaded:
-        print(f'{red("[X]")} No mangas downloaded')
+        print(f'[{red("X")}] No mangas downloaded')
 
     return is_downloaded

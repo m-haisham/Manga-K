@@ -102,6 +102,7 @@ class MangaDownloader:
         returns None
         """
 
+        # pre download
         manga_dir = os.path.join(
             Const.MangaSavePath, self.get_manga_name(url))
 
@@ -116,17 +117,20 @@ class MangaDownloader:
             if not os.path.exists(os.path.join(manga_dir, Const.JpgDir)):
                 os.mkdir(os.path.join(manga_dir, Const.JpgDir))
 
+        # download each chapter loop
         for chapter in chapters:
             chapter_name = chapter['name']
             chapter_directory = os.path.join(
                 manga_dir, make_valid(chapter_name))
 
+            # download
             print(f'\n!{chapter_name}')
             if not os.path.exists(chapter_directory):
                 os.mkdir(chapter_directory)  # create chapter_directory
             for page in self.get_page_list(chapter['href']):
                 self.save_image(page, chapter_directory)  # save image
 
+            # on chapter download complete
             if self.settings['make_composite']:
                 print('Attempting composition of %s ... ' % chapter_directory)
                 if self.settings['composition_type'] == 'pdf':
@@ -138,6 +142,8 @@ class MangaDownloader:
                 if not self.settings['keep_originals']:
                     shutil.rmtree(chapter_directory)  # remove chapter
                     print(chapter_directory, 'removed')
+
+        # on download task complete
 
     def print_info(self, manga_path):
         """
