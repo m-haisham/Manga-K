@@ -1,7 +1,6 @@
-CHECK_MARK = "\u2713"
-
 from .completer import Completer
 from .loader import Loader
+
 
 def completer(func, message):
     def function_wrapper(*args, **kwargs):
@@ -21,6 +20,15 @@ def completer(func, message):
 
 def loader(func, message):
     def function_wrapper(*args, **kwargs):
-        Loader(func, message, *args, **kwargs).run()
+        l = Loader(message).init()
+        try:
+            r = func(*args, **kwargs)
+        except Exception as e:
+            l.fail(e)
+            raise e
+
+        l.complete()
+
+        return r
 
     return function_wrapper

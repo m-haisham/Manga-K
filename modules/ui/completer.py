@@ -1,5 +1,5 @@
-from ..colorize import red, green, blue
-from . import CHECK_MARK
+from modules.ui.colorize import red, green, blue
+from .unicode import CHECK_MARK
 
 
 class Completer:

@@ -1,4 +1,3 @@
-
 NO_BREAK_SPACE = "\u00a0"
 CENT = "\u00a2"
 COPYRIGHT = "\u00a9"

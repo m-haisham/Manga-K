@@ -24,10 +24,12 @@ def floatingSort(value):
     numbers = floating_numbers.findall(value)
     return numbers
 
+
 def chapterSort(value):
     parts = floating.split(value)
     parts[1::2] = map(float, parts[1::2])
     return parts[1::2]
+
 
 class MangaManager():
     def __init__(self):

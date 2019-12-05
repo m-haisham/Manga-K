@@ -27,6 +27,15 @@ class Loader:
 
     def __call__(self, func):
         def wrapper(*args, **kwargs):
-            LoaderClass(func, self.message, *args, **kwargs).run()
+            l = LoaderClass(self.message).init()
+            try:
+                r = func(*args, **kwargs)
+            except Exception as e:
+                l.fail(e)
+                raise e
+
+            l.complete()
+
+            return r
 
         return wrapper

@@ -13,7 +13,6 @@ composing_options = {
 
 
 def compose_menu():
-
     if not is_any_manga_downloaded(True):
         return
 

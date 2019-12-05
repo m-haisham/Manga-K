@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 
-from . import unicode
-from .colorize import red, green
+from modules.ui import unicode
+from modules.ui.colorize import red, green
 
 
 class Const:

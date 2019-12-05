@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from modules.ImageStacking import VerticalStack, dir_to_pdf
 from modules.static import Const
-from modules.ui import completer, decorators
+from modules.ui import decorators
 
 
 def make_valid(path):
@@ -164,7 +164,7 @@ class MangaDownloader:
             print("{0}) {1}".format(iter_number,
                                     rows[i].find("a", href=True).text))
 
-    @decorators.Completer('Parse info')
+    @decorators.Loader('Parsing info')
     def get_info(self, manga_path):
         """
         manga_path (string): url of manga from mangakakalot.com

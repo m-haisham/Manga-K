@@ -6,7 +6,6 @@ from typing import List
 
 from whaaaaat import prompt, Separator
 
-from modules import colorize
 from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
 from modules.commandline import parse
@@ -15,7 +14,7 @@ from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
 from modules.static import Const, visualize
 from modules.styles import style
-from modules.ui import completer, loader, decorators
+from modules.ui import loader, colorize
 
 
 def search():
@@ -207,20 +206,6 @@ def check_files(download_manager):
 
 if __name__ == '__main__':
 
-    import time
-
-
-    @decorators.Loader('Sleep')
-    def sleeper(t):
-        time.sleep(t)
-        print(f'{t} time to wake up')
-        return t
-
-
-    t = sleeper(2)
-    print(t)
-    input()
-
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
 
@@ -259,7 +244,6 @@ if __name__ == '__main__':
         else:
             if args.view:
                 menuoption['menu'] = 2
-
 
         if menuoption['menu'] == 0:
             try:
