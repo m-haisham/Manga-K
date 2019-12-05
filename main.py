@@ -15,9 +15,7 @@ from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
 from modules.static import Const, visualize
 from modules.styles import style
-from modules.ui.decorators import completer, loader
-
-import time
+from modules.ui import completer, loader, decorators
 
 
 def search():
@@ -208,6 +206,20 @@ def check_files(download_manager):
 
 
 if __name__ == '__main__':
+
+    import time
+
+
+    @decorators.Loader('Sleep')
+    def sleeper(t):
+        time.sleep(t)
+        print(f'{t} time to wake up')
+        return t
+
+
+    t = sleeper(2)
+    print(t)
+    input()
 
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))

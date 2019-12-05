@@ -17,7 +17,7 @@ class Completer:
         print(f'\r[{green(CHECK_MARK)}] {self.message}')
 
     def fail(self, s=''):
-        print(f'\r[{red(CHECK_MARK)}] {self.message}')
+        print(f'\r[{red("X")}] {self.message}')
 
         if type(s) != str:
             raise TypeError('"s" must be of type str')

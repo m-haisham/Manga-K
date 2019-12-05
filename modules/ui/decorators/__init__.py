@@ -1,23 +1,32 @@
-from ..completer import Completer
-from ..loader import Loader
+from ..completer import Completer as CompleterClass
+from ..loader import Loader as LoaderClass
 
 
-def completer(func, message):
-    def function_wrapper(*args, **kwargs):
-        c = Completer(message).init()
-        try:
-            func(*args, **kwargs)
-        except Exception as e:
-            c.fail(e)
-            return
+class Completer:
+    def __init__(self, message):
+        self.message = message
 
-        c.complete()
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            c = CompleterClass(self.message).init()
+            try:
+                r = func(*args, **kwargs)
+            except Exception as e:
+                c.fail(e)
+                raise e
 
-    return function_wrapper
+            c.complete()
+            return r
+
+        return wrapper
 
 
-def loader(func, message):
-    def function_wrapper(*args, **kwargs):
-        Loader(func, message, *args, **kwargs).run()
+class Loader:
+    def __init__(self, message):
+        self.message = message
 
-    return function_wrapper
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            LoaderClass(func, self.message, *args, **kwargs).run()
+
+        return wrapper

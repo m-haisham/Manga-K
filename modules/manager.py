@@ -292,14 +292,14 @@ class HtmlManager:
                 with tag('li'):
                     with tag('a', klass='btn', href=previous):
                         try:
-                            text(f'PREVIOUS ({floatingSort(previous)[0]})')
+                            text(f'PREVIOUS ({floatingSort(previous)[-1]})')
                         except IndexError:
                             text('PREVIOUS')
 
                 with tag('li'):
                     with tag('a', klass='btn', href=next):
                         try:
-                            text(f'NEXT ({floatingSort(next)[0]})')
+                            text(f'NEXT ({floatingSort(next)[-1]})')
                         except IndexError:
                             text('NEXT')
 
