@@ -9,6 +9,7 @@ from whaaaaat import prompt, Separator
 from modules import colorize
 from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
+from modules.commandline import parse
 from modules.composition import compose_menu
 from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
@@ -218,26 +219,35 @@ if __name__ == '__main__':
 
     check_files(dm)
 
+    # commandline argument parse
+    skip_menu, args = parse()
+
     while True:
-        mainmenu = {
-            'type': 'list',
-            'name': 'menu',
-            'message': 'what do you wanna do?',
-            'choices': [
-                'Search for manga',
-                'Open manga using direct url',
-                'View the manga',
-                Separator('-'),
-                'Compose',
-                'Settings',
-                'Exit'
-            ],
-            'filter': lambda val: mainmenu['choices'].index(val),
-            'default': 4
+        menuoption = {}
+        if not skip_menu:
+            mainmenu = {
+                'type': 'list',
+                'name': 'menu',
+                'message': 'what do you wanna do?',
+                'choices': [
+                    'Search for manga',
+                    'Open manga using direct url',
+                    'View the manga',
+                    Separator('-'),
+                    'Compose',
+                    'Settings',
+                    'Exit'
+                ],
+                'filter': lambda val: mainmenu['choices'].index(val),
+                'default': 4
 
-        }
+            }
 
-        menuoption = prompt(mainmenu)
+            menuoption = prompt(mainmenu)
+        else:
+            if args.view:
+                menuoption['menu'] = 2
+
 
         if menuoption['menu'] == 0:
             try:
