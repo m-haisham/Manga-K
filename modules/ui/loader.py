@@ -11,6 +11,7 @@ class DrawingThread(threading.Thread):
         super(DrawingThread, self).__init__(*args, **kwargs)
         self.message = message
         self.error = False
+        self.drawing_speed = 0.1
         self._stop_event = threading.Event()
 
     def stop(self, error = False):
@@ -65,6 +66,11 @@ class Loader:
         self.thread = DrawingThread(message=s)
         self.thread.daemon = True
 
+        self._done = False
+
+    def set_drawing_speed(self, speed):
+        self.thread.drawing_speed = speed
+
     def init(self):
         # start drawing
         self.thread.start()
@@ -72,17 +78,33 @@ class Loader:
         return self
 
     def complete(self):
+        if self._done:
+            raise ValueError('this bar has already ran to completion')
+        self._done = True
+
         # stop drawing
         self.thread.stop(error=False)
-
+        
         # sanity check
         while self.thread.is_alive():
             pass
 
     def fail(self):
+        if self._done:
+            raise ValueError('this bar has already ran to completion')
+        self._done = True
+
         # stop drawing
         self.thread.stop(error=True)
+
 
         # sanity check
         while self.thread.is_alive():
             pass
+
+    def __enter__(self):
+        return self.init();
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self._done:
+            self.complete()

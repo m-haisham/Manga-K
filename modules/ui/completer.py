@@ -14,9 +14,17 @@ class Completer:
         return self
 
     def complete(self):
+        if self._done:
+            raise ValueError('this bar has already ran to completion')
+        self._done = True
+
         print(f'\r[{green(CHECK_MARK)}] {self.message}')
 
     def fail(self, s=''):
+        if self._done:
+            raise ValueError('this bar has already ran to completion')
+        self._done = True
+
         print(f'\r[{red("X")}] {self.message}')
 
         if type(s) != str:
@@ -26,3 +34,10 @@ class Completer:
 
     def __str__(self):
         return self.message
+
+    def __enter__(self):
+        return self.init();
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self._done:
+            self.complete()
