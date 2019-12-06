@@ -137,5 +137,5 @@ class MangaDownloader:
                         loader.fail(e)
 
         # on download task complete
-        Completer('Downloads finished').init().complete()
+        Completer('Downloads complete').init().complete()
         print()

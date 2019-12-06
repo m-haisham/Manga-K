@@ -8,6 +8,9 @@ class Manga:
 
     @staticmethod
     def from_dict(obj):
+        if obj is None:
+            return
+
         assert isinstance(obj, dict)
 
         try:
