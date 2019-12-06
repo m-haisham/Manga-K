@@ -1,7 +1,7 @@
 from .. import unicode
-from ..completer.completer_type import CompleterType
+from ..completer.style import CompleterStyle
 
-class State:
+class LoaderStyle:
     def __init__(self, bar_width, cursor_width=3, fill=unicode.FULL_BLOCK, empty=' ', prefix='[', postfix=']'):
 
         if type(bar_width) != int:
@@ -61,4 +61,4 @@ class State:
         # print({'start': fallout_start, 'end': fallout_end, 'width': fallout_end - fallout_start})
 
     def to_completer_state(self):
-        return CompleterType(prefix=self.prefix, postfix=self.postfix)
+        return CompleterStyle(prefix=self.prefix, postfix=self.postfix)

@@ -1,10 +1,11 @@
 from ..completer import Completer as CompleterClass
+from ..completer import CompleterStyle
+from ..loader import LoaderStyle
 from ...ui import Loader as LoaderClass
-from ..loader import State
-from ..completer import CompleterType
+
 
 class Completer:
-    def __init__(self, message, ctype=CompleterType()):
+    def __init__(self, message, ctype=CompleterStyle()):
         self.message = message
         self.ctype = ctype
 
@@ -24,7 +25,7 @@ class Completer:
 
 
 class Loader:
-    def __init__(self, message, state=State(5)):
+    def __init__(self, message, state=LoaderStyle(5)):
         self.message = message
         self.state = state
 

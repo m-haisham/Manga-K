@@ -1,6 +1,6 @@
-from modules.ui.loader.state import State
-from ..item import UItem
+from modules.ui.loader.style import LoaderStyle
 from .drawing import DrawingThread
+from ..item import UItem
 
 
 class Loader(UItem):
@@ -18,7 +18,7 @@ class Loader(UItem):
     or use decorators for functions
     """
 
-    def __init__(self, s, state=State(5)):
+    def __init__(self, s, state=LoaderStyle(5)):
         super().__init__(s)
 
         self.thread = DrawingThread(message=s, state=state)
@@ -52,11 +52,11 @@ class Loader(UItem):
         while self.thread.is_alive():
             pass
 
-    def fail(self):
+    def fail(self, error=''):
         super().fail()
 
         # stop drawing
-        self.thread.stop(error=True)
+        self.thread.stop(error=error)
 
         # sanity check
         while self.thread.is_alive():

@@ -1,22 +1,22 @@
 import threading
 import time
 
-from .state import State
-from ..line import delete_line
+from .style import LoaderStyle
 from ..completer import Completer
+from ..line import delete_line
 
 
 class DrawingThread(threading.Thread):
     """Thread class that draws indefinitely until stoppped"""
 
-    def __init__(self, message='', state=State(5), *args, **kwargs):
+    def __init__(self, message='', state=LoaderStyle(5), *args, **kwargs):
         super(DrawingThread, self).__init__(*args, **kwargs)
 
         self.state = state
 
         self.message = message
 
-        self.error = False
+        self.error = ''
         self.drawing_speed = 0.1
         self._stop_event = threading.Event()
 
@@ -49,7 +49,7 @@ class DrawingThread(threading.Thread):
                 if not self.error:
                     c.complete()
                 else:
-                    c.fail()
+                    c.fail(s=self.error)
                 return
 
             time.sleep(self.drawing_speed)

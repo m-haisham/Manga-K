@@ -1,34 +1,49 @@
-from .completer import Completer, CompleterType
-from .loader import Loader, DrawingThread, State
+from .completer import Completer, CompleterStyle
+from .loader import Loader, DrawingThread, LoaderStyle
+from .runnable import Runnable
 
 
-def completer(func, message, ctype=CompleterType()):
-    def function_wrapper(*args, **kwargs):
-        c = Completer(message, ctype).init()
-        try:
-            r = func(*args, **kwargs)
-        except Exception as e:
-            c.fail(e)
-            raise e
+class RunnableCompleter(Runnable):
+    def __init__(self, func, message, style=CompleterStyle(), condition=True):
+        super().__init__(func)
+        self.message = message
+        self.style = style
+        self.condition = condition
 
-        c.complete()
+    def run(self, *args, **kwargs):
+        if self.condition:
+            c = Completer(self.message, self.style).init()
+            try:
+                output = super().run(*args, **kwargs)
+            except Exception as e:
+                c.fail(e)
+                raise e
 
-        return r
+            c.complete()
 
-    return function_wrapper
+            return output
+        else:
+            return super().run(*args, **kwargs)
 
 
-def loader(func, message, state=State(5)):
-    def function_wrapper(*args, **kwargs):
-        l = Loader(message, state).init()
-        try:
-            r = func(*args, **kwargs)
-        except Exception as e:
-            l.fail(e)
-            raise e
+class RunnableLoader(Runnable):
+    def __init__(self, func, message, style=LoaderStyle(5), condition=True):
+        super().__init__(func)
+        self.message = message
+        self.style = style
+        self.condition = condition
 
-        l.complete()
+    def run(self, *args, **kwargs):
+        if self.condition:
+            l = Loader(self.message, self.style).init()
+            try:
+                output = super().run(*args, **kwargs)
+            except Exception as e:
+                l.fail(e)
+                raise e
 
-        return r
+            l.complete()
 
-    return function_wrapper
+            return output
+        else:
+            return super().run(*args, **kwargs)

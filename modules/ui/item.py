@@ -28,7 +28,7 @@ class UItem:
         self._done = True
 
     def __enter__(self):
-        return self.init();
+        return self.init()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if not self._done:

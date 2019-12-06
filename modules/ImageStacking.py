@@ -68,11 +68,9 @@ class VerticalStack:
         if verbose:
             print('done!')
 
-        composite_image.save(os.path.join(
-            save_path, get_last_directory(folder_path)) + end)
+        composite_image.save(os.path.join(save_path, folder_path.parts[-1] + end))
         if verbose:
-            print('composite saved as', os.path.join(
-                save_path, get_last_directory(folder_path)) + end)
+            print('composite saved as', os.path.join(save_path, folder_path.parts[-1] + end))
 
     def disect(self, image_paths, directory, key='name'):
         '''
@@ -133,12 +131,12 @@ class VerticalStack:
         return int((height * new_width) / width)
 
 
-def get_last_directory(full_dir):
-    '''
+def get_last_directory(full_dir: str) -> str:
+    """
     full_dir (string): relative of absolute path
 
     returns (string): last directory of (full_dir)
-    '''
+    """
     full_dir = full_dir if full_dir[-1] != '/' else full_dir[:-1]
     if '/' in full_dir:
         dir_lst = full_dir.split('/')

@@ -1,7 +1,8 @@
-from ..colorize import red, green, blue, colored
+from .style import CompleterStyle
+from ..colorize import colored
 from ..item import UItem
 from ..unicode import CHECK_MARK
-from .completer_type import CompleterType
+
 
 class Completer(UItem):
     """
@@ -15,7 +16,7 @@ class Completer(UItem):
 
     or use decorators for functions
     """
-    def __init__(self, s: str, ctype=CompleterType()):
+    def __init__(self, s: str, ctype=CompleterStyle()):
         super().__init__(s)
         self.type = ctype
 

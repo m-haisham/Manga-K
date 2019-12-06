@@ -2,6 +2,7 @@ import json
 import os
 import re
 import shutil
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,7 +34,7 @@ class MangaDownloader:
         This function downloads [url] and prints the progress of the download to the console and save the file to [directory]
         """
         filename = url.split('/')[-1]
-        with open(directory + '/' + filename, 'wb') as f:
+        with open(directory / Path(filename), 'wb') as f:
             response = requests.get(url, stream=True)
 
             total_length = response.headers.get('content-length')
@@ -105,47 +106,53 @@ class MangaDownloader:
         """
 
         # pre download
-        manga_dir = os.path.join(
-            Const.MangaSavePath, self.get_manga_name(url))
+        manga_dir = Path()
+        manga_dir = Const.MangaSavePath / Path(self.get_manga_name(url))
 
         # Create directories
-        if not os.path.exists(Const.MangaSavePath):
-            os.mkdir(Const.MangaSavePath)
-        if not os.path.exists(manga_dir):
-            os.mkdir(manga_dir)
+        Const.create_manga_save()
+        manga_dir.mkdir(parents=True, exist_ok=True)
         if self.settings['make_composite']:
-            if not os.path.exists(os.path.join(manga_dir, Const.PdfDIr)):
-                os.mkdir(os.path.join(manga_dir, Const.PdfDIr))
-            if not os.path.exists(os.path.join(manga_dir, Const.JpgDir)):
-                os.mkdir(os.path.join(manga_dir, Const.JpgDir))
+            Const.createCompositionDirs(manga_dir)
 
         # download each chapter loop
         for chapter in chapters:
             chapter_name = chapter['name']
-            chapter_directory = os.path.join(
-                manga_dir, make_valid(chapter_name))
+            chapter_directory = manga_dir / Path(make_valid(chapter_name))
 
-            # download
+            # parse info
             print()
             with Loader(chapter_name):
-                if not os.path.exists(chapter_directory):
-                    os.mkdir(chapter_directory)  # create chapter_directory
+                # create chapter dir
+                chapter_directory.mkdir(parents=True, exist_ok=True)
                 page_list = self.get_page_list(chapter['href'])
 
+            # download pages
             for page in page_list:
                 self.save_image(page, chapter_directory)  # save image
 
             # on chapter download complete
             if self.settings['make_composite']:
-                print('Attempting composition of %s ... ' % chapter_directory)
+
+                # convert to pdf
                 if self.settings['composition_type'] == 'pdf':
-                    dir_to_pdf(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
+                    with Loader(f'Convert {chapter_directory.parts[-1]} to pdf') as l:
+                        try:
+                            dir_to_pdf(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
+                        except OSError as e:
+                            l.fail(e)
+
+                # convert to jpg
                 elif self.settings['composition_type'] == 'image':
-                    self.image_stacker.stack(
-                        chapter_directory, os.path.join(manga_dir, Const.JpgDir))
-                print("Composition done!")
+                    with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as l:
+                        try:
+                            self.image_stacker.stack(chapter_directory, os.path.join(manga_dir, Const.JpgDir))
+                        except OSError as e:
+                            l.fail(e)
+
+                # conditional remove chapter
                 if not self.settings['keep_originals']:
-                    shutil.rmtree(chapter_directory)  # remove chapter
+                    shutil.rmtree(chapter_directory)
                     print(chapter_directory, 'removed')
 
         # on download task complete

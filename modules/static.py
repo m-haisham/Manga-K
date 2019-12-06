@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from modules.ui import unicode
@@ -6,19 +5,24 @@ from modules.ui.colorize import red, green
 
 
 class Const:
-    MangaSavePath = 'Manga'
-    StyleSaveFile = 'style.css'
+    MangaSavePath = Path('Manga')
+    StyleSaveFile = Path('style.css')
     StructFile = 'tree.json'
 
-    PdfDIr = 'pdf'
-    JpgDir = 'jpg'
+    PdfDIr = Path('pdf')
+    JpgDir = Path('jpg')
+
+    @staticmethod
+    def create_manga_save():
+        Const.MangaSavePath.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def createCompositionDirs(manga_dir):
-        if not os.path.exists(os.path.join(manga_dir, Const.PdfDIr)):
-            os.mkdir(os.path.join(manga_dir, Const.PdfDIr))
-        if not os.path.exists(os.path.join(manga_dir, Const.JpgDir)):
-            os.mkdir(os.path.join(manga_dir, Const.JpgDir))
+        if type(manga_dir) == str:
+            manga_dir = Path(manga_dir)
+
+        (manga_dir / Const.PdfDIr).mkdir(exist_ok=True, parents=True)
+        (manga_dir / Const.JpgDir).mkdir(exist_ok=True, parents=True)
 
 
 def visualize(val) -> str:

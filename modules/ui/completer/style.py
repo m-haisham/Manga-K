@@ -1,7 +1,7 @@
 from colorama import Fore
 
 
-class CompleterType:
+class CompleterStyle:
     def __init__(self, prefix='[', postfix=']', success=Fore.GREEN, error=Fore.RED, info=Fore.BLUE):
         self.prefix = prefix
         self.postfix = postfix
