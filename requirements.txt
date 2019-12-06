@@ -1,3 +1,4 @@
+tinydb
 colorama
 requests==2.22.0
 tqdm==4.36.1

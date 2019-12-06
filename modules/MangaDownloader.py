@@ -12,6 +12,7 @@ from modules.ImageStacking import VerticalStack, dir_to_pdf
 from modules.static import Const
 from modules.ui import decorators, Loader
 
+from modules import database
 
 def make_valid(path):
     return re.sub('[^A-Za-z0-9 -.]+', '', path)
@@ -107,13 +108,17 @@ class MangaDownloader:
 
         # pre download
         manga_dir = Path()
-        manga_dir = Const.MangaSavePath / Path(self.get_manga_name(url))
+        manga_title = self.get_manga_name(url)
+        manga_dir = Const.MangaSavePath / Path(manga_title)
 
         # Create directories
         Const.create_manga_save()
         manga_dir.mkdir(parents=True, exist_ok=True)
         if self.settings['make_composite']:
             Const.createCompositionDirs(manga_dir)
+
+        # update base database
+        database.add(manga_title, url, manga_dir)
 
         # download each chapter loop
         for chapter in chapters:

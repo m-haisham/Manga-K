@@ -9,6 +9,9 @@
 # HTML
 *.html
 
+# Database
+*.db
+
 # other
 *.json
 *.css
