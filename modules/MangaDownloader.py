@@ -14,8 +14,10 @@ from modules.static import Const
 from modules.ui import decorators, Loader
 
 from modules import database
+from modules.settings import get as get_settings
 from modules.database import models
 
+from modules.error import decorators as error_decorators
 
 def make_valid(path):
     return re.sub('[^A-Za-z0-9 -.]+', '', path)
@@ -24,9 +26,6 @@ def make_valid(path):
 class MangaDownloader:
     def __init__(self):
         self.image_stacker = VerticalStack()
-        self.settings_path = 'config.json'
-        if self.settings_exists():
-            self.load_settings()
 
     def save_image(self, url, directory):
         """
@@ -99,6 +98,7 @@ class MangaDownloader:
             pages.append(row['src'])
         return pages
 
+    @error_decorators.Catch(error_type=KeyboardInterrupt, output=True)
     def download_manga(self, url, chapters):
         """
         url (string): manga path from mangakakalot.com
@@ -108,6 +108,8 @@ class MangaDownloader:
 
         returns None
         """
+        # fetch settings
+        settings = get_settings()
 
         # pre download
         manga_title = self.get_manga_name(url)  # TODO expand to get full info
@@ -116,7 +118,7 @@ class MangaDownloader:
         # Create directories
         Const.create_manga_save()
         manga_dir.mkdir(parents=True, exist_ok=True)
-        if self.settings['make_composite']:
+        if settings.is_compositing():
             Const.createCompositionDirs(manga_dir)
 
         # update base database
@@ -152,32 +154,24 @@ class MangaDownloader:
                 self.save_image(page, chapter_directory)  # save image
 
             # on chapter download complete
-
             # update chapters left to download
             database.meta.downloads_left.update({'downloaded': True}, Query().url == chapter['href'])
 
-            if self.settings['make_composite']:
+            # convert to pdf
+            if settings.pdf:
+                with Loader(f'Convert {chapter_directory.parts[-1]} to pdf') as loader:
+                    try:
+                        dir_to_pdf(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
+                    except OSError as e:
+                        loader.fail(e)
 
-                # convert to pdf
-                if self.settings['composition_type'] == 'pdf':
-                    with Loader(f'Convert {chapter_directory.parts[-1]} to pdf') as l:
-                        try:
-                            dir_to_pdf(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
-                        except OSError as e:
-                            l.fail(e)
-
-                # convert to jpg
-                elif self.settings['composition_type'] == 'image':
-                    with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as l:
-                        try:
-                            self.image_stacker.stack(chapter_directory, os.path.join(manga_dir, Const.JpgDir))
-                        except OSError as e:
-                            l.fail(e)
-
-                # conditional remove chapter
-                if not self.settings['keep_originals']:
-                    shutil.rmtree(chapter_directory)
-                    print(chapter_directory, 'removed')
+            # convert to jpg
+            elif settings.jpg:
+                with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as loader:
+                    try:
+                        self.image_stacker.stack(chapter_directory, os.path.join(manga_dir, Const.JpgDir))
+                    except OSError as e:
+                        loader.fail(e)
 
         # on download task complete
 
@@ -208,42 +202,3 @@ class MangaDownloader:
             }
 
         return info
-
-    def save_settings(self, make_composites, keep_originals, composition_type):
-        '''
-        saves the current settings
-        '''
-        self.settings = {
-            'make_composite': make_composites,
-            'keep_originals': keep_originals,
-            'composition_type': composition_type
-        }
-        with open(self.settings_path, 'w') as f:
-            json.dump(self.settings, f)
-
-    def load_settings(self):
-        '''
-        load the settings from file
-        '''
-        with open(self.settings_path, 'r') as f:
-            self.settings = json.load(f)
-
-    def settings_exists(self):
-        '''
-        checks if save file exists
-        '''
-        return os.path.exists(self.settings_path)
-
-    def verify_settings(self):
-        '''
-        check validity of loaded settings
-
-        returns True if valid
-        '''
-        keys = self.settings.keys()
-        if len(keys) != 3:
-            return False
-        for key in keys:
-            if key == None:
-                return False
-        return True

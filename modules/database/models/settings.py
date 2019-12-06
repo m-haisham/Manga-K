@@ -19,6 +19,12 @@ class Settings:
     def to_dict(self):
         return vars(self)
 
+    def is_compositing(self):
+        return any([
+            self.pdf,
+            self.jpg
+        ])
+
     @staticmethod
     def prompt():
         return Settings.from_dict(from_template(Settings().to_dict()))

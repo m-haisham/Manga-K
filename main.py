@@ -20,6 +20,7 @@ from modules.ui import colorize, Loader, Completer
 from modules import console
 
 from modules import database
+from modules import settings
 from modules.database import models
 
 
@@ -103,96 +104,6 @@ def download_link(manga_url):
 
     dm.download_manga(manga_url, selected_choices)
 
-
-def settings(dmanager, skip_check=False):
-    if not skip_check and dmanager.settings_exists():
-        # load save file
-        dmanager.load_settings()
-
-        # load settings
-        settings_keys = dmanager.settings.keys()
-
-        # print page title to console
-        print('- - - Settings - - -')
-
-        # print settings to console
-        for key in settings_keys:
-            print(f'[{visualize(dmanager.settings[key])}] {key.capitalize()}')
-
-        # ask whether to change settings
-
-        setting_change = {
-            'type': 'confirm',
-            'name': 'setting_change',
-            'message': 'Would you like to change settings',
-            'default': False
-        }
-
-        change_settings_answer = prompt(setting_change)
-
-        make_settings = change_settings_answer['setting_change']
-
-        # exit function, not changing settings
-        if not make_settings:
-            return
-
-    # no settings saved or promted to skip, run rest of function
-    else:
-        if not skip_check:
-            print('No Settings Saved')
-
-    # create settings
-
-    # whether to make composites
-    make_composites = {
-        'type': 'confirm',
-        'name': 'make_composites',
-        'message': 'Would you like to make composites',
-        'default': False
-    }
-
-    composite_answer = prompt(make_composites)
-
-    if composite_answer['make_composites']:
-        make_composites = True
-        # which composition type
-        composition_type = {
-            'type': 'list',
-            'name': 'composite',
-            'message': 'which format do do you want to composite to?',
-            'choices': [
-                'pdf',
-                'image'
-            ],
-            'default': 0
-
-        }
-
-        answers = prompt(composition_type)
-
-        composition_type = answers['composite']
-
-        # whether to keep seperate images
-        keep_originals = {
-            'type': 'confirm',
-            'name': 'keep_originals',
-            'message': 'Would you like to keep original downloaded images?',
-            'default': True
-        }
-
-        keep_original_answer = prompt(keep_originals)
-
-        keep_originals = keep_original_answer['keep_originals']
-    # default rest of settings
-    elif not composite_answer['make_composites']:
-        make_composites = False
-        keep_originals = True
-        composition_type = 'pdf'
-        print('Keep_originals: True')
-
-    dm.save_settings(make_composites, keep_originals, composition_type)
-
-
 def check_files(download_manager):
     """
     Checks for existence of necessary files and folders
@@ -202,12 +113,6 @@ def check_files(download_manager):
 
     if not os.path.exists(Const.StyleSaveFile):
         list_to_file(style, Const.StyleSaveFile)
-    if not download_manager.settings_exists():
-        settings(download_manager)
-    else:
-        if not download_manager.verify_settings():
-            print('Imported settings unsupported')
-            settings(download_manager, skip_check=True)
 
 
 def continue_downloads():
@@ -220,7 +125,7 @@ def continue_downloads():
 
     # user prompt
     print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{database.meta.get_manga_title()}" unfinished.')
-    resume = console.confirm('Would you like to resume?', default=False)
+    resume = console.confirm('Would you like to resume?', default=True)
 
     if not resume:
         # remove all from database and exit
@@ -314,7 +219,7 @@ if __name__ == '__main__':
         elif menuoption['menu'] == 4:
             compose_menu()
         elif menuoption['menu'] == 5:
-            settings(dm)
+            settings.change()
         elif menuoption['menu'] == 6:
             break
         else:

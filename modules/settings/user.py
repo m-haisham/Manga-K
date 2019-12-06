@@ -5,12 +5,24 @@ from ..console import confirm, format_dict_pair, from_template, title
 
 
 def change():
+    # old
     print(title('Current'))
-    get().display()
+    old = get()
+    old.display()
 
+    # get new
+    print()
     print(title('New'))
     d = prompt()
+
+    print()
     Settings.from_dict(d).display()
+
+    if old.to_dict() == d:
+        print(title("No changes"))
+        return
+
+    # confirm changes
     if not confirm('Are you happy with the changes? '):
         print(title("Changes discarded"))
         return
