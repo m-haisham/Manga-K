@@ -6,9 +6,8 @@ from .wrapper import TinyWrapper, MetaWrapper
 
 # databases
 base = TinyWrapper(base_path)
-meta_base = MetaWrapper(meta_path)
-manga_base = MangaData(base)
-
+meta = MetaWrapper(meta_path)
+manga = MangaData(base)
 
 def add_manga(title, url, path):
     """
@@ -34,4 +33,4 @@ def add_manga(title, url, path):
 
     query = Query()
     base.upsert({'title': title, 'url': url, 'path': path}, query.title == title)
-    manga_base.add(title)
+    manga.add(title)

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from tinydb import Query
 from tqdm import tqdm
 
 from modules.ImageStacking import VerticalStack, dir_to_pdf
@@ -13,6 +14,8 @@ from modules.static import Const
 from modules.ui import decorators, Loader
 
 from modules import database
+from modules.database import models
+
 
 def make_valid(path):
     return re.sub('[^A-Za-z0-9 -.]+', '', path)
@@ -107,8 +110,7 @@ class MangaDownloader:
         """
 
         # pre download
-        manga_dir = Path()
-        manga_title = self.get_manga_name(url)
+        manga_title = self.get_manga_name(url)  # TODO expand to get full info
         manga_dir = Const.MangaSavePath / Path(manga_title)
 
         # Create directories
@@ -119,6 +121,19 @@ class MangaDownloader:
 
         # update base database
         database.add_manga(manga_title, url, manga_dir)
+
+        # delete all from downloads left
+        database.meta.downloads_left.purge()
+
+        # add chapter title
+        database.meta.insert_manga_title(manga_title)
+
+        # add all new chapters to be downloaded
+        chapters_to_be_downloaded = list(map(
+            lambda val: models.Chapter(val['name'], val['href'], url).to_dict(),
+            chapters
+        ))
+        database.meta.downloads_left.insert_multiple(chapters_to_be_downloaded)
 
         # download each chapter loop
         for chapter in chapters:
@@ -137,6 +152,10 @@ class MangaDownloader:
                 self.save_image(page, chapter_directory)  # save image
 
             # on chapter download complete
+
+            # update chapters left to download
+            database.meta.downloads_left.update({'downloaded': True}, Query().url == chapter['href'])
+
             if self.settings['make_composite']:
 
                 # convert to pdf
@@ -161,23 +180,6 @@ class MangaDownloader:
                     print(chapter_directory, 'removed')
 
         # on download task complete
-
-    def print_info(self, manga_path):
-        """
-        manga_path (string): url of manga from mangakakalot.com
-        returns None
-
-        prints the information of manga
-        """
-        r = requests.get(manga_path)
-        soup = BeautifulSoup(r.content, "html.parser")
-        print("\n-- %s --\n" % self.get_manga_name(manga_path))
-        chapterbox = soup.find_all(class_="chapter-list")
-        rows = chapterbox[0].find_all(class_="row")
-        for i in range(len(rows) - 1, -1, -1):
-            iter_number = len(rows) - i
-            print("{0}) {1}".format(iter_number,
-                                    rows[i].find("a", href=True).text))
 
     @decorators.Loader('Parsing info')
     def get_info(self, manga_path):

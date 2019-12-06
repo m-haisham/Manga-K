@@ -4,6 +4,7 @@ import traceback
 from pathlib import Path
 from typing import List
 
+from tinydb import where
 from whaaaaat import prompt, Separator
 
 from modules.MangaDownloader import MangaDownloader
@@ -15,6 +16,10 @@ from modules.manager import HtmlManager, MangaManager
 from modules.static import Const, visualize
 from modules.styles import style
 from modules.ui import colorize, Loader, Completer
+from modules import console
+
+from modules import database
+from modules.database import models
 
 
 def search():
@@ -204,30 +209,47 @@ def check_files(download_manager):
             settings(download_manager, skip_check=True)
 
 
+def continue_downloads():
+    unfinished = database.meta.downloads_left.search(where('downloaded') == False)
+
+    if len(unfinished) <= 0:
+        return
+
+    print(database.meta.get_manga_title())
+
+    # user prompt
+    print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{database.meta.get_manga_title()}" unfinished.')
+    resume = console.confirm('Would you like to resume?', default=False)
+
+    if not resume:
+        # remove all from database and exit
+        database.meta.downloads_left.purge()
+        return
+
+    # start download
+
+    dm.download_manga(
+        unfinished[0]['manga_url'],
+        list(map(  # change format to suit download manga
+            lambda val: dict(name=val['title'], href=val['url']),
+            unfinished
+        ))
+    )
+
+
+dm: MangaDownloader = MangaDownloader()
+
 if __name__ == '__main__':
-
-    from modules import database
-
-    database.meta_base.downloads_left = [
-        dict(title='One', url='adafds'),
-        dict(title='Two', url='adadffdght34erafds'),
-        dict(title='Three', url='adasdasafds'),
-    ]
-
-    print(database.meta_base.downloads_left)
-
-    database.meta_base.downloads_left = [
-        dict(title='One', url='adafds'),
-    ]
-
-    print(database.meta_base.all())
-
-    input()
-
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
 
-    dm: MangaDownloader = MangaDownloader()
+    # PLAYGROUND
+
+    input()
+    # END
+
+    continue_downloads()
+
     codec: MKCodec = MKCodec()
     manga_manager: MangaManager = MangaManager()
     html_manager: HtmlManager = HtmlManager()

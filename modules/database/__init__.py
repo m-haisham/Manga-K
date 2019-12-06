@@ -1,1 +1,1 @@
-from .database import base, meta_base, manga_base, add_manga
+from .database import base, meta, manga, add_manga

@@ -6,3 +6,4 @@ class MangaWrapper(TinyWrapper):
 
         self.info = self.table('info')
         self.chapters = self.table('chapters')
+        self.downloaded = self.table('downloaded')

@@ -4,23 +4,14 @@ from .default import TinyWrapper
 
 
 class MetaWrapper(TinyWrapper):
-    dleft = 'chapter_downloads_left'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @property
-    def downloads_left(self):
-        docs = self.search(where('type') == self.dleft)
-        if len(docs) == 1:
-            return docs[0]
-        else:
-            return docs
+        self.downloads_left = self.table('downloads_left')
 
-    @downloads_left.setter
-    def downloads_left(self, value):
-        self.upsert(dict(type=self.dleft, data=value), where('type') == self.dleft)
+    def insert_manga_title(self, title):
+        self.insert_key('manga_title', title, table='downloads_left')
 
-    @downloads_left.deleter
-    def downloads_left(self):
-        self.upsert(dict(type=self.dleft, data=[]), where('type') == self.dleft)
+    def get_manga_title(self):
+        return self.get_key('manga_title', table='downloads_left', single=True)
