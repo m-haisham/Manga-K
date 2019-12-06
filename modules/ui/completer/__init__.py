@@ -34,8 +34,6 @@ class Completer(UItem):
 
         print(f'\r{self.type.prefix}{colored("X", self.type.error)}{self.type.postfix} {self.message}')
 
-        if type(s) != str:
-            raise TypeError('"s" must be of type str')
         if s != '':
             print(f'{self.type.prefix}{colored("!", self.type.info)}{self.type.postfix} {s}')
 

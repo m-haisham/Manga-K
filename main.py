@@ -74,15 +74,17 @@ def direct():
 
     answer = prompt(direct_question)['direct']
 
-    return manga_parse(answer)
+    title, chapters = manga_parse(answer)
+
+    return title, chapters
 
 
-def download_link(title, url):
-    # dm.print_info(manga_url)
-    manga, chapters = manga_parse(url)
+def download_link(title, url, chapters=None):
 
     if not chapters:
-        return
+        manga, chapters = manga_parse(url)
+    else:
+        manga = models.Manga(title, url)
 
     question = {
         'type': 'checkbox',
@@ -199,7 +201,8 @@ if __name__ == '__main__':
                 traceback.print_exc()
         elif menuoption['menu'] == 1:
             try:
-                download_link(direct())
+                manga, chapters = direct()
+                download_link(manga.title, manga.url, chapters)
             except Exception:
                 traceback.print_exc()
         elif menuoption['menu'] == 2:
