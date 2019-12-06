@@ -13,7 +13,8 @@ from modules.commandline import parse
 from modules.composition import compose_menu
 from modules.conversions import list_to_file
 from modules.manager import HtmlManager, MangaManager
-from modules.static import Const, visualize
+from modules.static import Const
+from modules.console.display import visualize
 from modules.styles import style
 from modules.ui import colorize, Loader, Completer
 from modules import console
@@ -245,7 +246,11 @@ if __name__ == '__main__':
 
     # PLAYGROUND
 
-    input()
+    # from modules import settings
+    #
+    # settings.change()
+    #
+    # input()
     # END
 
     continue_downloads()

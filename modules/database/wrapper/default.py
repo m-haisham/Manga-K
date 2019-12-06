@@ -1,4 +1,4 @@
-from tinydb import TinyDB, where
+from tinydb import TinyDB, where, Query
 
 
 class TinyWrapper(TinyDB):
@@ -7,19 +7,16 @@ class TinyWrapper(TinyDB):
 
         self.path = args[0]
 
-    def insert_key(self, key, value, table=None):
-        if table is None:
-            table = self.DEFAULT_TABLE
-
+    def insert_key(self, key, value, table=TinyDB.DEFAULT_TABLE):
         self.table(table).upsert(dict(key=key, value=value), where('key') == key)
 
-    def get_key(self, key, table=None, single=False):
-        if table is None:
-            table = self.DEFAULT_TABLE
-
+    def get_key(self, key, table=TinyDB.DEFAULT_TABLE, single=False):
         docs = self.table(table).search(where('key') == key)
         if single:
             if len(docs) > 0:
                 return docs[0]['value']
         else:
             return [i['value'] for i in docs]
+
+    def remove_key(self, key, table=TinyDB.DEFAULT_TABLE):
+        self.table(table).remove(where('key') == key)

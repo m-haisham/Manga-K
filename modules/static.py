@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from modules.ui import unicode
-from modules.ui.colorize import red, green
+from modules.ui.colorize import red
 
 
 class Const:
@@ -23,19 +22,6 @@ class Const:
 
         (manga_dir / Const.PdfDIr).mkdir(exist_ok=True, parents=True)
         (manga_dir / Const.JpgDir).mkdir(exist_ok=True, parents=True)
-
-
-def visualize(val) -> str:
-    """
-    :returns appropriate symbol for the input colorized
-    """
-    if type(val) == bool:
-        if val:
-            return green(unicode.CHECK_MARK)
-        else:
-            return red('X')
-    else:
-        return val
 
 
 def is_any_manga_downloaded(verbose=False) -> bool:
