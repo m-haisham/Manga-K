@@ -5,10 +5,17 @@ from modules.database.models import Settings
 
 
 def get():
-    return Settings(
+    settings = Settings(
         meta.get_key('pdf', table=meta.settings.name, single=True),
         meta.get_key('jpg', table=meta.settings.name, single=True),
     )
+
+    if settings is None:
+        s = Settings()
+        update(s.to_dict())
+        return s
+    else:
+        return settings
 
 
 def upsert(key, value):

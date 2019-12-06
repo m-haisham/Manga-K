@@ -22,7 +22,7 @@ from modules import console
 from modules import database
 from modules import settings
 from modules.database import models
-
+from modules.database.models.manga import parse as manga_parse
 
 def search():
     search_question = {
@@ -63,7 +63,7 @@ def search():
         else:
             for result in codec.search_result:
                 if result['name'] == search_answer['search']:
-                    return result['href']
+                    return result['name'], result['href']
 
 
 def direct():
@@ -73,23 +73,23 @@ def direct():
         'message': 'Enter the url: ',
     }
 
-    answer = prompt(direct_question)
+    answer = prompt(direct_question)['direct']
 
-    return answer['direct']
+    return manga_parse(answer)
 
 
-def download_link(manga_url):
+def download_link(title, url):
     # dm.print_info(manga_url)
-    info = dm.get_info(manga_url)
+    manga, chapters = manga_parse(url)
 
-    if not info['chapters']:
+    if not chapters:
         return
 
     question = {
         'type': 'checkbox',
         'name': 'chapters',
         'message': 'Select chapters to download',
-        'choices': [{'name': i} for i in list(info['chapters'].keys())],
+        'choices': [{'name': i.title} for i in chapters],
     }
 
     answers = prompt(question)
@@ -97,12 +97,12 @@ def download_link(manga_url):
     if not answers['chapters']:
         return
 
-    selected_choices = [{
-        'name': val,
-        'href': info['chapters'][val]['href']
-    } for val in answers['chapters']]
+    selected = []
+    for chapter in chapters:
+        if chapter.title in answers['chapters']:
+            selected.append(chapter)
 
-    dm.download_manga(manga_url, selected_choices)
+    dm.download_manga(models.Manga(title, url), chapters, selected)
 
 def check_files(download_manager):
     """
@@ -121,10 +121,10 @@ def continue_downloads():
     if len(unfinished) <= 0:
         return
 
-    print(database.meta.get_manga_title())
+    manga = database.meta.get_manga()
 
     # user prompt
-    print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{database.meta.get_manga_title()}" unfinished.')
+    print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
     resume = console.confirm('Would you like to resume?', default=True)
 
     if not resume:
@@ -133,13 +133,11 @@ def continue_downloads():
         return
 
     # start download
-
+    manga, chapters = manga_parse(manga.url)
     dm.download_manga(
-        unfinished[0]['manga_url'],
-        list(map(  # change format to suit download manga
-            lambda val: dict(name=val['title'], href=val['url']),
-            unfinished
-        ))
+        manga,
+        chapters,
+        [models.Chapter.from_dict(chapter) for chapter in unfinished]
     )
 
 
@@ -197,7 +195,8 @@ if __name__ == '__main__':
 
         if menuoption['menu'] == 0:
             try:
-                download_link(search())
+                title, chapters = search()
+                download_link(title, chapters)
             except Exception:
                 traceback.print_exc()
         elif menuoption['menu'] == 1:

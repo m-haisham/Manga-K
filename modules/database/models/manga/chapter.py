@@ -1,9 +1,8 @@
 
 class Chapter:
-    def __init__(self, title, url, manga_url, downloaded=False):
+    def __init__(self, title, url, downloaded=False):
 
         self.title = title
-        self.manga_url = manga_url
         self.url = url
 
         assert isinstance(downloaded, bool)
@@ -11,3 +10,17 @@ class Chapter:
 
     def to_dict(self):
         return vars(self)
+
+    @staticmethod
+    def from_dict(obj):
+        assert isinstance(obj, dict)
+
+        try:
+            chapter = Chapter(
+                obj['title'],
+                obj['url'],
+                obj['downloaded']
+            )
+            return chapter
+        except KeyError:
+            return

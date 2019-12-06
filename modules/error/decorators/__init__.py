@@ -1,4 +1,4 @@
-class Catch:
+class Suppress:
     """
     Using this decorator around an function which gives a return may cause it to not give a return if error is thrown
     """

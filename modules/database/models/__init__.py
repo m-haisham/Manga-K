@@ -1,2 +1,2 @@
-from .manga import Chapter
+from .manga import Chapter, Manga
 from .settings import Settings
