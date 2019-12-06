@@ -1,4 +1,4 @@
-from tinydb import TinyDB, where, Query
+from tinydb import TinyDB, where
 
 
 class TinyWrapper(TinyDB):

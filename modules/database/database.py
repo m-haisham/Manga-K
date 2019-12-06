@@ -1,7 +1,9 @@
-from tinydb import TinyDB, Query
 from pathlib import Path
-from .paths import base_path, meta_path
+
+from tinydb import Query
+
 from .manga import MangaData
+from .paths import base_path, meta_path
 from .wrapper import TinyWrapper, MetaWrapper
 
 # databases

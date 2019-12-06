@@ -1,7 +1,5 @@
-from tinydb import where
-
-from ..models import Manga
 from .default import TinyWrapper
+from ..models import Manga
 
 
 class MetaWrapper(TinyWrapper):

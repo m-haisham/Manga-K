@@ -1,5 +1,7 @@
-from tinydb import TinyDB, Query
 from pathlib import Path
+
+from tinydb import TinyDB
+
 from ..paths import mangas_directory
 from ..wrapper import MangaWrapper
 

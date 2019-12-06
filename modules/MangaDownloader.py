@@ -1,7 +1,7 @@
-import json
 import os
-import re
-import shutil
+from pathlib import Path
+
+import os
 from pathlib import Path
 
 import requests
@@ -9,20 +9,13 @@ from bs4 import BeautifulSoup
 from tinydb import Query
 from tqdm import tqdm
 
-from modules.ImageStacking import VerticalStack, dir_to_pdf
-from modules.database.models import Manga
-from modules.static import Const
-from modules.ui import decorators, Loader
-
 from modules import database
+from modules import resume
+from modules.ImageStacking import VerticalStack, dir_to_pdf
+from modules.error import decorators as error_decorators, validate
 from modules.settings import get as get_settings
-from modules.database import models
-
-from modules.error import decorators as error_decorators
-
-
-def make_valid(path):
-    return re.sub('[^A-Za-z0-9 -.]+', '', path)
+from modules.static import Const
+from modules.ui import Loader, Completer
 
 
 class MangaDownloader:
@@ -58,42 +51,6 @@ class MangaDownloader:
                     for data in response.iter_content(chunk_size=chunksize):
                         pbar.update(len(data))
                         f.write(data)
-
-    def get_manga_info(self, manga_path):
-        """
-        manga_path (string): manga path from mangakakalot.com
-
-        return (string): manga title
-        """
-        r = requests.get(manga_path)
-        soup = BeautifulSoup(r.content, "html.parser")
-        titlebox = soup.find(class_="manga-info-text")
-        title = make_valid(titlebox.find("h1").text)
-
-        chapterbox = soup.find_all(class_="chapter-list")
-        rows = chapterbox[0].find_all(class_="row")
-
-        chapter_list = []
-        for i in range(len(rows) - 1, -1, -1):
-            chapter_list.append(models.Chapter(rows[i].find('a', href=True).text, rows[i].find('a', href=True)['href']))
-            print(models.Chapter(rows[i].find('a', href=True).text, rows[i].find('a', href=True)['href']).to_dict())
-
-        return title, chapter_list
-
-    def get_chapter_list(self, manga_path):
-        """
-        manga_path (string): manga path from mangakakalot.com
-
-        return (list): chapters of the manga
-        """
-        r = requests.get(manga_path)
-        soup = BeautifulSoup(r.content, "html.parser")
-        chapterbox = soup.find_all(class_="chapter-list")
-        rows = chapterbox[0].find_all(class_="row")
-        chapters = []
-        for i in range(len(rows) - 1, -1, -1):
-            chapters.append(rows[i].find('a', href=True)['href'])
-        return chapters
 
     def get_page_list(self, chapter_path):
         """
@@ -134,23 +91,18 @@ class MangaDownloader:
         # update base database
         database.add_manga(manga.title, manga.url, manga_dir)
 
+        manga_base = database.manga.databases[manga.title]
         # update manga info
-        database.manga.databases[manga.title].set_manga_info(manga)
+        manga_base.set_manga_info(manga)
         # update manga list
-        database.manga.databases[manga.title].update_chapter_list(chapters)
+        manga_base.update_chapter_list(chapters)
 
-        # delete all from downloads left
-        database.meta.downloads_left.purge()
-
-        # add manga info to download resume
-        database.meta.insert_manga(manga)
-
-        # add all new chapters to be downloaded
-        database.meta.downloads_left.insert_multiple([chapter.to_dict() for chapter in to_download])
+        # add mangas to waiting list
+        resume.new(manga, to_download)
 
         # download each chapter loop
         for chapter in to_download:
-            chapter_directory = manga_dir / Path(make_valid(chapter.title))
+            chapter_directory = manga_dir / Path(validate(chapter.title))
 
             # parse info
             print()
@@ -164,9 +116,9 @@ class MangaDownloader:
                 self.save_image(page, chapter_directory)  # save image
 
             # on chapter download complete
-            # update chapters left to download
-            database.meta.downloads_left.update({'downloaded': True}, Query().url == chapter.url)
-            database.manga.databases[manga.title].update({'downloaded': True}, Query().url == chapter.url)
+            # update chapters left to download, set downloaded to true
+            resume.update(chapter.url)
+            manga_base.chapters.update({'downloaded': True}, Query().url == chapter.url)
 
             # convert to pdf
             if settings.pdf:
@@ -185,3 +137,5 @@ class MangaDownloader:
                         loader.fail(e)
 
         # on download task complete
+        Completer('Downloads finished').init().complete()
+        print()

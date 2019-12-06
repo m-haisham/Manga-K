@@ -1,9 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 
-from .manga import Manga
+from modules.error import validate
+from modules.ui.decorators import Loader
 from .chapter import Chapter
+from .manga import Manga
 
+
+@Loader(message='Parse info')
 def parse(url):
     r = requests.get(url)
     soup = BeautifulSoup(r.content, "html.parser")
@@ -17,4 +21,4 @@ def parse(url):
     for i in range(len(rows) - 1, -1, -1):
         chapter_list.append(Chapter(rows[i].find("a", href=True).text, rows[i].find("a", href=True)['href']))
 
-    return Manga(title, url), chapter_list
+    return Manga(validate(title), url), chapter_list

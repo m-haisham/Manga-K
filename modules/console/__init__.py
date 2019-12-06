@@ -1,4 +1,4 @@
 from .confirm import confirm
-from .input import input
 from .display import visualize, format_dict_pair, title
+from .input import input
 from .user import from_template

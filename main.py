@@ -4,25 +4,24 @@ import traceback
 from pathlib import Path
 from typing import List
 
-from tinydb import where
 from whaaaaat import prompt, Separator
 
+from modules import console
+from modules import database
+from modules import resume
+from modules import settings
 from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
 from modules.commandline import parse
 from modules.composition import compose_menu
 from modules.conversions import list_to_file
-from modules.manager import HtmlManager, MangaManager
-from modules.static import Const
-from modules.console.display import visualize
-from modules.styles import style
-from modules.ui import colorize, Loader, Completer
-from modules import console
-
-from modules import database
-from modules import settings
 from modules.database import models
 from modules.database.models.manga import parse as manga_parse
+from modules.manager import HtmlManager, MangaManager
+from modules.static import Const
+from modules.styles import style
+from modules.ui import colorize, Loader
+
 
 def search():
     search_question = {
@@ -116,18 +115,17 @@ def check_files(download_manager):
 
 
 def continue_downloads():
-    unfinished = database.meta.downloads_left.search(where('downloaded') == False)
+
+    manga, unfinished = resume.get()
 
     if len(unfinished) <= 0:
         return
 
-    manga = database.meta.get_manga()
-
     # user prompt
     print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
-    resume = console.confirm('Would you like to resume?', default=True)
+    should_resume = console.confirm('Would you like to resume?', default=True)
 
-    if not resume:
+    if not should_resume:
         # remove all from database and exit
         database.meta.downloads_left.purge()
         return

@@ -1,7 +1,6 @@
+from .settings import get, update
+from ..console import confirm, from_template, title
 from ..database.models import Settings
-
-from .settings import get, upsert, update, check
-from ..console import confirm, format_dict_pair, from_template, title
 
 
 def change():

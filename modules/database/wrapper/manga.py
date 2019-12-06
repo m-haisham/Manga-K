@@ -21,9 +21,9 @@ class MangaWrapper(TinyWrapper):
 
         for chapter in chapters:
             # check if exists
-            exists = self.chapters.search(Query().url.any(chapter.url))
-            print(exists)
-            if exists:
-                self.chapters.update(dict(title=chapter.title), Query().url.any(chapter.url))
+            matches = self.chapters.search(Query().url == chapter.url)
+            # print(matches)
+            if len(matches) > 0:
+                self.chapters.update(dict(title=chapter.title), Query().url == chapter.url)
             else:
                 self.chapters.insert(chapter.to_dict())

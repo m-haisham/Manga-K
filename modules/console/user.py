@@ -1,5 +1,4 @@
 from .confirm import confirm
-from .display import format_dict_pair
 
 
 def from_template(template):
