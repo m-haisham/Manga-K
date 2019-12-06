@@ -118,7 +118,7 @@ class MangaDownloader:
             Const.createCompositionDirs(manga_dir)
 
         # update base database
-        database.add(manga_title, url, manga_dir)
+        database.add_manga(manga_title, url, manga_dir)
 
         # download each chapter loop
         for chapter in chapters:

@@ -11,8 +11,16 @@ class MetaWrapper(TinyWrapper):
 
     @property
     def downloads_left(self):
-        return self.all()[self.dleft]
+        docs = self.search(where('type') == self.dleft)
+        if len(docs) == 1:
+            return docs[0]
+        else:
+            return docs
 
     @downloads_left.setter
     def downloads_left(self, value):
-        self.upsert(value, where(self.dleft))
+        self.upsert(dict(type=self.dleft, data=value), where('type') == self.dleft)
+
+    @downloads_left.deleter
+    def downloads_left(self):
+        self.upsert(dict(type=self.dleft, data=[]), where('type') == self.dleft)

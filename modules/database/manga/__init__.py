@@ -13,7 +13,7 @@ class MangaData:
         for entry in all:
             self.add(entry['title'], exists_ok=False)
 
-        print(self.databases)
+        # print(self.databases)
 
     def add(self, title, exists_ok=True):
         if exists_ok:

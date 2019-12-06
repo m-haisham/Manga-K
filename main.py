@@ -206,6 +206,24 @@ def check_files(download_manager):
 
 if __name__ == '__main__':
 
+    from modules import database
+
+    database.meta_base.downloads_left = [
+        dict(title='One', url='adafds'),
+        dict(title='Two', url='adadffdght34erafds'),
+        dict(title='Three', url='adasdasafds'),
+    ]
+
+    print(database.meta_base.downloads_left)
+
+    database.meta_base.downloads_left = [
+        dict(title='One', url='adafds'),
+    ]
+
+    print(database.meta_base.all())
+
+    input()
+
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
 
