@@ -145,7 +145,7 @@ class HtmlManager:
             #
             #     # loop through the page list
             #     for page in page_list:
-            #         # add img tag
+            #         # add_manga img tag
             #         doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
             #                  style="margin:10px auto;")
             #
@@ -164,7 +164,7 @@ class HtmlManager:
 
             # loop through the page list
             for page in page_list:
-                # add img tag
+                # add_manga img tag
                 doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page')
 
             doc.asis(self.chapter_header(chapter_title, next, previous))

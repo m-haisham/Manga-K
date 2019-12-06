@@ -6,15 +6,21 @@ from typing import List
 
 from whaaaaat import prompt, Separator
 
+from modules import console
+from modules import database
+from modules import resume
+from modules import settings
 from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
 from modules.commandline import parse
 from modules.composition import compose_menu
 from modules.conversions import list_to_file
+from modules.database import models
+from modules.database.models.manga import parse as manga_parse
 from modules.manager import HtmlManager, MangaManager
-from modules.static import Const, visualize
+from modules.static import Const
 from modules.styles import style
-from modules.ui import colorize, Loader, Completer
+from modules.ui import colorize, Loader
 
 
 def search():
@@ -56,7 +62,7 @@ def search():
         else:
             for result in codec.search_result:
                 if result['name'] == search_answer['search']:
-                    return result['href']
+                    return result['name'], result['href']
 
 
 def direct():
@@ -66,23 +72,23 @@ def direct():
         'message': 'Enter the url: ',
     }
 
-    answer = prompt(direct_question)
+    answer = prompt(direct_question)['direct']
 
-    return answer['direct']
+    return manga_parse(answer)
 
 
-def download_link(manga_url):
+def download_link(title, url):
     # dm.print_info(manga_url)
-    info = dm.get_info(manga_url)
+    manga, chapters = manga_parse(url)
 
-    if not info['chapters']:
+    if not chapters:
         return
 
     question = {
         'type': 'checkbox',
         'name': 'chapters',
         'message': 'Select chapters to download',
-        'choices': [{'name': i} for i in list(info['chapters'].keys())],
+        'choices': [{'name': i.title} for i in chapters],
     }
 
     answers = prompt(question)
@@ -90,102 +96,12 @@ def download_link(manga_url):
     if not answers['chapters']:
         return
 
-    selected_choices = [{
-        'name': val,
-        'href': info['chapters'][val]['href']
-    } for val in answers['chapters']]
+    selected = []
+    for chapter in chapters:
+        if chapter.title in answers['chapters']:
+            selected.append(chapter)
 
-    dm.download_manga(manga_url, selected_choices)
-
-
-def settings(dmanager, skip_check=False):
-    if not skip_check and dmanager.settings_exists():
-        # load save file
-        dmanager.load_settings()
-
-        # load settings
-        settings_keys = dmanager.settings.keys()
-
-        # print page title to console
-        print('- - - Settings - - -')
-
-        # print settings to console
-        for key in settings_keys:
-            print(f'[{visualize(dmanager.settings[key])}] {key.capitalize()}')
-
-        # ask whether to change settings
-
-        setting_change = {
-            'type': 'confirm',
-            'name': 'setting_change',
-            'message': 'Would you like to change settings',
-            'default': False
-        }
-
-        change_settings_answer = prompt(setting_change)
-
-        make_settings = change_settings_answer['setting_change']
-
-        # exit function, not changing settings
-        if not make_settings:
-            return
-
-    # no settings saved or promted to skip, run rest of function
-    else:
-        if not skip_check:
-            print('No Settings Saved')
-
-    # create settings
-
-    # whether to make composites
-    make_composites = {
-        'type': 'confirm',
-        'name': 'make_composites',
-        'message': 'Would you like to make composites',
-        'default': False
-    }
-
-    composite_answer = prompt(make_composites)
-
-    if composite_answer['make_composites']:
-        make_composites = True
-        # which composition type
-        composition_type = {
-            'type': 'list',
-            'name': 'composite',
-            'message': 'which format do do you want to composite to?',
-            'choices': [
-                'pdf',
-                'image'
-            ],
-            'default': 0
-
-        }
-
-        answers = prompt(composition_type)
-
-        composition_type = answers['composite']
-
-        # whether to keep seperate images
-        keep_originals = {
-            'type': 'confirm',
-            'name': 'keep_originals',
-            'message': 'Would you like to keep original downloaded images?',
-            'default': True
-        }
-
-        keep_original_answer = prompt(keep_originals)
-
-        keep_originals = keep_original_answer['keep_originals']
-    # default rest of settings
-    elif not composite_answer['make_composites']:
-        make_composites = False
-        keep_originals = True
-        composition_type = 'pdf'
-        print('Keep_originals: True')
-
-    dm.save_settings(make_composites, keep_originals, composition_type)
-
+    dm.download_manga(models.Manga(title, url), chapters, selected)
 
 def check_files(download_manager):
     """
@@ -196,20 +112,50 @@ def check_files(download_manager):
 
     if not os.path.exists(Const.StyleSaveFile):
         list_to_file(style, Const.StyleSaveFile)
-    if not download_manager.settings_exists():
-        settings(download_manager)
-    else:
-        if not download_manager.verify_settings():
-            print('Imported settings unsupported')
-            settings(download_manager, skip_check=True)
 
+
+def continue_downloads():
+
+    manga, unfinished = resume.get()
+
+    if len(unfinished) <= 0:
+        return
+
+    # user prompt
+    print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
+    should_resume = console.confirm('Would you like to resume?', default=True)
+
+    if not should_resume:
+        # remove all from database and exit
+        database.meta.downloads_left.purge()
+        return
+
+    # start download
+    manga, chapters = manga_parse(manga.url)
+    dm.download_manga(
+        manga,
+        chapters,
+        [models.Chapter.from_dict(chapter) for chapter in unfinished]
+    )
+
+
+dm: MangaDownloader = MangaDownloader()
 
 if __name__ == '__main__':
-
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
 
-    dm: MangaDownloader = MangaDownloader()
+    # PLAYGROUND
+
+    # from modules import settings
+    #
+    # settings.change()
+    #
+    # input()
+    # END
+
+    continue_downloads()
+
     codec: MKCodec = MKCodec()
     manga_manager: MangaManager = MangaManager()
     html_manager: HtmlManager = HtmlManager()
@@ -247,7 +193,8 @@ if __name__ == '__main__':
 
         if menuoption['menu'] == 0:
             try:
-                download_link(search())
+                title, chapters = search()
+                download_link(title, chapters)
             except Exception:
                 traceback.print_exc()
         elif menuoption['menu'] == 1:
@@ -269,7 +216,7 @@ if __name__ == '__main__':
         elif menuoption['menu'] == 4:
             compose_menu()
         elif menuoption['menu'] == 5:
-            settings(dm)
+            settings.change()
         elif menuoption['menu'] == 6:
             break
         else:
