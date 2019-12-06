@@ -5,16 +5,15 @@ from modules.database.models import Settings
 
 
 def get():
-    settings = Settings(
-        meta.get_key('pdf', table=meta.settings.name, single=True),
-        meta.get_key('jpg', table=meta.settings.name, single=True),
-    )
-
-    if settings is None:
+    if not check():
         s = Settings()
         update(s.to_dict())
         return s
     else:
+        settings = Settings(
+            meta.get_key('pdf', table=meta.settings.name, single=True),
+            meta.get_key('jpg', table=meta.settings.name, single=True),
+        )
         return settings
 
 

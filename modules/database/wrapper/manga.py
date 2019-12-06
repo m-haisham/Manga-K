@@ -2,7 +2,7 @@ from tinydb import Query
 
 from modules.database.models import Manga
 from .default import TinyWrapper
-
+from modules.ui.decorators import Loader
 
 class MangaWrapper(TinyWrapper):
     def __init__(self, *args, **kwargs):
@@ -17,6 +17,7 @@ class MangaWrapper(TinyWrapper):
     def get_manga_info(self):
         return self.get_key('info', table=self.info.name, single=True)
 
+    @Loader(message='Update database')
     def update_chapter_list(self, chapters):
 
         for chapter in chapters:
