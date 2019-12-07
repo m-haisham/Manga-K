@@ -29,6 +29,12 @@ class Manga:
 
         return self, chapter_list
 
+    def path(self):
+        return self.directory / Path(self.title)
+
+    def mkdir(self, parents=True, exist_ok=True):
+        self.path().mkdir(parents=parents, exist_ok=exist_ok)
+
     def todict(self):
         d = vars(self)
         d['directory'] = str(d['directory'])
@@ -50,3 +56,6 @@ class Manga:
             return manga
         except KeyError:
             return
+
+    def mkdir_base(self):
+        self.directory.mkdir(parents=True, exist_ok=True)

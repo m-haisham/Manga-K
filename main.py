@@ -14,14 +14,13 @@ from modules.codec import MKCodec
 from modules.commandline import parse
 from modules.composition.menu import compose_menu
 from modules.console import vinput
-from modules.conversions import list_to_file
 from modules.database import models
 from modules.database.models.manga.download import selective_download
 from modules.manager import HtmlManager, MangaManager
 from modules.static import Const
-from modules.styles import style
 from modules.ui import colorize, Loader
 from modules.console.menu import Menu
+from modules import resource
 
 def search():
     search = vinput('Enter here to search:')
@@ -101,9 +100,6 @@ def check_files():
     if not os.path.exists(Const.MangaSavePath):
         os.mkdir(Const.MangaSavePath)
 
-    if not os.path.exists(Const.StyleSaveFile):
-        list_to_file(style, Const.StyleSaveFile)
-
 
 def continue_downloads():
     manga, unfinished = resume.get()
@@ -129,6 +125,8 @@ def continue_downloads():
 if __name__ == '__main__':
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
+
+    resource.manager.check_resources() # mandatory resource check
 
     # PLAYGROUND
 

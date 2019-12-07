@@ -13,8 +13,12 @@ class Menu:
         self.action = action
 
         if type(options) == list:
-            print(options)
-            self._options = {key(item): '' for item in options}
+            self._options = {}
+            for option in options:
+                if type(option) == str:
+                    self._options[option] = ''
+                else:
+                    self._options[key(option)] = ''
             self.action = False
         else:
             self._options = options

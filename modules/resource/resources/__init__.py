@@ -7,12 +7,10 @@ class RawResource(Resource):
     def __init__(self, data, path: Path):
         self.data = data
 
-        if type(path) != Path:
-            self.path = Path(path)
-        elif type(path) != Path:
-            self.path = path
+        if type(path) == str:
+            self.path = Path(path).absolute()
         else:
-            raise TypeError('path must be a str or Path')
+            self.path = path.absolute()
 
     def check(self):
         return self.path.exists()
@@ -21,7 +19,7 @@ class RawResource(Resource):
         if check and self.check():
             return
 
-        self.path.parent.mkdir(parent=True, exists_ok=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
 
         if type(self.data) == str:
             with self.path.open('w') as f:

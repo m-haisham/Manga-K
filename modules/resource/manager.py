@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from modules.resource import RawResource
-from modules.resource.raw import style
+from .resources import RawResource
+from .raw import style
 
 
 class ResourceManager:

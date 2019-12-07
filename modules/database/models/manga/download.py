@@ -5,7 +5,10 @@ import requests
 from tinydb import Query
 from tqdm import tqdm
 
+from .manga import Manga
+
 from modules import resume
+from modules import composition
 from modules.composition import dir_to_jpg, dir_to_pdf
 from modules.database import database
 from modules.error import decorators as error, validate
@@ -58,16 +61,15 @@ def selective_download(manga, chapters, to_download, update=False):
     # fetch settings
     settings = get_settings()
 
-    manga_dir = Const.MangaSavePath / Path(manga.title)
+    manga_path = manga.path()
 
     # Create directories
-    Const.create_manga_save()
-    manga_dir.mkdir(parents=True, exist_ok=True)
+    Manga.mkdir_base()
     if settings.is_compositing():
-        Const.createCompositionDirs(manga_dir)
+        composition.create_directories(manga)
 
     # update base database
-    database.add_manga(manga.title, manga.url, manga_dir)
+    database.add_manga(manga.title, manga.url, manga_path)
 
     manga_base = database.manga.databases[manga.title]
     # update manga info
@@ -82,7 +84,7 @@ def selective_download(manga, chapters, to_download, update=False):
 
     # download each chapter loop
     for chapter in to_download:
-        chapter_directory = manga_dir / Path(validate(chapter.title))
+        chapter_directory = manga_path / Path(validate(chapter.title))
 
         # parse info
         print()
@@ -104,7 +106,7 @@ def selective_download(manga, chapters, to_download, update=False):
         if settings.pdf:
             with Loader(f'Convert {chapter_directory.parts[-1]} to pdf') as loader:
                 try:
-                    dir_to_pdf(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
+                    dir_to_pdf(chapter_directory, os.path.join(manga_path, Const.PdfDIr))
                 except OSError as e:
                     loader.fail(e)
 
@@ -112,7 +114,7 @@ def selective_download(manga, chapters, to_download, update=False):
         elif settings.jpg:
             with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as loader:
                 try:
-                    dir_to_jpg(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
+                    dir_to_jpg(chapter_directory, os.path.join(manga_path, Const.PdfDIr))
                 except OSError as e:
                     loader.fail(e)
 

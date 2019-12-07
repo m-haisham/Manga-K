@@ -11,18 +11,6 @@ class Const:
     PdfDIr = Path('pdf')
     JpgDir = Path('jpg')
 
-    @staticmethod
-    def create_manga_save():
-        Const.MangaSavePath.mkdir(parents=True, exist_ok=True)
-
-    @staticmethod
-    def createCompositionDirs(manga_dir):
-        if type(manga_dir) == str:
-            manga_dir = Path(manga_dir)
-
-        (manga_dir / Const.PdfDIr).mkdir(exist_ok=True, parents=True)
-        (manga_dir / Const.JpgDir).mkdir(exist_ok=True, parents=True)
-
 
 def is_any_manga_downloaded(verbose=False) -> bool:
     manga_path = Path(Const.MangaSavePath)
