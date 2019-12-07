@@ -24,9 +24,7 @@ from modules.ui import colorize, Loader
 
 
 def search():
-    search_answer = vinput('Enter here to search:')
-
-    search = search_answer['search']
+    search = vinput('Enter here to search:')
     url = codec.search_prefix + search
     while True:
         codec.search(url)
@@ -71,11 +69,17 @@ def download_link(manga: models.Manga, chapters=None):
     if not chapters:
         manga, chapters = manga.parse()
 
+    # check database and update chapters
+    database.manga.databases[manga.title].update_chapter_list(chapters)
+
+    # get
+    chapters = database.manga.databases[manga.title].get_chapter_list()
+
     question = {
         'type': 'checkbox',
         'name': 'chapters',
         'message': 'Select chapters to download',
-        'choices': [{'name': i.title} for i in chapters],
+        'choices': [dict(name=chapter.title, disabled='Downloaded' if chapter.downloaded else False) for chapter in chapters],
     }
 
     answers = prompt(question)
@@ -120,7 +124,7 @@ def continue_downloads():
 
     # start download
     manga, chapters = manga.parse()
-    selective_download(manga, chapters, [models.Chapter.fromdict(chapter) for chapter in unfinished])
+    selective_download(manga, chapters, [models.Chapter.fromdict(chapter) for chapter in unfinished], update=True)
 
 
 if __name__ == '__main__':

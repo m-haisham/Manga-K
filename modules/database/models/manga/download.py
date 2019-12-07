@@ -46,7 +46,7 @@ def save_image(url, directory):
 
 
 @error.Suppress(error_type=KeyboardInterrupt, output=True)
-def selective_download(manga, chapters, to_download):
+def selective_download(manga, chapters, to_download, update=False):
     """
     url (string): manga path from mangakakalot.com
     starting_chapter (int): download start (inclusive)
@@ -72,8 +72,10 @@ def selective_download(manga, chapters, to_download):
     manga_base = database.manga.databases[manga.title]
     # update manga info
     manga_base.set_manga_info(manga)
-    # update manga list
-    manga_base.update_chapter_list(chapters)
+
+    if update:
+        # update chapter list
+        manga_base.update_chapter_list(chapters)
 
     # add mangas to waiting list
     resume.new(manga, to_download)

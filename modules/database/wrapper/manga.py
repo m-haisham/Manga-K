@@ -1,6 +1,6 @@
 from tinydb import Query
 
-from modules.database.models import Manga
+from modules.database.models import Manga, Chapter
 from modules.ui.decorators import Loader
 from .default import TinyWrapper
 
@@ -29,3 +29,7 @@ class MangaWrapper(TinyWrapper):
                 self.chapters.update(dict(title=chapter.title), Query().url == chapter.url)
             else:
                 self.chapters.insert(chapter.todict())
+
+    def get_chapter_list(self):
+        docs = self.chapters.all()
+        return [Chapter.fromdict(doc) for doc in docs]
