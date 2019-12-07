@@ -64,7 +64,7 @@ def selective_download(manga, chapters, to_download, update=False):
     manga_path = manga.path()
 
     # Create directories
-    Manga.mkdir_base()
+    manga.mkdir_base()
     if settings.is_compositing():
         composition.create_directories(manga)
 
@@ -73,7 +73,7 @@ def selective_download(manga, chapters, to_download, update=False):
 
     manga_base = database.manga.databases[manga.title]
     # update manga info
-    manga_base.set_manga_info(manga)
+    manga_base.set_info(manga)
 
     if update:
         # update chapter list
@@ -98,9 +98,9 @@ def selective_download(manga, chapters, to_download, update=False):
             save_image(page, chapter_directory)  # save image
 
         # on chapter download complete
-        # update chapters left to download, set downloaded to true
+        # update get_chapter_list left to download, set downloaded to true
         resume.update(chapter.url)
-        manga_base.chapters.update({'downloaded': True}, Query().url == chapter.url)
+        manga_base.get_chapter_list.update({'downloaded': True}, Query().url == chapter.url)
 
         # convert to pdf
         if settings.pdf:

@@ -23,3 +23,6 @@ class MangaData:
                 return
 
         self.databases[title] = MangaWrapper(mangas_directory / Path(f'{title}.db'))
+
+    def all(self):
+        return [self.databases[key] for key in self.databases.keys()]

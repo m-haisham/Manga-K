@@ -5,7 +5,12 @@ from whaaaaat import prompt
 
 from modules.composition.pdf import dir_to_pdf
 from modules.composition.jpg.stack import dir_to_jpg
-from modules.static import Const, is_any_manga_downloaded
+from modules.static import Const
+
+from modules.ui.colorize import red
+
+from modules import database
+from modules.sorting import numerical_sort
 
 composing_options = {
     Const.PdfDIr: dir_to_pdf,
@@ -14,7 +19,8 @@ composing_options = {
 
 
 def compose_menu():
-    if not is_any_manga_downloaded(True):
+    if len(database.manga.all()) <= 0:
+        print(f'[{red("X")}] No mangas downloaded')
         return
 
     compose_menu_options = {
@@ -43,7 +49,7 @@ def compose_menu():
 
 def chapterSelection():
     """
-    :returns array os strings pointing to chapters to be composed
+    :returns array os strings pointing to get_chapter_list to be composed
     """
 
     manga_dir = Path(Const.MangaSavePath)
@@ -69,21 +75,23 @@ def chapterSelection():
         print(e)
         return Path, []
 
-    # select chapters
+    # select get_chapter_list
     chapter_option = {
         'type': 'checkbox',
-        'name': 'chapters',
-        'message': 'Select chapters to compose',
-        'choices': [{'name': i.parts[-1]} for i in manga.iterdir() if not is_folder_static(i.parts[-1])],
+        'name': 'get_chapter_list',
+        'message': 'Select get_chapter_list to compose',
+        'choices': sorted(
+            [{'name': i.parts[-1]} for i in manga.iterdir() if not is_folder_static(i.parts[-1])],
+            key=lambda val: numerical_sort(val['name'])
+        ),
     }
 
-    # if no chapters
+    # if no get_chapter_list
     if len(chapter_option['choices']) <= 0:
         return manga, []
 
-    chapters = []
     try:
-        chapters = prompt(chapter_option)['chapters']
+        chapters = prompt(chapter_option)['get_chapter_list']
         chapters = map(lambda path: manga / Path(path), chapters)
     except KeyError as e:
         print(e)

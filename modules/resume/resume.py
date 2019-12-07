@@ -10,7 +10,7 @@ def new(manga, to_download):
     # add manga info to download resume
     meta.insert_manga(manga)
 
-    # add all new chapters to be downloaded
+    # add all new get_chapter_list to be downloaded
     meta.downloads_left.insert_multiple([chapter.todict() for chapter in to_download])
 
 

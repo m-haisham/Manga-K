@@ -64,10 +64,10 @@ def download_link(manga: models.Manga, chapters=None):
     exists = manga.title in database.manga.databases.keys()
 
     if exists:
-        # check database and update chapters
+        # check database and update get_chapter_list
         database.manga.databases[manga.title].update_chapter_list(chapters)
 
-        # get new chapters from updated database
+        # get new get_chapter_list from updated database
         chapters = database.manga.databases[manga.title].get_chapter_list()
 
     # get settings
@@ -75,19 +75,19 @@ def download_link(manga: models.Manga, chapters=None):
 
     question = {
         'type': 'checkbox',
-        'name': 'chapters',
-        'message': 'Select chapters to download',
+        'name': 'get_chapter_list',
+        'message': 'Select get_chapter_list to download',
         'choices': [dict(name=chapter.title, disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False) for chapter in chapters],
     }
 
     answers = prompt(question)
 
-    if not answers['chapters']:
+    if not answers['get_chapter_list']:
         return
 
     selected = []
     for chapter in chapters:
-        if chapter.title in answers['chapters']:
+        if chapter.title in answers['get_chapter_list']:
             selected.append(chapter)
 
     selective_download(manga, chapters, selected, update=not exists)
@@ -109,7 +109,7 @@ def continue_downloads():
 
     # user prompt
     print(
-        f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
+        f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "get_chapter_list"} from "{manga.title}" unfinished.')
     should_resume = console.confirm('Would you like to resume?', default=True)
 
     if not should_resume:

@@ -136,7 +136,7 @@ class HtmlManager:
     def generate_list(self, title, mlist, destination, is_manga_list=True):
         '''
         title (string): manga name
-        mlist (list): list of manga or chapters
+        mlist (list): list of manga or get_chapter_list
         destination (str): save path for the chapter html file
         
         is_manga_list (bool): Determines the link of the list items
@@ -330,7 +330,7 @@ class HtmlManager:
             if not os.path.exists(save_location):
                 os.mkdir(save_location)
 
-            # loop through all chapters
+            # loop through all get_chapter_list
             for i in range(len(all_chapters_keys)):
                 chapter_key = all_chapters_keys[i]
 

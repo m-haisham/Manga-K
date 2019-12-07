@@ -10,13 +10,17 @@ class MangaWrapper(TinyWrapper):
         super().__init__(*args, **kwargs)
 
         self.info = self.table('info')
-        self.chapters = self.table('chapters')
+        self.chapters = self.table('get_chapter_list')
 
-    def set_manga_info(self, manga: Manga):
+    def get_chapter_list(self):
+        docs = self.chapters.all()
+        return [Chapter.fromdict(doc) for doc in docs]
+
+    def set_info(self, manga: Manga):
         self.insert_key('info', manga.todict(), table=self.info.name)
 
-    def get_manga_info(self):
-        return self.get_key('info', table=self.info.name, single=True)
+    def get_info(self):
+        return Manga(self.get_key('info', table=self.info.name, single=True))
 
     @Loader(message='Update database')
     def update_chapter_list(self, chapters):
@@ -29,7 +33,3 @@ class MangaWrapper(TinyWrapper):
                 self.chapters.update(dict(title=chapter.title), Query().url == chapter.url)
             else:
                 self.chapters.insert(chapter.todict())
-
-    def get_chapter_list(self):
-        docs = self.chapters.all()
-        return [Chapter.fromdict(doc) for doc in docs]
