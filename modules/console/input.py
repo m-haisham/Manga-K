@@ -18,7 +18,7 @@ def vinput(message, default=True, input_type=str):
     if type(default) != str:
         default = str(default)
 
-    return prompt(dict(
+    r = prompt(dict(
         type='input',
         name='q',
         message=message,
@@ -26,3 +26,4 @@ def vinput(message, default=True, input_type=str):
         validate=TypeValidator
     ))['q']
 
+    return input_type(r)

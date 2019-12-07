@@ -5,6 +5,7 @@ import webbrowser
 
 from yattag import Doc
 
+from modules import settings
 from modules.static import Const
 from .sorting import seperate_alphabetically
 
@@ -104,6 +105,7 @@ class HtmlManager:
         self.manga_path = Const.MangaSavePath
         self.location = 'Web'
         self.main_menu = os.path.join(self.location, 'index.html')
+        self.chapter_seperation = settings.get().image_separation
 
     def generate_new_chapter(self, manga_title, chapter_title, page_list, destination, prefix='', previous='#',
                              next='#'):
@@ -142,7 +144,7 @@ class HtmlManager:
             # loop through the page list
             for page in page_list:
                 # add_manga img tag
-                doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page')
+                doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page', style=f"margin:{self.chapter_seperation}px auto;")
 
             doc.asis(self.chapter_header(chapter_title, next, previous))
             doc.asis(self.footer())
