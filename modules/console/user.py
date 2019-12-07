@@ -1,7 +1,6 @@
 from .confirm import confirm
 from .input import vinput as validated_input
 
-
 def from_template(template):
     if type(template) == dict:
 

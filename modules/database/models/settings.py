@@ -6,10 +6,12 @@ class Settings:
             self,
             pdf=False,
             jpg=False,
-            image_separation=5
+            disable_downloaded=True,
+            image_separation=10
     ):
         self.pdf = pdf
         self.jpg = jpg
+        self.disable_downloaded = disable_downloaded
         self.image_separation = image_separation
 
     def display(self):

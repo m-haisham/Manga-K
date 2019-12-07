@@ -22,7 +22,6 @@ from modules.static import Const
 from modules.styles import style
 from modules.ui import colorize, Loader
 
-
 def search():
     search = vinput('Enter here to search:')
     url = codec.search_prefix + search
@@ -72,14 +71,17 @@ def download_link(manga: models.Manga, chapters=None):
     # check database and update chapters
     database.manga.databases[manga.title].update_chapter_list(chapters)
 
-    # get
+    # get new chapters from updated database
     chapters = database.manga.databases[manga.title].get_chapter_list()
+
+    # get settings
+    s = settings.get()
 
     question = {
         'type': 'checkbox',
         'name': 'chapters',
         'message': 'Select chapters to download',
-        'choices': [dict(name=chapter.title, disabled='Downloaded' if chapter.downloaded else False) for chapter in chapters],
+        'choices': [dict(name=chapter.title, disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False) for chapter in chapters],
     }
 
     answers = prompt(question)
