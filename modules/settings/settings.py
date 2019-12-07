@@ -40,7 +40,6 @@ def update(settings: dict or Settings):
 
     # loop all keys
     for key in settings.keys():
-        print(key, settings[key])
         upsert(key, settings[key])
 
 
