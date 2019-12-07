@@ -1,8 +1,8 @@
-from whaaaaat import prompt
 from whaaaaat import ValidationError, Validator
+from whaaaaat import prompt
 
 
-def vinput(message, default=True, input_type=str):
+def vinput(message, default='', input_type=str):
 
     class TypeValidator(Validator):
         def validate(self, document):

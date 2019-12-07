@@ -13,6 +13,7 @@ from modules import settings
 from modules.codec import MKCodec
 from modules.commandline import parse
 from modules.composition import compose_menu
+from modules.console import vinput
 from modules.conversions import list_to_file
 from modules.database import models
 from modules.database.models.manga.download import selective_download
@@ -23,13 +24,7 @@ from modules.ui import colorize, Loader
 
 
 def search():
-    search_question = {
-        'type': 'input',
-        'name': 'search',
-        'message': 'Enter here to search: '
-    }
-
-    search_answer = prompt(search_question)
+    search_answer = vinput('Enter here to search:')
 
     search = search_answer['search']
     url = codec.search_prefix + search
@@ -65,13 +60,7 @@ def search():
 
 
 def direct():
-    direct_question = {
-        'type': 'input',
-        'name': 'direct',
-        'message': 'Enter the url: ',
-    }
-
-    answer = prompt(direct_question)['direct']
+    answer = vinput('Enter the url: ')
 
     parsed_manga, chapters = models.Manga('', answer).parse()
 
