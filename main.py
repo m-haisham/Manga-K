@@ -10,13 +10,12 @@ from modules import console
 from modules import database
 from modules import resume
 from modules import settings
-from modules.MangaDownloader import MangaDownloader
 from modules.codec import MKCodec
 from modules.commandline import parse
 from modules.composition import compose_menu
 from modules.conversions import list_to_file
 from modules.database import models
-from modules.database.models.manga import parse as manga_parse
+from modules.database.models.manga.download import selective_download
 from modules.manager import HtmlManager, MangaManager
 from modules.static import Const
 from modules.styles import style
@@ -62,7 +61,7 @@ def search():
         else:
             for result in codec.search_result:
                 if result['name'] == search_answer['search']:
-                    return result['name'], result['href']
+                    return models.Manga(result['name'], result['href'])
 
 
 def direct():
@@ -74,17 +73,14 @@ def direct():
 
     answer = prompt(direct_question)['direct']
 
-    title, chapters = manga_parse(answer)
+    parsed_manga, chapters = models.Manga('', answer).parse()
 
-    return title, chapters
+    return parsed_manga, chapters
 
 
-def download_link(title, url, chapters=None):
-
+def download_link(manga: models.Manga, chapters=None):
     if not chapters:
-        manga, chapters = manga_parse(url)
-    else:
-        manga = models.Manga(title, url)
+        manga, chapters = manga.parse()
 
     question = {
         'type': 'checkbox',
@@ -103,9 +99,10 @@ def download_link(title, url, chapters=None):
         if chapter.title in answers['chapters']:
             selected.append(chapter)
 
-    dm.download_manga(models.Manga(title, url), chapters, selected)
+    selective_download(manga, chapters, selected)
 
-def check_files(download_manager):
+
+def check_files():
     """
     Checks for existence of necessary files and folders
     """
@@ -117,14 +114,14 @@ def check_files(download_manager):
 
 
 def continue_downloads():
-
     manga, unfinished = resume.get()
 
     if len(unfinished) <= 0:
         return
 
     # user prompt
-    print(f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
+    print(
+        f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
     should_resume = console.confirm('Would you like to resume?', default=True)
 
     if not should_resume:
@@ -133,15 +130,9 @@ def continue_downloads():
         return
 
     # start download
-    manga, chapters = manga_parse(manga.url)
-    dm.download_manga(
-        manga,
-        chapters,
-        [models.Chapter.from_dict(chapter) for chapter in unfinished]
-    )
+    manga, chapters = manga.parse()
+    selective_download(manga, chapters, [models.Chapter.fromdict(chapter) for chapter in unfinished])
 
-
-dm: MangaDownloader = MangaDownloader()
 
 if __name__ == '__main__':
     # set working directory
@@ -149,9 +140,12 @@ if __name__ == '__main__':
 
     # PLAYGROUND
 
-    # from modules import settings
+    # from modules.database.models import DictClass
     #
-    # settings.change()
+    # class ex(DictClass):
+    #     def __init__(self, a, b):
+    #         self.a = a,
+    #         self.b = b
     #
     # input()
     # END
@@ -162,7 +156,7 @@ if __name__ == '__main__':
     manga_manager: MangaManager = MangaManager()
     html_manager: HtmlManager = HtmlManager()
 
-    check_files(dm)
+    check_files()
 
     # commandline argument parse
     skip_menu, args = parse()
@@ -183,9 +177,7 @@ if __name__ == '__main__':
                     'Settings',
                     'Exit'
                 ],
-                'filter': lambda val: mainmenu['choices'].index(val),
-                'default': 4
-
+                'filter': lambda val: mainmenu['choices'].index(val)
             }
 
             menuoption = prompt(mainmenu)
@@ -195,14 +187,13 @@ if __name__ == '__main__':
 
         if menuoption['menu'] == 0:
             try:
-                title, chapters = search()
-                download_link(title, chapters)
+                download_link(search())
             except Exception:
                 traceback.print_exc()
         elif menuoption['menu'] == 1:
             try:
                 manga, chapters = direct()
-                download_link(manga.title, manga.url, chapters)
+                download_link(manga, chapters)
             except Exception:
                 traceback.print_exc()
         elif menuoption['menu'] == 2:

@@ -8,6 +8,12 @@ class TinyWrapper(TinyDB):
         self.path = args[0]
 
     def insert_key(self, key, value, table=TinyDB.DEFAULT_TABLE):
+        """
+        :param key: position
+        :param value: data
+        :param table: data table to insert
+        :return: None
+        """
         self.table(table).upsert(dict(key=key, value=value), where('key') == key)
 
     def get_key(self, key, table=TinyDB.DEFAULT_TABLE, single=False):

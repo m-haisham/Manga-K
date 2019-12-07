@@ -1,8 +1,9 @@
 from tinydb import Query
 
 from modules.database.models import Manga
-from .default import TinyWrapper
 from modules.ui.decorators import Loader
+from .default import TinyWrapper
+
 
 class MangaWrapper(TinyWrapper):
     def __init__(self, *args, **kwargs):
@@ -12,7 +13,7 @@ class MangaWrapper(TinyWrapper):
         self.chapters = self.table('chapters')
 
     def set_manga_info(self, manga: Manga):
-        self.insert_key('info', manga.to_dict(), table=self.info.name)
+        self.insert_key('info', manga.todict(), table=self.info.name)
 
     def get_manga_info(self):
         return self.get_key('info', table=self.info.name, single=True)
@@ -27,4 +28,4 @@ class MangaWrapper(TinyWrapper):
             if len(matches) > 0:
                 self.chapters.update(dict(title=chapter.title), Query().url == chapter.url)
             else:
-                self.chapters.insert(chapter.to_dict())
+                self.chapters.insert(chapter.todict())

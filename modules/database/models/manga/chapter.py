@@ -1,3 +1,6 @@
+import requests
+from bs4 import BeautifulSoup
+
 
 class Chapter:
     def __init__(self, title, url, downloaded=False):
@@ -8,11 +11,26 @@ class Chapter:
         assert isinstance(downloaded, bool)
         self.downloaded = downloaded
 
-    def to_dict(self):
+    def todict(self):
         return vars(self)
 
+    def pages(self):
+        """
+        chapter_path (string): path of the chapter
+
+        returns (list): pages of the chapter
+        """
+        r = requests.get(self.url)
+        soup = BeautifulSoup(r.content, "html.parser")
+        pagebox = soup.find(id="vungdoc")
+        rows = pagebox.find_all('img')
+        pages = []
+        for row in rows:
+            pages.append(row['src'])
+        return pages
+
     @staticmethod
-    def from_dict(obj):
+    def fromdict(obj):
         assert isinstance(obj, dict)
 
         try:

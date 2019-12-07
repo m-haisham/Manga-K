@@ -132,29 +132,6 @@ class HtmlManager:
             with tag('title'):
                 text(manga_title + ' - ' + chapter_title)
         with tag('body'):
-            # with tag('div', klass='container'):
-            #     # manga title
-            #     with tag('div', klass='title-container'):
-            #         doc.asis('<a class="title manga-title" href="' + os.path.join('..',
-            #                                             manga_title + '.html') + '" >' + manga_title + '</a>')
-            #     with tag('div', klass='chapter-bar'):
-            #         doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
-            #         with tag('h3', klass='title chapter-title'):
-            #             text(chapter_title)
-            #         doc.asis('<a class="btn btn-right btn-1 btn-1d" href="' + next + '">Next</a>')
-            #
-            #     # loop through the page list
-            #     for page in page_list:
-            #         # add_manga img tag
-            #         doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
-            #                  style="margin:10px auto;")
-            #
-            #     with tag('div', klass='chapter-bar'):
-            #         doc.asis('<a class="btn btn-left btn-1 btn-1d" href="' + previous + '">Previous</a>')
-            #         with tag('h3', klass='title chapter-title'):
-            #             text(chapter_title)
-            #         doc.asis('<a class="btn btn-right btn-1 btn-1d" href="' + next + '">Next</a>')
-
             doc.asis(self.header(manga_title, manga_link))
 
             with tag('div', klass='divider'):
@@ -210,27 +187,6 @@ class HtmlManager:
             with tag('title'):
                 text(title if is_manga_list else title + '- Chapter list')
         with tag('body'):
-            # with tag('div', klass='container'):
-            #
-            #     # if is a chapter list generate a button to access main menu
-            #     if not is_manga_list:
-            #         doc.asis('<a class="btn btn-left btn-1 btn-1d" href="index.html">Menu</a>')
-            #
-            #     # manga title
-            #     with tag('div', klass='title-container'):
-            #         with tag('h1', klass='title manga-title'):
-            #             text(title)
-            #
-            #     with tag('ul'):
-            #         # loop through the list
-            #         for item in mlist:
-            #             if is_manga_list:
-            #                 link = item + '.html'
-            #             else:
-            #                 # chapter htmls are stored in folder inside save location named (title)
-            #                 link = os.path.join(title, item + '.html')
-            #             with tag('li', klass='manga'):
-            #                 doc.asis('<a class="btn btn-1 btn-1d" href="' + link + '">' + item + '</a>')
             doc.asis(self.header(title if is_manga_list else title + ' - Chapter list'))
 
             with tag('div', klass='divider'):

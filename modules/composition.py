@@ -20,12 +20,13 @@ def compose_menu():
         'type': 'list',
         'name': 'compose',
         'message': 'Pick composition type.',
-        'choices': composing_options.keys()
+        'choices': [str(key) for key in composing_options.keys()]
     }
 
     response = ''
     try:
         response = prompt(compose_menu_options)['compose']
+        response = Path(response)
     except KeyError as e:
         print(e)
 
@@ -34,8 +35,8 @@ def compose_menu():
 
     for chapter in tqdm(chapters):
         composing_options[response](
-            str(chapter),
-            str(manga / Path(response))
+            chapter,
+            manga / Path(response)
         )
 
 

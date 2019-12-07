@@ -11,7 +11,7 @@ class MetaWrapper(TinyWrapper):
         self.settings = self.table('settings')
 
     def insert_manga(self, manga: Manga):
-        self.insert_key('manga', manga.to_dict(), table=self.downloads_left.name)
+        self.insert_key('manga', manga.todict(), table=self.downloads_left.name)
 
     def get_manga(self) -> Manga:
-        return Manga.from_dict(self.get_key('manga', table=self.downloads_left.name, single=True))
+        return Manga.fromdict(self.get_key('manga', table=self.downloads_left.name, single=True))

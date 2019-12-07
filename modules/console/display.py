@@ -6,7 +6,7 @@ def title(s):
 
 def visualize(val) -> str:
     """
-    :returns appropriate symbol for the input colorized
+    :returns appropriate symbol for the vinput colorized
     """
     if type(val) == bool:
         if val:

@@ -1,6 +1,6 @@
 from tinydb import Query
 
-from modules.database import meta
+from modules.database.database import meta
 
 
 def new(manga, to_download):
@@ -11,7 +11,7 @@ def new(manga, to_download):
     meta.insert_manga(manga)
 
     # add all new chapters to be downloaded
-    meta.downloads_left.insert_multiple([chapter.to_dict() for chapter in to_download])
+    meta.downloads_left.insert_multiple([chapter.todict() for chapter in to_download])
 
 
 def get():

@@ -5,18 +5,20 @@ class Settings:
     def __init__(
             self,
             pdf=False,
-            jpg=False
+            jpg=False,
+            image_separation=5
     ):
         self.pdf = pdf
         self.jpg = jpg
+        self.image_separation = image_separation
 
     def display(self):
-        settings = self.to_dict()
+        settings = self.todict()
 
         for key in settings.keys():
             print(format_dict_pair(key, settings[key]))
 
-    def to_dict(self):
+    def todict(self):
         return vars(self)
 
     def is_compositing(self):
@@ -27,13 +29,17 @@ class Settings:
 
     @staticmethod
     def prompt():
-        return Settings.from_dict(from_template(Settings().to_dict()))
+        return Settings.fromdict(from_template(Settings().todict()))
 
     @staticmethod
-    def from_dict(d: dict):
+    def fromdict(d: dict):
         assert isinstance(d, dict)
 
         try:
-            return Settings(d['pdf'], d['jpg'])
+            s = Settings()
+            for key in d.keys():
+                setattr(s, key, d[key])
+
+            return s
         except KeyError:
             return

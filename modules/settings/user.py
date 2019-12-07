@@ -15,9 +15,9 @@ def change():
     d = prompt()
 
     print()
-    Settings.from_dict(d).display()
+    Settings.fromdict(d).display()
 
-    if old.to_dict() == d:
+    if old.todict() == d:
         print(title("No changes"))
         return
 
@@ -30,4 +30,4 @@ def change():
 
 
 def prompt():
-    return from_template(get().to_dict())
+    return from_template(get().todict())

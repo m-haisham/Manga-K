@@ -5,27 +5,42 @@ from modules.database.models import Settings
 
 
 def get():
-    if check():
-        return Settings(
-            meta.get_key('pdf', table=meta.settings.name, single=True),
-            meta.get_key('jpg', table=meta.settings.name, single=True),
-        )
-    else:
-        s = Settings()
-        update(s.to_dict())
-        return s
+        params = list(Settings().todict().keys())
 
+        sdict = {
+            param: meta.get_key(param, table=meta.settings.name, single=True) for param in params
+        }
+
+        if any(list(map(lambda val: sdict[val] is None, sdict.keys()))):
+            s = Settings()
+            update(s.todict())
+            return s
+
+        return Settings.fromdict(sdict)
 
 def upsert(key, value):
+    """
+    Insert (Update if exists) the key-value pair
+    :param key: identifier
+    :param value: data
+    :return: None
+    """
     meta.insert_key(key, value, table=meta.settings.name)
 
 
-def update(settings: Settings):
-    if type(settings) == dict:
-        settings = Settings.from_dict(settings)
+def update(settings: dict or Settings):
+    """
+    Update the datastore for settings
+    :param settings: data
+    :return: None
+    """
+    # to dict format
+    if type(settings) == Settings:
+        settings = settings.todict()
 
-    meta.insert_key('pdf', settings.pdf, table=meta.settings.name)
-    meta.insert_key('jpg', settings.jpg, table=meta.settings.name)
+    # loop all keys
+    for key in settings.keys():
+        upsert(key, settings[key])
 
 
 def check():
@@ -35,4 +50,4 @@ def check():
     apply the queries to settings table
     check if the resulting list is all true
     """
-    return all([meta.settings.search(i) for i in [Query().key.any(key) for key in Settings().to_dict().keys()]])
+    return all([meta.settings.search(i) for i in [Query().key.any(key) for key in Settings().todict().keys()]])
