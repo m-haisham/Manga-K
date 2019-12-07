@@ -21,5 +21,5 @@ def get():
     return manga, unfinished
 
 
-def update(url):
-    meta.downloads_left.update({'downloaded': True}, Query().url == url)
+def update(url, status=True):
+    meta.downloads_left.update({'downloaded': status}, Query().url == url)

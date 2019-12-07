@@ -1,7 +1,7 @@
 import string
 
 
-def seperate_alphabetically(objects, key=None):
+def sort_initials(objects, key=None, key_modifier=lambda val: val.upper()):
     if key is None:
         key = lambda val: val
 
@@ -16,9 +16,12 @@ def seperate_alphabetically(objects, key=None):
         if len(val) <= 0:
             continue
         if val[0].lower() in string.ascii_lowercase:
-            k = val[0].upper()
+            k = val[0]
         else:
             k = '#'
+
+        # apply modifier
+        k = key_modifier(k)
 
         if k not in separated.keys():
             separated[k] = []

@@ -7,29 +7,7 @@ from yattag import Doc
 
 from modules import settings
 from modules.static import Const
-from .sorting import seperate_alphabetically
-
-numbers = re.compile(r'(\d+)')
-
-floating_numbers = re.compile(r"([-+]?\d*\.\d+|\d+)")
-floating = re.compile(r"(?i)chapter ([-+]?\d*\.\d+|\d+)")
-
-
-def numericalSort(value):
-    parts = numbers.split(value)
-    parts[1::2] = map(int, parts[1::2])
-    return parts
-
-
-def floatingSort(value):
-    numbers = floating_numbers.findall(value)
-    return numbers
-
-
-def chapterSort(value):
-    parts = floating.split(value)
-    parts[1::2] = map(float, parts[1::2])
-    return parts[1::2]
+from .sorting import sort_initials, extract_float, floating_sort, numerical_sort
 
 
 class MangaManager():
@@ -55,7 +33,7 @@ class MangaManager():
             self.remove_const_dirs(shallow_dirs)
 
             # sort the chapter dirs to numerical order
-            shallow_dirs = sorted(shallow_dirs, key=numericalSort)
+            shallow_dirs = sorted(shallow_dirs, key=numerical_sort)
 
             self.tree[dirs[i]] = {}
 
@@ -63,7 +41,7 @@ class MangaManager():
                 # get all page files of the chapter
                 deep_files = self.get_dirs(os.path.join(self.manga_path, dirs[i], shallow_dirs[j]))[1]
 
-                self.tree[dirs[i]][shallow_dirs[j]] = sorted(deep_files, key=numericalSort)
+                self.tree[dirs[i]][shallow_dirs[j]] = sorted(deep_files, key=numerical_sort)
 
         # save dict as json
         with open('tree.json', 'w') as f:
@@ -197,7 +175,7 @@ class HtmlManager:
             with tag('div', klass='container list mt-2'):
                 if is_manga_list:
                     doc.asis(self.list_from_links(
-                        seperate_alphabetically(
+                        sort_initials(
                             list(map(link_mapper, mlist)),
                             key=lambda val: val['name']
                         )
@@ -252,14 +230,14 @@ class HtmlManager:
                 with tag('li'):
                     with tag('a', klass='btn', href=previous):
                         try:
-                            text(f'PREVIOUS ({floatingSort(previous)[-1]})')
+                            text(f'PREVIOUS ({extract_float(previous)[-1]})')
                         except IndexError:
                             text('PREVIOUS')
 
                 with tag('li'):
                     with tag('a', klass='btn', href=next):
                         try:
-                            text(f'NEXT ({floatingSort(next)[-1]})')
+                            text(f'NEXT ({extract_float(next)[-1]})')
                         except IndexError:
                             text('NEXT')
 
@@ -341,7 +319,7 @@ class HtmlManager:
         for i in range(len(all_manga_keys)):
             manga_key = all_manga_keys[i]
             all_chapters_keys = list(dir_tree[manga_key].keys())
-            all_chapters_keys.sort(key=chapterSort)
+            all_chapters_keys.sort(key=floating_sort)
 
             # generate chapter list for manga (manga_key)
             self.generate_list(manga_key, all_chapters_keys, os.path.join(self.location, manga_key + '.html'),

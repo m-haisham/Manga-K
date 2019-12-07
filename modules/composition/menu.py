@@ -3,12 +3,13 @@ from pathlib import Path
 from tqdm import tqdm
 from whaaaaat import prompt
 
-from .ImageStacking import dir_to_pdf, dir_to_img
-from .static import Const, is_any_manga_downloaded
+from modules.composition.pdf import dir_to_pdf
+from modules.composition.jpg.stack import dir_to_jpg
+from modules.static import Const, is_any_manga_downloaded
 
 composing_options = {
     Const.PdfDIr: dir_to_pdf,
-    Const.JpgDir: dir_to_img
+    Const.JpgDir: dir_to_jpg
 }
 
 

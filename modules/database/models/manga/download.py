@@ -6,7 +6,7 @@ from tinydb import Query
 from tqdm import tqdm
 
 from modules import resume
-from modules.ImageStacking import dir_to_img, dir_to_pdf
+from modules.composition import dir_to_jpg, dir_to_pdf
 from modules.database import database
 from modules.error import decorators as error, validate
 from modules.settings import get as get_settings
@@ -112,7 +112,7 @@ def selective_download(manga, chapters, to_download, update=False):
         elif settings.jpg:
             with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as loader:
                 try:
-                    dir_to_img(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
+                    dir_to_jpg(chapter_directory, os.path.join(manga_dir, Const.PdfDIr))
                 except OSError as e:
                     loader.fail(e)
 

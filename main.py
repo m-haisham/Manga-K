@@ -12,7 +12,7 @@ from modules import resume
 from modules import settings
 from modules.codec import MKCodec
 from modules.commandline import parse
-from modules.composition import compose_menu
+from modules.composition.menu import compose_menu
 from modules.console import vinput
 from modules.conversions import list_to_file
 from modules.database import models
@@ -21,6 +21,7 @@ from modules.manager import HtmlManager, MangaManager
 from modules.static import Const
 from modules.styles import style
 from modules.ui import colorize, Loader
+from modules.console.menu import Menu
 
 def search():
     search = vinput('Enter here to search:')
@@ -35,24 +36,17 @@ def search():
         if codec.next_page_exists():
             choices.append('NEXT')
 
-        search_question = {
-            'type': 'list',
-            'name': 'search',
-            'message': 'choose',
-            'choices': choices
-        }
+        search_answer = Menu('Choose', choices, key=lambda chapter: chapter['name']).prompt()
 
-        search_answer = prompt(search_question)
-
-        if search_answer['search'] == 'PREVIOUS':
+        if search_answer == 'PREVIOUS':
             url = codec.get_page(codec.current_page - 1)
             continue
-        elif search_answer['search'] == 'NEXT':
+        elif search_answer == 'NEXT':
             url = codec.get_page(codec.current_page + 1)
             continue
         else:
             for result in codec.search_result:
-                if result['name'] == search_answer['search']:
+                if result['name'] == search_answer:
                     return models.Manga(result['name'], result['href'])
 
 
@@ -68,11 +62,14 @@ def download_link(manga: models.Manga, chapters=None):
     if not chapters:
         manga, chapters = manga.parse()
 
-    # check database and update chapters
-    database.manga.databases[manga.title].update_chapter_list(chapters)
+    exists = manga.title in database.manga.databases.keys()
 
-    # get new chapters from updated database
-    chapters = database.manga.databases[manga.title].get_chapter_list()
+    if exists:
+        # check database and update chapters
+        database.manga.databases[manga.title].update_chapter_list(chapters)
+
+        # get new chapters from updated database
+        chapters = database.manga.databases[manga.title].get_chapter_list()
 
     # get settings
     s = settings.get()
@@ -94,7 +91,7 @@ def download_link(manga: models.Manga, chapters=None):
         if chapter.title in answers['chapters']:
             selected.append(chapter)
 
-    selective_download(manga, chapters, selected)
+    selective_download(manga, chapters, selected, update=not exists)
 
 
 def check_files():
