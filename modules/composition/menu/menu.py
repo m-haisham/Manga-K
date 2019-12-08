@@ -4,13 +4,13 @@ from tqdm import tqdm
 from whaaaaat import prompt
 
 from modules import database
-from modules.composition.pdf import dir_to_pdf
 from modules.composition.jpg import dir_to_jpg
-from modules.database.models import Manga
+from modules.composition.pdf import dir_to_pdf
+from modules.database.models.manga import Manga
 from modules.sorting import numerical_sort
 from modules.ui.colorize import red
-from ..dir import directories
 from .sorting import alphabetric_list
+from ..dir import directories
 
 composing_options = {
     directories.pdf.parts[-1]: dir_to_pdf,

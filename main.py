@@ -20,7 +20,7 @@ from modules.database import models
 from modules.database.models.manga.download import selective_download
 from modules.manager import HtmlManager, MangaManager
 from modules.ui import colorize, Loader
-
+from modules.database.models.manga.dialog import select_and_download
 
 def search():
     search = vinput('Enter here to search:')
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         if not skip_menu:
             mainmenu = {
                 'type': 'list',
-                'name': 'menu',
+                'name': 'dialog',
                 'message': 'what do you wanna do?',
                 'choices': [
                     'Search for manga',
@@ -167,20 +167,20 @@ if __name__ == '__main__':
             menuoption = prompt(mainmenu)
         else:
             if args.view:
-                menuoption['menu'] = 2
+                menuoption['dialog'] = 2
 
-        if menuoption['menu'] == 0:
+        if menuoption['dialog'] == 0:
             try:
-                download_link(search())
+                select_and_download(search())
             except Exception:
                 traceback.print_exc()
-        elif menuoption['menu'] == 1:
+        elif menuoption['dialog'] == 1:
             try:
                 manga, chapters = direct()
-                download_link(manga, chapters)
+                select_and_download(manga, chapters)
             except Exception:
                 traceback.print_exc()
-        elif menuoption['menu'] == 2:
+        elif menuoption['dialog'] == 2:
             # generate manga tree
             with Loader('Generating tree'):
                 manga_manager.generate_tree()
@@ -191,13 +191,13 @@ if __name__ == '__main__':
 
             if html_manager.open():
                 break
-        elif menuoption['menu'] == 4:
+        elif menuoption['dialog'] == 4:
             compose_menu()
-        elif menuoption['menu'] == 5:
+        elif menuoption['dialog'] == 5:
             database.actions.menu()
-        elif menuoption['menu'] == 6:
+        elif menuoption['dialog'] == 6:
             settings.change()
-        elif menuoption['menu'] == 7:
+        elif menuoption['dialog'] == 7:
             break
         else:
             print(colorize.red('Pick a valid choice'))

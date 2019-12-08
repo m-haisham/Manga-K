@@ -4,7 +4,6 @@ import requests
 from tinydb import Query
 from tqdm import tqdm
 
-import modules.composition.dir
 from modules import composition
 from modules import resume
 from modules.composition import dir_to_jpg, dir_to_pdf
@@ -64,7 +63,7 @@ def selective_download(manga, chapters, to_download, update=False):
     # Create directories
     Manga.mkdir_base()
     if settings.is_compositing():
-        modules.composition.dir.create_directories(manga)
+        composition.dir.create_directories(manga)
 
     # update base database
     database.add_manga(manga.title, manga.url, manga_path)

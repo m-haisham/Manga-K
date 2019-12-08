@@ -1,12 +1,11 @@
 from tinydb import Query
 
-from modules.database.models import Chapter
-from ..models import Manga
-from ..database import base, add_manga, manga as mangabase
 from modules.codec import MKCodec
-
-from modules.ui import Loader
 from modules.console import vinput, title, visualize
+from modules.database.models import Chapter
+from modules.ui import Loader
+from ..database import base, add_manga, manga as mangabase
+from ..models import Manga
 
 
 def refresh():

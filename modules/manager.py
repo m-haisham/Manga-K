@@ -219,14 +219,14 @@ class HtmlManager:
                 text(title)
             with tag('ul', klass='chap_links'):
                 with tag('li'):
-                    with tag('a', klass='btn', href=previous):
+                    with tag('a', klass='btn previous', href=previous):
                         try:
                             text(f'PREVIOUS ({extract_float(previous)[-1]})')
                         except IndexError:
                             text('PREVIOUS')
 
                 with tag('li'):
-                    with tag('a', klass='btn', href=next):
+                    with tag('a', klass='btn next', href=next):
                         try:
                             text(f'NEXT ({extract_float(next)[-1]})')
                         except IndexError:

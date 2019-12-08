@@ -3,7 +3,7 @@ from pathlib import Path
 from tinydb import TinyDB
 
 from ..paths import mangas_directory
-from ..wrapper import MangaWrapper
+from ..wrapper.manga import MangaWrapper
 
 
 class MangaData:

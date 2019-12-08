@@ -1,6 +1,7 @@
-from modules.sorting import sort_initials
 from whaaaaat import Separator
-from modules.ui.colorize import blue
+
+from modules.sorting import sort_initials
+
 
 def alphabetric_list(l):
     alphabetic = sort_initials(l)

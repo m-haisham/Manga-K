@@ -8,6 +8,7 @@ class MetaWrapper(TinyWrapper):
         super().__init__(*args, **kwargs)
 
         self.downloads_left = self.table('downloads_left')
+        self.favourites = self.table('favourites')
         self.settings = self.table('settings')
 
     def insert_manga(self, manga: Manga):

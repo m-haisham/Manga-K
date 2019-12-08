@@ -2,8 +2,10 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from whaaaaat import prompt
 
 from modules.error import validate
+from modules.ui import Loader
 from modules.ui.decorators import Loader
 from .chapter import Chapter
 
@@ -29,7 +31,8 @@ class Manga:
 
         chapter_list = []
         for i in range(len(rows) - 1, -1, -1):
-            chapter_list.append(Chapter(validate(rows[i].find("a", href=True).text), rows[i].find("a", href=True)['href']))
+            chapter_list.append(
+                Chapter(validate(rows[i].find("a", href=True).text), rows[i].find("a", href=True)['href']))
 
         return self, chapter_list
 
@@ -38,10 +41,6 @@ class Manga:
 
     def mkdir(self, parents=True, exist_ok=True):
         self.path().mkdir(parents=parents, exist_ok=exist_ok)
-
-    def todict(self):
-        d = vars(self)
-        return d
 
     @staticmethod
     def fromdict(obj):
@@ -58,6 +57,10 @@ class Manga:
             return manga
         except KeyError:
             return
+
+    def todict(self):
+        d = vars(self)
+        return d
 
     @staticmethod
     def mkdir_base(parents=True, exist_ok=True):

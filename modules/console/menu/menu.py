@@ -1,4 +1,4 @@
-from whaaaaat import prompt
+from whaaaaat import prompt, Separator
 
 
 class Menu:
@@ -36,10 +36,10 @@ class Menu:
 
         key = prompt(dict(
             type='list',
-            name='menu',
+            name='dialog',
             message=self.message,
             choices=list(self.options.keys())
-        ))['menu']
+        ))['dialog']
 
         if self.return_index:
             for i, k in enumerate(self.options.keys()):
@@ -49,3 +49,7 @@ class Menu:
             self.options[key]()
         else:
             return key
+
+    @staticmethod
+    def seperator(s=''):
+        return Separator(s)

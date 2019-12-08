@@ -1,7 +1,6 @@
 from tinydb import Query
 
 from modules.database.models import Manga, Chapter
-from modules.ui.decorators import Loader
 from .default import TinyWrapper
 
 
