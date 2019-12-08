@@ -2,13 +2,14 @@ from whaaaaat import prompt
 
 
 class Menu:
-    def __init__(self, message, options, action=True, key=lambda val: val):
+    def __init__(self, message, options, return_index=False, action=True, key=lambda val: val):
         """
 
         :param options: key-action pairs
         :param action:
         :param loop:
         """
+        self.return_index = return_index
         self.message = message
         self.action = action
 
@@ -40,7 +41,11 @@ class Menu:
             choices=list(self.options.keys())
         ))['menu']
 
-        if self.action:
+        if self.return_index:
+            for i, k in enumerate(self.options.keys()):
+                if i == k:
+                    return i
+        elif self.action:
             self.options[key]()
         else:
             return key

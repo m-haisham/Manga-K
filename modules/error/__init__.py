@@ -1,5 +1,7 @@
 import re
 from .decorators import Suppress
 
-def validate(path):
-    return re.sub('[^A-Za-z0-9 -.]+', '', path)
+def validate(s):
+    s = re.sub('[^A-Za-z0-9 -.]+', '', s)
+    s = re.sub("\s\s+", " ", s)
+    return s

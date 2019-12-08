@@ -1,8 +1,8 @@
 from modules.ui import unicode
-from modules.ui.colorize import green, red
+from modules.ui.colorize import green, red, blue
 
 def title(s):
-    return f'? {s}'
+    return f'{blue("?")} {s}'
 
 def visualize(val) -> str:
     """

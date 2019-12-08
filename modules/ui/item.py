@@ -1,3 +1,5 @@
+from .line import delete_line
+
 class UItem:
     def __init__(self, s: str):
         if type(s) != str:
@@ -26,6 +28,10 @@ class UItem:
         if self._done:
             raise ValueError('this bar has already ran to completion')
         self._done = True
+
+    def print(self, s):
+        delete_line()
+        print(f'\r{s}')
 
     def __enter__(self):
         return self.init()

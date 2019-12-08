@@ -22,7 +22,6 @@ class MangaWrapper(TinyWrapper):
     def get_info(self):
         return Manga(self.get_key('info', table=self.info.name, single=True))
 
-    @Loader(message='Update database')
     def update_chapter_list(self, chapters):
 
         for chapter in chapters:

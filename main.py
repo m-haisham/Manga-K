@@ -64,11 +64,12 @@ def download_link(manga: models.Manga, chapters=None):
     exists = manga.title in database.manga.databases.keys()
 
     if exists:
-        # check database and update get_chapter_list
-        database.manga.databases[manga.title].update_chapter_list(chapters)
+        with Loader("Update database"):
+            # check database and update get_chapter_list
+            database.manga.databases[manga.title].update_chapter_list(chapters)
 
-        # get new get_chapter_list from updated database
-        chapters = database.manga.databases[manga.title].get_chapter_list()
+            # get new get_chapter_list from updated database
+            chapters = database.manga.databases[manga.title].get_chapter_list()
 
     # get settings
     s = settings.get()
@@ -156,6 +157,7 @@ if __name__ == '__main__':
                     'View the manga',
                     Separator('-'),
                     'Compose',
+                    'Database',
                     'Settings',
                     'Exit'
                 ],
@@ -192,8 +194,10 @@ if __name__ == '__main__':
         elif menuoption['menu'] == 4:
             compose_menu()
         elif menuoption['menu'] == 5:
-            settings.change()
+            database.actions.menu()
         elif menuoption['menu'] == 6:
+            settings.change()
+        elif menuoption['menu'] == 7:
             break
         else:
             print(colorize.red('Pick a valid choice'))

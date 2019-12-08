@@ -1,3 +1,5 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -25,7 +27,7 @@ class MKCodec:
     def get_page(self, page: int):
         return f'{self.search_prefix}{self.keyword}{self.search_postfix}{page}'
 
-    def search(self, keyword):
+    def search(self, keyword: str):
         '''
         keyword (string): word or phrase no less than three characters
 
@@ -36,6 +38,8 @@ class MKCodec:
         '''
         if len(keyword) < len(self.search_prefix) + 3:
             return
+
+        keyword = re.sub(' ', '_', keyword.lower())
 
         self.keyword = keyword[len(self.search_prefix):]
 

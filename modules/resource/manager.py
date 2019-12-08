@@ -14,5 +14,5 @@ class ResourceManager:
 
 
 manager = ResourceManager([
-    RawResource(style, Path('style.css'))
+    RawResource(style, Path('Web') / Path('style.css'))
 ])

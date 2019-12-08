@@ -98,7 +98,7 @@ class HtmlManager:
         doc.asis('<html lang="en" dir="ltr">')
         with tag('head'):
             doc.asis('<meta charset="utf-8">')
-            doc.asis('<link rel="stylesheet" href="../../style.css">')
+            doc.asis('<link rel="stylesheet" href="../style.css">')
             with tag('title'):
                 text(manga_title + ' - ' + chapter_title)
         with tag('body'):
@@ -154,7 +154,7 @@ class HtmlManager:
         doc.asis('<html lang="en" dir="ltr">')
         with tag('head'):
             doc.asis('<meta charset="utf-8">')
-            doc.asis('<link rel="stylesheet" href="../style.css">')
+            doc.asis('<link rel="stylesheet" href="style.css">')
             with tag('title'):
                 text(title if is_manga_list else title + '- Chapter list')
         with tag('body'):

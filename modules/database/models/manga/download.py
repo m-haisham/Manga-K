@@ -74,8 +74,9 @@ def selective_download(manga, chapters, to_download, update=False):
     manga_base.set_info(manga)
 
     if update:
-        # update chapter list
-        manga_base.update_chapter_list(chapters)
+        with Loader("Update database"):
+            # update chapter list
+            manga_base.update_chapter_list(chapters)
 
     # add mangas to waiting list
     resume.new(manga, to_download)
@@ -98,7 +99,7 @@ def selective_download(manga, chapters, to_download, update=False):
         # on chapter download complete
         # update get_chapter_list left to download, set downloaded to true
         resume.update(chapter.url)
-        manga_base.get_chapter_list.update({'downloaded': True}, Query().url == chapter.url)
+        manga_base.chapters.update({'downloaded': True}, Query().url == chapter.url)
 
         # convert to pdf
         if settings.pdf:

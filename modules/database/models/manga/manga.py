@@ -3,6 +3,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
+from modules.error import validate
 from modules.ui.decorators import Loader
 from .chapter import Chapter
 
@@ -14,19 +15,21 @@ class Manga:
         self.title = title
         self.url = url
 
-    @Loader(message='Parse info')
     def parse(self):
         r = requests.get(self.url)
         soup = BeautifulSoup(r.content, "html.parser")
         titlebox = soup.find(class_="manga-info-text")
-        self.title = titlebox.find("h1").text
+        if titlebox is None:
+            return self, []
+
+        self.title = validate(titlebox.find("h1").text)
 
         chapterbox = soup.find_all(class_="chapter-list")
         rows = chapterbox[0].find_all(class_="row")
 
         chapter_list = []
         for i in range(len(rows) - 1, -1, -1):
-            chapter_list.append(Chapter(rows[i].find("a", href=True).text, rows[i].find("a", href=True)['href']))
+            chapter_list.append(Chapter(validate(rows[i].find("a", href=True).text), rows[i].find("a", href=True)['href']))
 
         return self, chapter_list
 
@@ -38,8 +41,6 @@ class Manga:
 
     def todict(self):
         d = vars(self)
-        d['directory'] = str(d['directory'])
-
         return d
 
     @staticmethod
