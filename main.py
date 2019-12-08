@@ -13,7 +13,7 @@ from modules import resume
 from modules import settings
 from modules.codec import MKCodec
 from modules.commandline import parse
-from modules.composition.menu import compose_menu
+from modules.composition import compose_menu
 from modules.console import vinput
 from modules.console.menu import Menu
 from modules.database import models

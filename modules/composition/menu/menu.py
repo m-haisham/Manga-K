@@ -4,12 +4,13 @@ from tqdm import tqdm
 from whaaaaat import prompt
 
 from modules import database
-from modules.composition.jpg.stack import dir_to_jpg
 from modules.composition.pdf import dir_to_pdf
+from modules.composition.jpg import dir_to_jpg
 from modules.database.models import Manga
 from modules.sorting import numerical_sort
 from modules.ui.colorize import red
-from .dir import directories
+from ..dir import directories
+from .sorting import alphabetric_list
 
 composing_options = {
     directories.pdf.parts[-1]: dir_to_pdf,
@@ -40,9 +41,9 @@ def compose_menu():
     (manga / Path(response)).mkdir(exist_ok=True)
 
     for chapter in tqdm(chapters):
-        composing_options[response](
+        composing_options[response.parts[-1]](
             chapter,
-            manga / Path(response)
+            manga / response
         )
 
 
@@ -62,7 +63,7 @@ def chapterSelection():
         'type': 'list',
         'name': 'manga',
         'message': 'Pick manga',
-        'choices': map(lambda path: path.parts[-1], mangas),
+        'choices': alphabetric_list(map(lambda path: path.parts[-1], mangas)),
         'filter': lambda val: mangas[mangas.index(Manga.directory / Path(val))]
     }
 
