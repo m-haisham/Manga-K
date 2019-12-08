@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class MKCodec():
+class MKCodec:
     def __init__(self):
         ''' 
         initialize the object

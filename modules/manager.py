@@ -6,7 +6,7 @@ import webbrowser
 from yattag import Doc
 
 from modules import settings
-from modules.static import Const
+from modules.database.models import Manga
 from .sorting import sort_initials, extract_float, floating_sort, numerical_sort
 
 
@@ -15,7 +15,7 @@ class MangaManager():
         '''
         initialize object
         '''
-        self.manga_path = Const.MangaSavePath
+        self.manga_path = Manga.directory
         self.tree = {}
 
     def generate_tree(self):
@@ -30,7 +30,6 @@ class MangaManager():
 
             # get all downloaded chapter directories for the manga
             shallow_dirs = self.get_dirs(os.path.join(self.manga_path, dirs[i]))[0]
-            self.remove_const_dirs(shallow_dirs)
 
             # sort the chapter dirs to numerical order
             shallow_dirs = sorted(shallow_dirs, key=numerical_sort)
@@ -65,22 +64,13 @@ class MangaManager():
 
         return dir_list, files_list
 
-    def remove_const_dirs(self, dirs):
-        """
-        Remove static dirs from dir
-        """
-        if Const.PdfDIr in dirs:
-            dirs.remove(Const.PdfDIr)
-        if Const.JpgDir in dirs:
-            dirs.remove(Const.JpgDir)
-
 
 class HtmlManager:
     def __init__(self):
         """
         Initialize the object
         """
-        self.manga_path = Const.MangaSavePath
+        self.manga_path = Manga.directory
         self.location = 'Web'
         self.main_menu = os.path.join(self.location, 'index.html')
         self.chapter_seperation = settings.get().image_separation
@@ -122,7 +112,8 @@ class HtmlManager:
             # loop through the page list
             for page in page_list:
                 # add_manga img tag
-                doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page', style=f"margin:{self.chapter_seperation}px auto;")
+                doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
+                         style=f"margin:{self.chapter_seperation}px auto;")
 
             doc.asis(self.chapter_header(chapter_title, next, previous))
             doc.asis(self.footer())
@@ -367,20 +358,3 @@ class HtmlManager:
         '''
         new = re.sub(r'[ ]', '%20', source)
         return new
-
-
-if __name__ == '__main__':
-    # Testing purposees
-    html = HtmlManager()
-
-    manga = MangaManager()
-    manga.generate_tree()
-
-    mangas_list = list(manga.tree.keys())
-
-    manga_title = mangas_list[2]
-    chapter_dict = manga.tree[manga_title]
-    chapter = list(chapter_dict.keys())[0]
-    page_list = chapter_dict[chapter]
-
-    html.generate_web(manga.tree)

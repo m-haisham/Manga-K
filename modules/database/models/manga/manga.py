@@ -8,10 +8,11 @@ from .chapter import Chapter
 
 
 class Manga:
+    directory = Path('Manga')
+
     def __init__(self, title, url):
         self.title = title
         self.url = url
-        self.directory = Path('Manga')
 
     @Loader(message='Parse info')
     def parse(self):
@@ -57,5 +58,6 @@ class Manga:
         except KeyError:
             return
 
-    def mkdir_base(self):
-        self.directory.mkdir(parents=True, exist_ok=True)
+    @staticmethod
+    def mkdir_base(parents=True, exist_ok=True):
+        Manga.directory.mkdir(parents=parents, exist_ok=exist_ok)

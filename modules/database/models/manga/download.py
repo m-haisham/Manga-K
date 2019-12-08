@@ -1,20 +1,18 @@
-import os
 from pathlib import Path
 
 import requests
 from tinydb import Query
 from tqdm import tqdm
 
-from .manga import Manga
-
-from modules import resume
+import modules.composition.dir
 from modules import composition
+from modules import resume
 from modules.composition import dir_to_jpg, dir_to_pdf
 from modules.database import database
 from modules.error import decorators as error, validate
 from modules.settings import get as get_settings
-from modules.static import Const
 from modules.ui import Loader, Completer
+from .manga import Manga
 
 
 def save_image(url, directory):
@@ -64,9 +62,9 @@ def selective_download(manga, chapters, to_download, update=False):
     manga_path = manga.path()
 
     # Create directories
-    manga.mkdir_base()
+    Manga.mkdir_base()
     if settings.is_compositing():
-        composition.create_directories(manga)
+        modules.composition.dir.create_directories(manga)
 
     # update base database
     database.add_manga(manga.title, manga.url, manga_path)
@@ -106,7 +104,7 @@ def selective_download(manga, chapters, to_download, update=False):
         if settings.pdf:
             with Loader(f'Convert {chapter_directory.parts[-1]} to pdf') as loader:
                 try:
-                    dir_to_pdf(chapter_directory, os.path.join(manga_path, Const.PdfDIr))
+                    dir_to_pdf(chapter_directory, manga_path / composition.directories.pdf)
                 except OSError as e:
                     loader.fail(e)
 
@@ -114,7 +112,7 @@ def selective_download(manga, chapters, to_download, update=False):
         elif settings.jpg:
             with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as loader:
                 try:
-                    dir_to_jpg(chapter_directory, os.path.join(manga_path, Const.PdfDIr))
+                    dir_to_jpg(chapter_directory, manga_path / composition.directories.jpg)
                 except OSError as e:
                     loader.fail(e)
 

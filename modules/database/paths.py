@@ -13,7 +13,3 @@ meta_path = base_directory / Path('meta.db')
 # manga info
 mangas_directory = base_directory / Path('manga')
 mangas_directory.mkdir(parents=True, exist_ok=True)
-
-# manga saves
-# mangas_save_directory = base_directory / Path('manga')
-# mangas_save_directory.mkdir(parents=True, exist_ok=True)

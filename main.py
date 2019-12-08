@@ -8,19 +8,19 @@ from whaaaaat import prompt, Separator
 
 from modules import console
 from modules import database
+from modules import resource
 from modules import resume
 from modules import settings
 from modules.codec import MKCodec
 from modules.commandline import parse
 from modules.composition.menu import compose_menu
 from modules.console import vinput
+from modules.console.menu import Menu
 from modules.database import models
 from modules.database.models.manga.download import selective_download
 from modules.manager import HtmlManager, MangaManager
-from modules.static import Const
 from modules.ui import colorize, Loader
-from modules.console.menu import Menu
-from modules import resource
+
 
 def search():
     search = vinput('Enter here to search:')
@@ -77,7 +77,9 @@ def download_link(manga: models.Manga, chapters=None):
         'type': 'checkbox',
         'name': 'get_chapter_list',
         'message': 'Select get_chapter_list to download',
-        'choices': [dict(name=chapter.title, disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False) for chapter in chapters],
+        'choices': [
+            dict(name=chapter.title, disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False)
+            for chapter in chapters],
     }
 
     answers = prompt(question)
@@ -91,14 +93,6 @@ def download_link(manga: models.Manga, chapters=None):
             selected.append(chapter)
 
     selective_download(manga, chapters, selected, update=not exists)
-
-
-def check_files():
-    """
-    Checks for existence of necessary files and folders
-    """
-    if not os.path.exists(Const.MangaSavePath):
-        os.mkdir(Const.MangaSavePath)
 
 
 def continue_downloads():
@@ -125,8 +119,8 @@ def continue_downloads():
 if __name__ == '__main__':
     # set working directory
     os.chdir(str(Path(sys.executable if getattr(sys, 'frozen', False) else __file__).parent))
-
-    resource.manager.check_resources() # mandatory resource check
+    models.Manga.mkdir_base()
+    resource.manager.check_resources()  # mandatory resource check
 
     # PLAYGROUND
 
@@ -145,8 +139,6 @@ if __name__ == '__main__':
     codec: MKCodec = MKCodec()
     manga_manager: MangaManager = MangaManager()
     html_manager: HtmlManager = HtmlManager()
-
-    check_files()
 
     # commandline argument parse
     skip_menu, args = parse()

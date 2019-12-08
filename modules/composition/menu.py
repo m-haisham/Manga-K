@@ -3,18 +3,17 @@ from pathlib import Path
 from tqdm import tqdm
 from whaaaaat import prompt
 
-from modules.composition.pdf import dir_to_pdf
-from modules.composition.jpg.stack import dir_to_jpg
-from modules.static import Const
-
-from modules.ui.colorize import red
-
 from modules import database
+from modules.composition.jpg.stack import dir_to_jpg
+from modules.composition.pdf import dir_to_pdf
+from modules.database.models import Manga
 from modules.sorting import numerical_sort
+from modules.ui.colorize import red
+from .dir import directories
 
 composing_options = {
-    Const.PdfDIr: dir_to_pdf,
-    Const.JpgDir: dir_to_jpg
+    directories.pdf.parts[-1]: dir_to_pdf,
+    directories.jpg.parts[-1]: dir_to_jpg
 }
 
 
@@ -52,7 +51,7 @@ def chapterSelection():
     :returns array os strings pointing to get_chapter_list to be composed
     """
 
-    manga_dir = Path(Const.MangaSavePath)
+    manga_dir = Manga.directory
 
     mangas = list(manga_dir.iterdir())
     if len(mangas) <= 0:
@@ -64,7 +63,7 @@ def chapterSelection():
         'name': 'manga',
         'message': 'Pick manga',
         'choices': map(lambda path: path.parts[-1], mangas),
-        'filter': lambda val: mangas[mangas.index(Path(Const.MangaSavePath) / Path(val))]
+        'filter': lambda val: mangas[mangas.index(Manga.directory / Path(val))]
     }
 
     manga: Path = Path()
@@ -101,4 +100,4 @@ def chapterSelection():
 
 
 def is_folder_static(folder_name) -> bool:
-    return folder_name == Const.StructFile or folder_name == Const.JpgDir or folder_name == Const.PdfDIr
+    return folder_name in composing_options.keys()
