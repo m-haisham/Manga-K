@@ -20,7 +20,7 @@ from modules.database import models
 from modules.database.models.manga.download import selective_download
 from modules.manager import HtmlManager, MangaManager
 from modules.ui import colorize, Loader
-from modules.database.models.manga.dialog import select_and_download
+from modules.database.models.manga.dialog import MangaDialog
 
 def search():
     search = vinput('Enter here to search:')
@@ -52,7 +52,8 @@ def search():
 def direct():
     answer = vinput('Enter the url: ')
 
-    parsed_manga, chapters = models.Manga('', answer).parse()
+    with Loader("Parse Info"):
+        parsed_manga, chapters = models.Manga('', answer).parse()
 
     return parsed_manga, chapters
 
@@ -171,13 +172,15 @@ if __name__ == '__main__':
 
         if menuoption['dialog'] == 0:
             try:
-                select_and_download(search())
+                dialog = MangaDialog(search())
+                dialog.prompt()
             except Exception:
                 traceback.print_exc()
         elif menuoption['dialog'] == 1:
             try:
                 manga, chapters = direct()
-                select_and_download(manga, chapters)
+                dialog = MangaDialog(manga)
+                dialog.prompt()
             except Exception:
                 traceback.print_exc()
         elif menuoption['dialog'] == 2:

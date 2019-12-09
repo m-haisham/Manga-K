@@ -1,5 +1,7 @@
 import string
 
+from whaaaaat import Separator
+
 
 def sort_initials(objects, key=None, key_modifier=lambda val: val.upper()):
     if key is None:
@@ -29,3 +31,19 @@ def sort_initials(objects, key=None, key_modifier=lambda val: val.upper()):
         separated[k].append(obj)
 
     return separated
+
+
+def alphabetic_prompt_list(l, key=lambda val: val):
+    alphabetic = sort_initials(l, key=key)
+    sorted_keys = sorted(alphabetic.keys())
+
+    sorted_list = []
+    for key in sorted_keys:
+        if len(sorted_list) != 0:
+            sorted_list.append(Separator(' '))
+        sorted_list.append(Separator(key))
+
+        # sort the sublist and add to sorted list
+        sorted_list.extend(sorted(alphabetic[key]))
+
+    return sorted_list

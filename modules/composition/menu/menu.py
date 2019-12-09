@@ -9,7 +9,7 @@ from modules.composition.pdf import dir_to_pdf
 from modules.database.models.manga import Manga
 from modules.sorting import numerical_sort
 from modules.ui.colorize import red
-from .sorting import alphabetric_list
+from modules.sorting.alphabetic import alphabetic_prompt_list
 from ..dir import directories
 
 composing_options = {
@@ -63,7 +63,7 @@ def chapterSelection():
         'type': 'list',
         'name': 'manga',
         'message': 'Pick manga',
-        'choices': alphabetric_list(map(lambda path: path.parts[-1], mangas)),
+        'choices': alphabetic_prompt_list(map(lambda path: path.parts[-1], mangas)),
         'filter': lambda val: mangas[mangas.index(Manga.directory / Path(val))]
     }
 
