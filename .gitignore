@@ -6,14 +6,15 @@
 *.jpg
 *.png
 
-# HTML
+# web
 *.html
+*.css
+*.js
 
 # Database
 *.db
 
 # other
 *.json
-*.css
 *.bat
 *.pdf
