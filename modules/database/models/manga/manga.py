@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import requests
@@ -9,6 +11,7 @@ from modules.ui import Loader
 from modules.ui.decorators import Loader
 from .chapter import Chapter
 
+from typing import Tuple, List
 
 class Manga:
     directory = Path('Manga')
@@ -17,7 +20,7 @@ class Manga:
         self.title = title
         self.url = url
 
-    def parse(self):
+    def parse(self) -> Tuple[Manga, List[Chapter]]:
         r = requests.get(self.url)
         soup = BeautifulSoup(r.content, "html.parser")
         titlebox = soup.find(class_="manga-info-text")

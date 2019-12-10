@@ -78,7 +78,7 @@ def download_link(manga: models.Manga, chapters=None):
     question = {
         'type': 'checkbox',
         'name': 'get_chapter_list',
-        'message': 'Select get_chapter_list to download',
+        'message': 'Select chapters to download',
         'choices': [
             dict(name=chapter.title, disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False)
             for chapter in chapters],
@@ -105,7 +105,7 @@ def continue_downloads():
 
     # user prompt
     print(
-        f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "get_chapter_list"} from "{manga.title}" unfinished.')
+        f'Download of {len(unfinished)} {"chapter" if len(unfinished) == 1 else "chapters"} from "{manga.title}" unfinished.')
     should_resume = console.confirm('Would you like to resume?', default=True)
 
     if not should_resume:

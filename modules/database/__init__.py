@@ -1,2 +1,3 @@
 from .actions import menu
-from .database import base, meta, manga, add_manga
+from .database import meta
+from .mangas import base, manga, add_manga

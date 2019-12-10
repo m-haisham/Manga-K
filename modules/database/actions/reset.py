@@ -3,7 +3,9 @@ import sys
 
 from modules.console import confirm
 from modules.ui import Loader
-from ..database import base, manga, meta
+from ..database import meta
+from ..mangas import manga
+from modules.database.mangas import base
 from ..paths import base_directory
 
 

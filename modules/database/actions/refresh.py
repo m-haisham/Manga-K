@@ -4,7 +4,7 @@ from modules.codec import MKCodec
 from modules.console import vinput, title, visualize
 from modules.database.models import Chapter
 from modules.ui import Loader
-from ..database import base, add_manga, manga as mangabase
+from ..mangas import base, add_manga, manga as mangabase
 from ..models import Manga
 
 

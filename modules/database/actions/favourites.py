@@ -4,7 +4,6 @@ from modules.database.models import Manga
 from modules.sorting.alphabetic import alphabetic_prompt_list
 from modules.console.menu import Menu
 
-
 def favourites():
     # get all favourites
     favoured = alphabetic_prompt_list(favourite.all(), key=lambda val: val.title)
