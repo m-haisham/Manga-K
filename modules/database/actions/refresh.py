@@ -55,6 +55,7 @@ def mangas_check():
             if url != '':
                 # update database
                 add_manga(manga.title, url, manga.path())
+                mangabase.databases[manga.title].set_info(manga)
             else:
                 unsuccessful_retrievals.append(manga)
 
@@ -115,3 +116,4 @@ def manual(manga_list):
         manga.url = vinput('Enter url')
 
         add_manga(manga.title, manga.url, manga.path())
+        mangabase.databases[manga.title].set_info(manga)

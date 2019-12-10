@@ -3,6 +3,7 @@ from modules.ui import Loader
 
 from modules.database.mangas import manga
 from .menu import UpdatesMenu
+from modules.console import title
 
 def updates():
     favoured = favourite.all()
@@ -33,5 +34,9 @@ def updates():
                     updates[f_manga].append(o_chapter)
 
         loader.message = 'Update check'
+
+    if not updates.keys():
+        print(title('No updates.'))
+        return
 
     UpdatesMenu(updates).prompt()

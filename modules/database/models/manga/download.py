@@ -97,7 +97,7 @@ def selective_download(manga, chapters, to_download, update=False):
             save_image(page, chapter_directory)  # save image
 
         # on chapter download complete
-        # update get_chapter_list left to download, set downloaded to true
+        # update chapters left to download, set downloaded to true
         resume.update(chapter.url)
         manga_base.chapters.update({'downloaded': True}, Query().url == chapter.url)
 
@@ -131,10 +131,10 @@ def select_and_download(manga, chapters=None):
 
     if exists:
         with Loader("Update database"):
-            # check database and update get_chapter_list
+            # check database and update chapters
             saved_manga.databases[manga.title].update_chapter_list(chapters)
 
-            # get new get_chapter_list from updated database
+            # get new chapters from updated database
             chapters = saved_manga.databases[manga.title].get_chapter_list()
 
     # get settings
@@ -142,8 +142,8 @@ def select_and_download(manga, chapters=None):
 
     question = {
         'type': 'checkbox',
-        'name': 'get_chapter_list',
-        'message': 'Select get_chapter_list to download',
+        'name': 'chapters',
+        'message': 'Select chapters to download',
         'choices': [
             dict(name=chapter.title,
                  disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False)
@@ -152,12 +152,12 @@ def select_and_download(manga, chapters=None):
 
     answers = prompt(question)
 
-    if not answers['get_chapter_list']:
+    if not answers['chapters']:
         return
 
     selected = []
     for chapter in chapters:
-        if chapter.title in answers['get_chapter_list']:
+        if chapter.title in answers['chapters']:
             selected.append(chapter)
 
     selective_download(manga, chapters, selected, update=not exists)

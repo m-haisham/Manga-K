@@ -16,9 +16,10 @@ from typing import Tuple, List
 class Manga:
     directory = Path('Manga')
 
-    def __init__(self, title, url):
+    def __init__(self, title, url, is_manhua=False):
         self.title = title
         self.url = url
+        self.is_manhua = is_manhua
 
     def parse(self) -> Tuple[Manga, List[Chapter]]:
         r = requests.get(self.url)
@@ -55,7 +56,8 @@ class Manga:
         try:
             manga = Manga(
                 obj['title'],
-                obj['url']
+                obj['url'],
+                obj['is_manhua']
             )
             return manga
         except KeyError:

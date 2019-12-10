@@ -17,6 +17,10 @@ def upsert(manga: Manga):
     meta.favourites.upsert(manga.todict(), favourite.url == manga.url)
 
 
+def update(manga, obj: dict):
+    meta.favourites.upsert(obj, favourite.url == manga.url)
+
+
 def remove(manga: Manga):
     """
     Remove from favourites

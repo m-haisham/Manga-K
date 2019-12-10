@@ -49,7 +49,7 @@ def compose_menu():
 
 def chapterSelection():
     """
-    :returns array os strings pointing to get_chapter_list to be composed
+    :returns array os strings pointing to chapters to be composed
     """
 
     manga_dir = Manga.directory
@@ -75,23 +75,23 @@ def chapterSelection():
         print(e)
         return Path, []
 
-    # select get_chapter_list
+    # select chapters
     chapter_option = {
         'type': 'checkbox',
-        'name': 'get_chapter_list',
-        'message': 'Select get_chapter_list to compose',
+        'name': 'chapters',
+        'message': 'Select chapters to compose',
         'choices': sorted(
             [{'name': i.parts[-1]} for i in manga.iterdir() if not is_folder_static(i.parts[-1])],
             key=lambda val: numerical_sort(val['name'])
         ),
     }
 
-    # if no get_chapter_list
+    # if no chapters
     if len(chapter_option['choices']) <= 0:
         return manga, []
 
     try:
-        chapters = prompt(chapter_option)['get_chapter_list']
+        chapters = prompt(chapter_option)['chapters']
         chapters = map(lambda path: manga / Path(path), chapters)
     except KeyError as e:
         print(e)

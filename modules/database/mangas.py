@@ -32,5 +32,18 @@ def add_manga(title, url, path):
         raise TypeError('"path" must be of type str or pathlib.Path')
 
     query = Query()
-    base.upsert({'title': title, 'url': url, 'path': path}, query.title == title)
+    l = base.search(query.title == title)
+    if len(l) > 0:
+        base.upsert({'title': title, 'url': url, 'path': path}, query.title == title)
+    else:
+        base.insert({'title': title, 'url': url, 'path': path, 'is_manhua': False})
+
     manga.add(title)
+
+
+def update_is_manhua(_manga, state):
+    base.upsert(dict(is_manhua=state), Query().url == _manga.url)
+    manga.databases[_manga.title].update_info(dict(is_manhua=state))
+
+    from modules import favourite
+    favourite.update(_manga, dict(is_manhua=state))

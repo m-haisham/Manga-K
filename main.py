@@ -46,7 +46,14 @@ def search():
         else:
             for result in codec.search_result:
                 if result['name'] == search_answer:
-                    return models.Manga(result['name'], result['href'])
+                    from modules.database.mangas import manga
+                    m = models.Manga(result['name'], result['href'])
+
+                    if m.title in manga.databases.keys():
+                        info = manga.databases[m.title].get_info()
+                        m.is_manhua = info.is_manhua
+
+                    return m
 
 
 def direct():
@@ -66,10 +73,10 @@ def download_link(manga: models.Manga, chapters=None):
 
     if exists:
         with Loader("Update database"):
-            # check database and update get_chapter_list
+            # check database and update chapters
             database.manga.databases[manga.title].update_chapter_list(chapters)
 
-            # get new get_chapter_list from updated database
+            # get new chapters from updated database
             chapters = database.manga.databases[manga.title].get_chapter_list()
 
     # get settings
@@ -77,7 +84,7 @@ def download_link(manga: models.Manga, chapters=None):
 
     question = {
         'type': 'checkbox',
-        'name': 'get_chapter_list',
+        'name': 'chapter',
         'message': 'Select chapters to download',
         'choices': [
             dict(name=chapter.title, disabled='Downloaded' if s.disable_downloaded and chapter.downloaded else False)
@@ -86,12 +93,12 @@ def download_link(manga: models.Manga, chapters=None):
 
     answers = prompt(question)
 
-    if not answers['get_chapter_list']:
+    if not answers['chapters']:
         return
 
     selected = []
     for chapter in chapters:
-        if chapter.title in answers['get_chapter_list']:
+        if chapter.title in answers['chapters']:
             selected.append(chapter)
 
     selective_download(manga, chapters, selected, update=not exists)
@@ -126,12 +133,10 @@ if __name__ == '__main__':
 
     # PLAYGROUND
 
-    # from modules.database.models import DictClass
+    # from modules.database.models import Manga
     #
-    # class ex(DictClass):
-    #     def __init__(self, a, b):
-    #         self.a = a,
-    #         self.b = b
+    # v = Manga('name', 'asdas').todict()
+    # print(v)
     #
     # input()
     # END
