@@ -9,7 +9,7 @@ import modules.database.mangas
 from modules import composition
 from modules import resume
 from modules.composition import dir_to_jpg, dir_to_pdf
-from modules.database import database
+from modules.database.mangas import manga as saved_manga
 from modules.error import decorators as error, validate
 from modules.settings import get as get_settings
 from modules.ui import Loader, Completer
@@ -34,7 +34,6 @@ def save_image(url, directory):
             f.write(response.content)
         else:
             total_length = int(total_length)
-            length_kb = round(total_length / 1024, 2)
             chunksize = int(total_length / 50)
 
             with tqdm(desc=f'{filename:<8}',
@@ -128,15 +127,15 @@ def select_and_download(manga, chapters=None):
         with Loader("Parse Info"):
             manga, chapters = manga.parse()
 
-    exists = manga.title in database.manga.databases.keys()
+    exists = manga.title in saved_manga.databases.keys()
 
     if exists:
         with Loader("Update database"):
             # check database and update get_chapter_list
-            database.manga.databases[manga.title].update_chapter_list(chapters)
+            saved_manga.databases[manga.title].update_chapter_list(chapters)
 
             # get new get_chapter_list from updated database
-            chapters = database.manga.databases[manga.title].get_chapter_list()
+            chapters = saved_manga.databases[manga.title].get_chapter_list()
 
     # get settings
     s = get_settings()
