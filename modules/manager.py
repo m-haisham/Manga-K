@@ -9,6 +9,7 @@ from modules import settings
 from modules.database.models import Manga
 from .sorting import sort_initials, extract_float, floating_sort, numerical_sort
 
+from modules.database.mangas import manga
 
 class MangaManager():
     def __init__(self):
@@ -89,6 +90,9 @@ class HtmlManager:
 
         Creates a new html file containing all pages and named (chapter_title).html
         """
+
+        m = manga.databases[manga_title].get_info()
+
         doc, tag, text = Doc().tagtext()
 
         manga_link = os.path.join('..', manga_title + '.html')
@@ -113,7 +117,7 @@ class HtmlManager:
             for page in page_list:
                 # add_manga img tag
                 doc.stag('img', src=self.verify_source(os.path.join(prefix, page)), klass='page',
-                         style=f"margin:{self.chapter_seperation}px auto;")
+                         style=f"margin:{0 if m.is_manhua else self.chapter_seperation}px auto;")
 
             doc.asis(self.chapter_header(chapter_title, next, previous))
             doc.asis(self.footer())
