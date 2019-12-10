@@ -122,6 +122,8 @@ class HtmlManager:
             doc.asis(self.chapter_header(chapter_title, next, previous))
             doc.asis(self.footer())
 
+            doc.asis('<script type="text/javascript" src="../script.js"></script>')
+
         doc.asis('</html>')
 
         # save html doc in (destination)
