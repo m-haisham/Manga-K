@@ -1,25 +1,22 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Tuple, List
 
 import requests
 from bs4 import BeautifulSoup
-from whaaaaat import prompt
 
 from modules.error import validate
-from modules.ui import Loader
-from modules.ui.decorators import Loader
 from .chapter import Chapter
 
-from typing import Tuple, List
 
 class Manga:
     directory = Path('Manga')
 
-    def __init__(self, title, url, is_manhua=False):
+    def __init__(self, title, url, is_manhwa=False):
         self.title = title
         self.url = url
-        self.is_manhua = is_manhua
+        self.is_manhwa = is_manhwa
 
     def parse(self) -> Tuple[Manga, List[Chapter]]:
         r = requests.get(self.url)
@@ -57,7 +54,7 @@ class Manga:
             manga = Manga(
                 obj['title'],
                 obj['url'],
-                obj['is_manhua']
+                obj['is_manhwa']
             )
             return manga
         except KeyError:

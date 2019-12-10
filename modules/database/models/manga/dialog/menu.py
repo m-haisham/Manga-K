@@ -1,7 +1,6 @@
 from modules import favourite
-from modules.database.mangas import update_is_manhua, base
 from modules.console.menu import Menu
-from modules.console import visualize
+from modules.database.mangas import update_is_manhwa
 from ..manga import Manga
 
 
@@ -42,7 +41,7 @@ class MangaDialog:
         from ..download import select_and_download
         self.options['Download'] = lambda: select_and_download(self.manga, self.chapters)
 
-        self.options[f'[{self.manga.is_manhua}] Set Manhua to {not self.manga.is_manhua}'] = self._toggle
+        self.options[f'[{self.manga.is_manhwa}] Set Manhwa to {not self.manga.is_manhwa}'] = self._toggle
 
         if favourite.exist(self.manga):
             self.options['Remove from favourites'] = lambda: self.repeat(favourite.remove, self.manga)
@@ -50,5 +49,5 @@ class MangaDialog:
         self.menu = Menu('Pick an action', self.options)
 
     def _toggle(self):
-        update_is_manhua(self.manga, not self.manga.is_manhua)
-        self.manga.is_manhua = not self.manga.is_manhua
+        update_is_manhwa(self.manga, not self.manga.is_manhwa)
+        self.manga.is_manhwa = not self.manga.is_manhwa

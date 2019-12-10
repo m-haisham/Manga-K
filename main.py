@@ -17,10 +17,11 @@ from modules.composition import compose_menu
 from modules.console import vinput
 from modules.console.menu import Menu
 from modules.database import models
+from modules.database.models.manga.dialog import MangaDialog
 from modules.database.models.manga.download import selective_download
 from modules.manager import HtmlManager, MangaManager
 from modules.ui import colorize, Loader
-from modules.database.models.manga.dialog import MangaDialog
+
 
 def search():
     search = vinput('Enter here to search:')
@@ -51,7 +52,7 @@ def search():
 
                     if m.title in manga.databases.keys():
                         info = manga.databases[m.title].get_info()
-                        m.is_manhua = info.is_manhua
+                        m.is_manhwa = info.is_manhwa
 
                     return m
 
