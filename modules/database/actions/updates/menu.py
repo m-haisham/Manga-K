@@ -45,5 +45,5 @@ class UpdatesMenu:
             manga, all_chapters = manga.parse()
 
         from modules.database.models.manga.download import selective_download
-        selective_download(manga, all_chapters, selected, update=False)
+        selective_download(manga, all_chapters, selected, update=True)
 
