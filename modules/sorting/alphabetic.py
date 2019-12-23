@@ -38,12 +38,12 @@ def alphabetic_prompt_list(l, key=lambda val: val):
     sorted_keys = sorted(alphabetic.keys())
 
     sorted_list = []
-    for key in sorted_keys:
+    for skey in sorted_keys:
         if len(sorted_list) != 0:
             sorted_list.append(Separator(' '))
-        sorted_list.append(Separator(key))
+        sorted_list.append(Separator(skey))
 
         # sort the sublist and add to sorted list
-        sorted_list.extend(sorted(alphabetic[key]))
+        sorted_list.extend(sorted(alphabetic[skey], key=key))
 
     return sorted_list
