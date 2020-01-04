@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import requests
+from pynotifier import Notification
 from tinydb import Query
 from tqdm import tqdm
 from whaaaaat import prompt
@@ -110,7 +111,7 @@ def selective_download(manga, chapters, to_download, update=False):
                     loader.fail(e)
 
         # convert to jpg
-        elif settings.jpg:
+        if settings.jpg:
             with Loader(f'Convert {chapter_directory.parts[-1]} to jpg') as loader:
                 try:
                     dir_to_jpg(chapter_directory, manga_path / composition.directories.jpg)
@@ -119,6 +120,13 @@ def selective_download(manga, chapters, to_download, update=False):
 
     # on download task complete
     Completer('Downloads complete').init().complete()
+
+    # download task complete notification
+    Notification(
+        title='Download task complete',
+        description=f'{manga.title} | {len(to_download)} chapters downloaded'
+    ).send()
+
     print()
 
 
