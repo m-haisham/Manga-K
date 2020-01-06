@@ -11,7 +11,7 @@ from modules import composition
 from modules import resume
 from modules.composition import dir_to_jpg, dir_to_pdf
 from modules.database.mangas import manga as saved_manga
-from modules.error import decorators as error, validate
+from modules.error import decorators as error
 from modules.settings import get as get_settings
 from modules.ui import Loader, Completer
 from .manga import Manga
@@ -84,7 +84,7 @@ def selective_download(manga, chapters, to_download, update=False):
 
     # download each chapter loop
     for chapter in to_download:
-        chapter_directory = manga_path / Path(validate(chapter.title))
+        chapter_directory = manga_path / Path(chapter.title)
 
         # parse info
         print()
