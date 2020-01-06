@@ -33,7 +33,7 @@ class Manga:
         chapter_list = []
         for i in range(len(rows) - 1, -1, -1):
             chapter_list.append(
-                Chapter(validate(rows[i].find("a", href=True).text), rows[i].find("a", href=True)['href']))
+                Chapter(validate(rows[i].find("a", href=True).text, dot=False), rows[i].find("a", href=True)['href']))
 
         return self, chapter_list
 
