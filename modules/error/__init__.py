@@ -11,3 +11,10 @@ def validate(s, dot=True):
         s = ''.join(s.split('.'))
 
     return s.strip()
+
+
+def validate_list(l, key=None):
+    if key is None:
+        key = lambda v: validate(v)
+
+    return [key(item) for item in l]

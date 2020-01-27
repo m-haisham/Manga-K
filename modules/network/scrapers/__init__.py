@@ -1,0 +1,1 @@
+from .mangakakalot import Mangakakalot

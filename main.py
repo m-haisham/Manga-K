@@ -134,12 +134,21 @@ if __name__ == '__main__':
 
     # PLAYGROUND
 
-    # from modules.database.models import Manga
-    #
-    # v = Manga('name', 'asdas').todict()
-    # print(v)
-    #
-    # input()
+    from modules.network.scrapers import Mangakakalot
+
+    url = 'https://manganelo.com/manga/pn918005'
+    parser = Mangakakalot()
+
+    manga = parser.get_manga_info(url)
+    print(vars(manga))
+
+    chapters = parser.get_chapter_list(manga)
+    print([chapter.title for chapter in chapters])
+
+    pages = parser.get_page_list(chapters[0])
+    print([page.url for page in pages])
+
+    input()
     # END
 
     continue_downloads()
