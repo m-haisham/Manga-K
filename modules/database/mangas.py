@@ -7,7 +7,7 @@ from modules.database.paths import base_path
 from modules.database.wrapper import TinyWrapper
 
 base = TinyWrapper(base_path)
-manga = MangaData(base)
+mangadata = MangaData(base)
 
 def add_manga(title, url, path):
     """
@@ -38,12 +38,12 @@ def add_manga(title, url, path):
     else:
         base.insert({'title': title, 'url': url, 'path': path, 'is_manhwa': False})
 
-    manga.add(title)
+    mangadata.add(title)
 
 
 def update_is_manhwa(_manga, state):
     base.upsert(dict(is_manhwa=state), Query().url == _manga.url)
-    manga.databases[_manga.title].update_info(dict(is_manhwa=state))
+    mangadata.databases[_manga.title].update_info(dict(is_manhwa=state))
 
     from modules import favourite
     favourite.update(_manga, dict(is_manhwa=state))

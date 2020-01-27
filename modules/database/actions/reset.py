@@ -4,7 +4,7 @@ import sys
 from modules.console import confirm
 from modules.ui import Loader
 from ..database import meta
-from ..mangas import manga
+from ..mangas import mangadata
 from modules.database.mangas import base
 from ..paths import base_directory
 
@@ -19,7 +19,7 @@ def reset():
             base.close()
             meta.close()
 
-            for key, database in manga.databases.items():
+            for key, database in mangadata.databases.items():
                 database.close()
 
             # unlink the files and exit

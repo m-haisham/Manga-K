@@ -19,7 +19,7 @@ composing_options = {
 
 
 def compose_menu():
-    if len(database.manga.all()) <= 0:
+    if len(database.mangadata.all()) <= 0:
         print(f'[{red("X")}] No mangas downloaded')
         return
 

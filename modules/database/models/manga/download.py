@@ -10,7 +10,7 @@ import modules.database.mangas
 from modules import composition
 from modules import resume
 from modules.composition import dir_to_jpg, dir_to_pdf
-from modules.database.mangas import manga as saved_manga
+from modules.database.mangas import mangadata as saved_manga
 from modules.error import decorators as error
 from modules.settings import get as get_settings
 from modules.ui import Loader, Completer
@@ -70,7 +70,7 @@ def selective_download(manga, chapters, to_download, update=False):
     # update base database
     modules.database.mangas.add_manga(manga.title, manga.url, manga_path)
 
-    manga_base = modules.database.mangas.manga.databases[manga.title]
+    manga_base = modules.database.mangas.mangadata.databases[manga.title]
     # update manga info
     manga_base.set_info(manga)
 

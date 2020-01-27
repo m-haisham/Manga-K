@@ -47,11 +47,11 @@ def search():
         else:
             for result in codec.search_result:
                 if result['name'] == search_answer:
-                    from modules.database.mangas import manga
+                    from modules.database.mangas import mangadata
                     m = models.Manga(result['name'], result['href'])
 
-                    if m.title in manga.databases.keys():
-                        info = manga.databases[m.title].get_info()
+                    if m.title in mangadata.databases.keys():
+                        info = mangadata.databases[m.title].get_info()
                         m.is_manhwa = info.is_manhwa
 
                     return m
@@ -70,15 +70,15 @@ def download_link(manga: models.Manga, chapters=None):
     if not chapters:
         manga, chapters = manga.parse()
 
-    exists = manga.title in database.manga.databases.keys()
+    exists = manga.title in database.mangadata.databases.keys()
 
     if exists:
         with Loader("Update database"):
             # check database and update chapters
-            database.manga.databases[manga.title].update_chapter_list(chapters)
+            database.mangadata.databases[manga.title].update_chapter_list(chapters)
 
             # get new chapters from updated database
-            chapters = database.manga.databases[manga.title].get_chapter_list()
+            chapters = database.mangadata.databases[manga.title].get_chapter_list()
 
     # get settings
     s = settings.get()
@@ -134,21 +134,21 @@ if __name__ == '__main__':
 
     # PLAYGROUND
 
-    from modules.network.scrapers import Mangakakalot
-
-    url = 'https://manganelo.com/manga/pn918005'
-    parser = Mangakakalot()
-
-    manga = parser.get_manga_info(url)
-    print(vars(manga))
-
-    chapters = parser.get_chapter_list(manga)
-    print([chapter.title for chapter in chapters])
-
-    pages = parser.get_page_list(chapters[0])
-    print([page.url for page in pages])
-
-    input()
+    # from modules.network.scrapers import Mangakakalot
+    #
+    # url = 'https://manganelo.com/manga/pn918005'
+    # parser = Mangakakalot()
+    #
+    # manga = parser.get_manga_info(url)
+    # print(vars(manga))
+    #
+    # chapters = parser.get_chapter_list(manga)
+    # print([chapter.title for chapter in chapters])
+    #
+    # pages = parser.get_page_list(chapters[0])
+    # print([page.url for page in pages])
+    #
+    # input()
     # END
 
     continue_downloads()

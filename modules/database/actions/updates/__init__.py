@@ -1,7 +1,7 @@
 from modules import favourite
 from modules.ui import Loader
 
-from modules.database.mangas import manga
+from modules.database.mangas import mangadata
 from .menu import UpdatesMenu
 from modules.console import title
 
@@ -14,10 +14,10 @@ def updates():
             loader.message = f'Parsing {f_manga.title}'
 
             # a bit of sanity check
-            if f_manga.title not in manga.databases.keys():
+            if f_manga.title not in mangadata.databases.keys():
                 continue
 
-            d_database = manga.databases[f_manga.title].get_chapter_list()
+            d_database = mangadata.databases[f_manga.title].get_chapter_list()
             _, d_online = f_manga.parse()
 
             # compare

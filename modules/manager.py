@@ -6,7 +6,7 @@ import webbrowser
 from yattag import Doc
 
 from modules import settings
-from modules.database.mangas import manga
+from modules.database.mangas import mangadata
 from modules.database.models import Manga
 from .sorting import sort_initials, extract_float, floating_sort, numerical_sort
 
@@ -91,7 +91,7 @@ class HtmlManager:
         Creates a new html file containing all pages and named (chapter_title).html
         """
 
-        m = manga.databases[manga_title].get_info()
+        m = mangadata.databases[manga_title].get_info()
 
         doc, tag, text = Doc().tagtext()
 

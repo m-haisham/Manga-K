@@ -1,9 +1,8 @@
-
 from ..exceptions import IdentificationError
+
 
 class Manga:
     def __init__(self):
-
         self.title = ''
         self.status = Status.UNKNOWN
         self.description = ''
