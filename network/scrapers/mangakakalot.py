@@ -13,13 +13,14 @@ class Mangakakalot(ScraperSource):
 
     @checked_connection
     def get_manga_info(self, url: str) -> Manga:
-
         r = requests.get(url)
         soup = BeautifulSoup(r.content, "html.parser")
 
         type = _Source.identify(url)
 
         instance = Manga()
+
+        # mangakakalot.com
         if type == _Source.Mangakakalot:
             titlebox = soup.find(class_="manga-info-text")
             if titlebox is None:
@@ -34,6 +35,8 @@ class Mangakakalot(ScraperSource):
 
             _descriptionbox = soup.find('div', {'id': 'noidungm'})
             instance.description = _descriptionbox.text[len(_descriptionbox.find('h2').text):].strip()
+
+        # manganel.com
         elif type == _Source.Manganel:
             leftpanel = soup.find(class_='story-info-right')
             if leftpanel is None:
@@ -104,6 +107,10 @@ class _Source:
 
     @staticmethod
     def identify(url):
+        """
+        :param url: url to identify
+        :return: source of url
+        """
         if 'mangakakalot' in url:
             return _Source.Mangakakalot
         elif 'manganel' in url:

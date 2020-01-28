@@ -16,7 +16,7 @@ class Chapter:
 
     def pages(self):
         """
-        chapter_path (string): path of the chapter
+        chapter_link (string): path of the chapter
 
         returns (list): pages of the chapter
         """

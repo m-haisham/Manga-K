@@ -1,8 +1,11 @@
 from flask_restful import Resource
-from modules import favourite
-from ..encoding import linked_dict
+
+from database.access import MangaAccess
 
 
-class Favourite(Resource):
+class FavouriteList(Resource):
     def get(self):
-        return dict(manga=[linked_dict(manga) for manga in favourite.all()])
+        all_mangas = [MangaAccess(title).get_info(recorded=False) for title in MangaAccess.all()]
+
+        favourites = filter(lambda info: info is not None and info['favourite'], all_mangas)
+        return list(favourites)
