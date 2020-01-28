@@ -34,6 +34,31 @@ class ScraperSource:
         """
         raise NotImplementedError()
 
-    # TODO search by keywords
-    # TODO popular
-    # TODO latest
+    def get_search(self, word: str, i: int) -> List[Manga]:
+        """
+        downloads webpage and extracts contents to list
+
+        :param word: word to use for search
+        :param i: index of page of search
+        :return: list of mangas
+        """
+        raise NotImplementedError()
+
+    def get_popular(self, i: int) -> List[Manga]:
+        """
+        downloads webpage and extracts contents to list
+
+        :param i: index of page of page
+        :return: list of mangas
+        """
+        raise NotImplementedError()
+
+    def get_latest(self, i: int) -> List[Manga]:
+        """
+        downloads webpage and extracts contents to list
+
+        :param i: index of page of page
+        :return: list of mangas
+        """
+        raise NotImplementedError()
+

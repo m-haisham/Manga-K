@@ -1,3 +1,4 @@
+import re
 from typing import List
 
 import requests
@@ -10,6 +11,11 @@ from ..exceptions import IdentificationError, NetworkError
 
 
 class Mangakakalot(ScraperSource):
+
+    base = 'https://mangakakalot.com'
+
+    def _encode(self, s):
+        return re.sub(' ', '_', s)
 
     @checked_connection
     def get_manga_info(self, url: str) -> Manga:
@@ -100,6 +106,67 @@ class Mangakakalot(ScraperSource):
             pages.append(Page(row['src']))
         return pages
 
+    @checked_connection
+    def get_search(self, word: str, i: int) -> List[Manga]:
+        url = f'{self.base}/search/{self._encode(word)}?page={i}'
+
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content, "html.parser")
+
+        boxes = soup.find('div', {'class': 'panel_story_list'}).find_all('div', {'class': 'story_item'})
+
+        results = []
+        for box in boxes:
+            manga = Manga()
+
+            manga.title = box.find('h3', {'class': 'story_name'}).find('a').text,
+            manga.title = manga.title[0].strip(' \n')
+
+            manga.url = box.find('a')['href']
+
+            results.append(manga)
+
+        return results
+
+    @checked_connection
+    def get_popular(self, i: int) -> List[Manga]:
+        url = f'{self.base}/manga_list?type=topview&category=all&state=all&page={i}'
+
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content, "html.parser")
+        
+        boxes = soup.find_all('div', {'class': 'list-truyen-item-wrap'})
+
+        results = []
+        for box in boxes:
+            manga = Manga()
+
+            manga.title = box.find('h3').text.strip(' \n')
+            manga.url = box.find('a', href=True)['href']
+
+            results.append(manga)
+
+        return results
+
+    @checked_connection
+    def get_latest(self, i: int) -> List[Manga]:
+        url = f'{self.base}/manga_list?type=latest&category=all&state=all&page={i}'
+
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content, "html.parser")
+
+        boxes = soup.find_all('div', {'class': 'list-truyen-item-wrap'})
+
+        results = []
+        for box in boxes:
+            manga = Manga()
+
+            manga.title = box.find('h3').text.strip(' \n')
+            manga.url = box.find('a', href=True)['href']
+
+            results.append(manga)
+
+        return results
 
 class _Source:
     Mangakakalot = 'mangakakalot'
