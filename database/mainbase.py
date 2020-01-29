@@ -8,7 +8,7 @@ class Mainbase(KeyDB):
     def __init__(self, *args, **kwargs):
         super(Mainbase, self).__init__(*args, **kwargs)
 
-        self.settings = self.table('')
+        self.downloads = self.table('downloads', cache_size=100)
         self.recents = self.table('recents')
 
 

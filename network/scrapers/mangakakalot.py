@@ -62,11 +62,11 @@ class Mangakakalot(ScraperSource):
         return instance
 
     @checked_connection
-    def get_chapter_list(self, manga: Manga) -> List[Chapter]:
-        r = requests.get(manga.url)
+    def get_chapter_list(self, url) -> List[Chapter]:
+        r = requests.get(url)
         soup = BeautifulSoup(r.content, "html.parser")
 
-        type = _Source.identify(manga.url)
+        type = _Source.identify(url)
 
         chapter_list = []
         if type == _Source.Mangakakalot:

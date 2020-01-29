@@ -16,11 +16,11 @@ class ScraperSource:
         """
         raise NotImplementedError()
 
-    def get_chapter_list(self, manga: Manga) -> List[Chapter]:
+    def get_chapter_list(self, url) -> List[Chapter]:
         """
         downloads website and extracts chapters
 
-        :param manga: manga [url] to which chapters belong to
+        :param url: url to which chapters belong to
         :return: list of chapter objects
         """
         raise NotImplementedError()

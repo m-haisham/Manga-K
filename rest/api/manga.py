@@ -6,6 +6,7 @@ from database.models import MangaModel, ChapterModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from ..encoding import manga_linked, UrlEncoding, chapter_link
+from store import chapter_path, sanitize
 
 pref_parser = reqparse.RequestParser()
 pref_parser.add_argument('manhwa', type=bool)
@@ -26,12 +27,18 @@ class Manga(Resource):
         if NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
 
-            chapters = mangakakalot.get_chapter_list(MangaModel.from_json(info))
-            models = [ChapterModel.from_chapter(chapter, link=chapter_link(info['title'], chapter.title)) for chapter in chapters]
+            chapters = mangakakalot.get_chapter_list(info['url'])
+            models = [
+                ChapterModel.from_chapter(
+                    chapter,
+                    link=chapter_link(info['title'], chapter.title),
+                    path=str(chapter_path(info['title'], chapter.title))
+                ) for chapter in chapters
+            ]
 
             access.update_chapters(models)
 
-        info['chapters'] = access.get_chapters()
+        info['chapters'] = [sanitize(chapter) for chapter in access.get_chapters()]
         return info
 
     def post(self, title):
@@ -87,4 +94,17 @@ class MangaList(Resource):
 
         model = manga_linked(vars(model))
         access.set_info(model)
+
+        # chapters
+        chapters = mangakakalot.get_chapter_list(manga.url)
+        models = [
+            ChapterModel.from_chapter(
+                chapter,
+                link=chapter_link(manga.title, chapter.title),
+                path=str(chapter_path(manga.title, chapter.title))
+            ) for chapter in chapters
+        ]
+
+        access.update_chapters(models)
+
         return model

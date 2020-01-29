@@ -10,6 +10,7 @@ class Mangabase(KeyDB):
 
         self.map = self.table('map')
 
+
 def get():
     """
     instantiates database if it doesnt already exist

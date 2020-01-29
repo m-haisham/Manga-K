@@ -1,3 +1,7 @@
+"""
+Links are referred as server paths
+"""
+
 import re
 
 
@@ -31,8 +35,10 @@ def manga_linked(manga: dict):
     d['link'] = f'/manga/{UrlEncoding.forward(manga["title"])}'
     return d
 
+
 def manga_link(title):
     return f'/manga/{UrlEncoding.forward(title)}'
+
 
 def chapter_link(manga_title, chapter_title):
     return f'/manga/{UrlEncoding.forward(manga_title)}/{UrlEncoding.forward(chapter_title)}'

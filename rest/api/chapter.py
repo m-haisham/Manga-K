@@ -16,7 +16,7 @@ class Chapter(Resource):
 
         access = MangaAccess(manga_title)
 
-        info = access.get_chapter(chapter_title)
+        info = access.get_chapter_by_title(chapter_title)
         if info is None:
             return dict(message=f'{manga_title}/{chapter_title} not found'), status.HTTP_404_NOT_FOUND
 
@@ -26,7 +26,7 @@ class Chapter(Resource):
         if NetworkHelper.is_connected():
 
             mangakakalot = Mangakakalot()
-            pages = mangakakalot.get_page_list(ChapterModel.from_json(info))
+            pages = mangakakalot.get_page_list(ChapterModel.fromdict(info))
 
         info['pages'] = [vars(page) for page in pages]
 

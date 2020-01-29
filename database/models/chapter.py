@@ -7,6 +7,7 @@ class ChapterModel(Chapter):
 
         self.downloaded = False
         self.link = ''
+        self.path = ''
 
     def todict(self):
         return vars(self)
@@ -30,7 +31,7 @@ class ChapterModel(Chapter):
         return new
 
     @staticmethod
-    def from_json(j: dict):
+    def fromdict(j: dict):
         """
         :param j: dict
         :return: new ChapterModel with corresponding dict values
@@ -41,5 +42,6 @@ class ChapterModel(Chapter):
         new.url = j['url']
         new.downloaded = j['downloaded']
         new.link = j['link']
+        new.path = j['path']
 
         return new
