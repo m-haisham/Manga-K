@@ -24,7 +24,6 @@ class Chapter(Resource):
 
         chapter_info['manga'] = access.get_info()['link']
 
-        pages = []
         models = chapter_info['pages']
 
         # give link to pages if downloaded
