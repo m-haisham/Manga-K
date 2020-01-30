@@ -4,6 +4,8 @@ from flask_restful import Resource
 from network.scrapers import Mangakakalot
 from ..encoding import manga_link
 
+from ..error import error_message
+
 
 class Latest(Resource):
     def get(self, i=1):
@@ -12,7 +14,7 @@ class Latest(Resource):
         mangas = mangakakalot.get_latest(i)
 
         if mangas is None:
-            return dict(message=f'Not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'Latest at index {i} not found'), status.HTTP_404_NOT_FOUND
 
         latest = []
         for manga in mangas:

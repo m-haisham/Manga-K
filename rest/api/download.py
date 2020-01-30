@@ -1,11 +1,12 @@
 from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.models import ChapterModel
+from database.models import ChapterModel, PageModel
 from database.access import DownloadAccess, MangaAccess
 
 from background.models import DownloadModel
 from network.scrapers import Mangakakalot
+from rest.error import error_message
 
 download_access = DownloadAccess()
 
@@ -36,7 +37,7 @@ class DownloadsList(Resource):
 
         manga_access = MangaAccess.url(args['manga_url'])
         if manga_access is None:
-            return dict(message=f'Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
+            return error_message('Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
 
         info = manga_access.get_info()
 
@@ -44,12 +45,18 @@ class DownloadsList(Resource):
         for url in args['urls']:
             d_chapter = manga_access.get_chapter_by_url(url)
 
-            model = DownloadModel.create(info, d_chapter, mangakakalot.get_page_list(ChapterModel.fromdict(d_chapter)))
-            download_access.add(model)
+            pages = [PageModel.from_page(page) for page in mangakakalot.get_page_list(ChapterModel.fromdict(d_chapter))]
+            model = DownloadModel.create(info, d_chapter, pages)
+            response = download_access.add(model)
 
             d_model = model.todict()
             del d_model['path']
             del d_model['pages']
+
+            # no progress checks if download adding failed
+            if not response:
+                del d_model['value']
+                del d_model['max']
 
             models.append(d_model)
 
@@ -60,8 +67,8 @@ class Download(Resource):
     def get(self, i):
         download = download_access.get(i)
         if download is None:
-            return dict(message='Model of index does not exist',
-                        length=len(download_access.get_all())), status.HTTP_404_NOT_FOUND
+            return error_message('Model of index does not exist', length=len(download_access.get_all())), \
+                   status.HTTP_404_NOT_FOUND
 
         d_model = download.todict()
         del d_model['path']

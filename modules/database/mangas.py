@@ -43,7 +43,7 @@ def add_manga(title, url, path):
 
 def update_is_manhwa(_manga, state):
     base.upsert(dict(is_manhwa=state), Query().url == _manga.url)
-    mangadata.databases[_manga.title].update_info(dict(is_manhwa=state))
+    mangadata.databases[_manga.title].update_info({'is_manhwa': state})
 
     from modules import favourite
-    favourite.update(_manga, dict(is_manhwa=state))
+    favourite.update(_manga, {'is_manhwa': state})

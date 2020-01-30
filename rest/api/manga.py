@@ -7,6 +7,7 @@ from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from ..encoding import manga_linked, UrlEncoding, chapter_link
 from store import chapter_path, sanitize
+from ..error import error_message
 
 pref_parser = reqparse.RequestParser()
 pref_parser.add_argument('manhwa', type=bool)
@@ -21,7 +22,7 @@ class Manga(Resource):
         info = access.get_info()
         if info is None:
             access.purge()
-            return dict(message=f'{title} not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'{title} not found'), status.HTTP_404_NOT_FOUND
 
         # update chapters
         if NetworkHelper.is_connected():
@@ -50,7 +51,7 @@ class Manga(Resource):
         manga = access.get_info()
         if manga is None:
             access.purge()
-            return dict(message=f'{title} not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'{title} not found'), status.HTTP_404_NOT_FOUND
 
         for key, value in args.items():
             if value is not None:

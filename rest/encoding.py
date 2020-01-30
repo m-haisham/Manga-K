@@ -42,3 +42,7 @@ def manga_link(title):
 
 def chapter_link(manga_title, chapter_title):
     return f'/manga/{UrlEncoding.forward(manga_title)}/{UrlEncoding.forward(chapter_title)}'
+
+
+def page_link(manga_title, chapter_title, page_number):
+    return f'/manga/{UrlEncoding.forward(manga_title)}/{UrlEncoding.forward(chapter_title)}/{page_number}'

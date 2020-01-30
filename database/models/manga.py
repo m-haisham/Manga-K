@@ -32,7 +32,7 @@ class MangaModel(Manga):
         new = MangaModel()
 
         new.title = manga.title
-        new.status = manga.get_status
+        new.status = manga.status
         new.description = manga.description
         new.url = manga.url
 

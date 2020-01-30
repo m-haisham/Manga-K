@@ -8,6 +8,7 @@ class ChapterModel(Chapter):
         self.downloaded = False
         self.link = ''
         self.path = ''
+        self.pages = []
 
     def todict(self):
         return vars(self)
@@ -43,5 +44,6 @@ class ChapterModel(Chapter):
         new.downloaded = j['downloaded']
         new.link = j['link']
         new.path = j['path']
+        new.pages = j['pages']
 
         return new

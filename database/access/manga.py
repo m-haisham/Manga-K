@@ -51,9 +51,22 @@ class MangaAccess:
             matches = self.table.contains(chapter_access.url == chapter.url)
 
             if matches:
-                self.table.update(dict(title=chapter.title, link=chapter.link, ), chapter_access.url == chapter.url)
+                self.table.update({
+                    'title': chapter.title,
+                    'link': chapter.link
+                }, chapter_access.url == chapter.url)
             else:
                 self.table.insert(chapter.todict())
+
+    def update_pages(self, chapters):
+        """
+        Update pages of :param chapters:
+
+        :return: None
+        """
+        chapter_access = Query()
+        for chapter in chapters:
+            self.table.update({'pages': chapter['pages']}, chapter_access.url == chapter['url'])
 
     def update_chapters_downloaded(self, chapters):
         """
@@ -65,7 +78,7 @@ class MangaAccess:
         """
         chapter_access = Query()
         for chapter in chapters:
-            self.table.update(dict(downloaded=chapter.downloaded), chapter_access.url == chapter.url)
+            self.table.update({'downloaded': chapter.downloaded}, chapter_access.url == chapter.url)
 
     def get_chapters(self):
         """
@@ -79,10 +92,7 @@ class MangaAccess:
         :return: return chapter which has matching title to :param title:
         """
         chapter_access = Query()
-        try:
-            return self.table.search(chapter_access.title == title)[0]
-        except IndexError:
-            return None
+        return self.table.get(chapter_access.title == title)
 
     def get_chapter_by_url(self, url):
         """

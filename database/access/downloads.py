@@ -1,8 +1,11 @@
+from pathlib import Path
 from threading import Lock
 
 from tinydb import Query
 
 from background.models import DownloadModel
+from rest.encoding import page_link
+from . import MangaAccess
 from .. import mainbase, mangabase
 
 from background import BackgroundDownload
@@ -25,13 +28,26 @@ class DownloadAccess:
         :param model: model to download
         :return: true if added else false
         """
+        access = MangaAccess(model.manga_title)
+
+        # already in progress
         if any([download.url == model.url for download in self.downloads]):
+            return False
+
+        # already downloaded
+        if access.get_chapter_by_url(model.url)['downloaded']:
             return False
 
         self.maindb.downloads.upsert(model.todict(), dbmodel.url == model.url)
 
         self.dthread.queue.put(model)
         self.downloads.append(model)
+
+        for i, page in enumerate(model.pages):
+            page.path = str(model.path / Path(f'{i + 1}.jpg'))
+            page.link = page_link(model.manga_title, model.title, i+1)
+
+        access.update_pages([model.todict()])
         return True
 
     def get(self, i):

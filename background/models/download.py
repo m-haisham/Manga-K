@@ -1,5 +1,5 @@
+from database.models import PageModel
 from database.models.chapter import ChapterModel
-from network import Page
 
 from store import chapter_path
 
@@ -18,7 +18,7 @@ class DownloadModel(ChapterModel):
 
     def todict(self):
         model = vars(self).copy()
-        model['pages'] = [vars(page) for page in self.pages]
+        model['pages'] = [page.to_dict() for page in self.pages]
 
         return model
 
@@ -30,7 +30,7 @@ class DownloadModel(ChapterModel):
         for key in model.keys():
             setattr(new, key, j[key])
 
-        new.pages = [Page(item['url']) for item in new.pages]
+        new.pages = [PageModel.from_dict(page) for page in new.pages]
         return new
 
     @staticmethod

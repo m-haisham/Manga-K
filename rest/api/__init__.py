@@ -2,6 +2,7 @@ from ..rest import Rest
 from .manga import Manga, MangaList
 from .favourite import FavouriteList
 from .chapter import Chapter
+from .page import Page
 
 from .search import Search
 from .popular import Popular
@@ -18,6 +19,7 @@ def setup():
     api.add_resource(FavouriteList, '/favourites')
     api.add_resource(Manga, '/manga/<title>')
     api.add_resource(Chapter, '/manga/<manga_title>/<chapter_title>')
+    api.add_resource(Page, '/manga/<manga_title>/<chapter_title>/<int:i>')
 
     api.add_resource(Search, '/search/<int:i>')
     api.add_resource(Popular, '/popular', '/popular/<int:i>')
