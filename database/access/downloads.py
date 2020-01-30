@@ -71,6 +71,31 @@ class DownloadAccess:
         """
         pass
 
+    def get_status(self):
+        return dict(
+            paused=self.dthread.paused.value,
+            clear=self.dthread.clear.value
+        )
+
+    def set_status(self, paused=None, clear=None):
+        """
+        value is not set if arg is None
+
+        :param paused: new value for paused
+        :param clear: new value for clear
+        :return: new value for reset flags
+        """
+        flags = {}
+        if paused is not None:
+            self.dthread.paused.value = paused
+            flags['paused'] = paused
+
+        if clear is not None:
+            self.dthread.clear.value = clear
+            flags['clear'] = clear
+
+        return flags
+
     @staticmethod
     def load_from_database():
         """

@@ -68,3 +68,17 @@ class Download(Resource):
         del d_model['pages']
 
         return d_model
+
+
+class DownloadStatus(Resource):
+    status_parser = reqparse.RequestParser()
+    status_parser.add_argument('pause', type=bool)
+    status_parser.add_argument('clear', type=bool)
+
+    def get(self):
+        return download_access.get_status()
+
+    def post(self):
+        args = self.status_parser.parse_args()
+
+        return download_access.set_status(args['pause'], args['clear'])

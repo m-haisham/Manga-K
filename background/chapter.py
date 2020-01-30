@@ -1,14 +1,15 @@
-import requests
-
 from pathlib import Path
 
-from .models import DownloadModel
+import requests
 
 
 class ChapterDownload:
-    def __init__(self, m_download):
+    def __init__(self, m_download, pause, exit):
         self.model = m_download
         self.path = Path(self.model.path)
+
+        self.pause = pause
+        self.exit = exit
 
         self.path.mkdir(parents=True, exist_ok=True)
 
@@ -37,3 +38,12 @@ class ChapterDownload:
                 for data in response.iter_content(chunk_size=chunksize):
                     self.model.value += len(data)
                     f.write(data)
+
+                    print(self.model.value / self.model.max)
+
+                    while self.pause.value:
+                        if self.exit.value:
+                            return
+
+                    if self.exit.value:
+                        return

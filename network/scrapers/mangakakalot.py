@@ -53,7 +53,7 @@ class Mangakakalot(ScraperSource):
 
             for box in leftpanel.find_all('tr'):
                 content = box.find_all('td')
-                if 'info-status' in content[0].find('i')['class']:
+                if 'info-get_status' in content[0].find('i')['class']:
                     instance.status = MangaStatus.parse(content[1].text)
 
             _descriptionbox = soup.find('div', {'id': 'panel-story-info-description'})

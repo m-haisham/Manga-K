@@ -6,7 +6,7 @@ from .chapter import Chapter
 from .search import Search
 from .popular import Popular
 from .latest import Latest
-from .download import Download, DownloadsList
+from .download import Download, DownloadsList, DownloadStatus
 
 
 def setup():
@@ -25,3 +25,4 @@ def setup():
 
     api.add_resource(DownloadsList, '/downloads')
     api.add_resource(Download, '/download/<int:i>')
+    api.add_resource(DownloadStatus, '/download/status')

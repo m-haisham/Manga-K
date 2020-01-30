@@ -57,7 +57,7 @@ class MangaAccess:
 
     def update_chapters_downloaded(self, chapters):
         """
-        updates the downloaded status of the given chapters
+        updates the downloaded get_status of the given chapters
         if chapter doesnt exist it is ignored
 
         :param chapters: chapters to update

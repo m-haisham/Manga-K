@@ -32,7 +32,7 @@ class MangaModel(Manga):
         new = MangaModel()
 
         new.title = manga.title
-        new.status = manga.status
+        new.status = manga.get_status
         new.description = manga.description
         new.url = manga.url
 
@@ -51,7 +51,7 @@ class MangaModel(Manga):
         new = MangaModel()
 
         new.title = j['title']
-        new.status = j['status']
+        new.status = j['get_status']
         new.description = j['description']
         new.url = j['url']
         new.manhwa = j['manhwa']

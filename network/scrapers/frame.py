@@ -9,7 +9,7 @@ class ScraperSource:
         """
         downloads the website and extracts key information
 
-        :information: title, status, and description
+        :information: title, get_status, and description
 
         :param url: url of manga
         :return: manga object
