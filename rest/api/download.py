@@ -35,7 +35,7 @@ class DownloadsList(Resource):
 
         mangakakalot = Mangakakalot()
 
-        manga_access = MangaAccess.url(args['manga_url'])
+        manga_access = MangaAccess.map(args['manga_url'])
         if manga_access is None:
             return error_message('Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
 

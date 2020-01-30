@@ -3,6 +3,7 @@ from datetime import datetime
 import tinydb
 from tinydb import Query, TinyDB
 
+from store import slugify
 from .. import mangabase
 
 
@@ -21,6 +22,7 @@ class MangaAccess:
         :return: None
         """
         self.mangadb.insert_key(info['url'], self.title, self.mangadb.map.name)
+        self.mangadb.insert_key(slugify(info['title']), self.title, self.mangadb.map.name)
         self.mangadb.insert_key('info', info, self.title)
 
     def get_info(self, recorded=True) -> dict:
@@ -57,6 +59,7 @@ class MangaAccess:
                 }, chapter_access.url == chapter.url)
             else:
                 self.table.insert(chapter.todict())
+                self.mangadb.insert_key(slugify(chapter.title), chapter.title, self.mangadb.map.name)
 
     def update_pages(self, chapters):
         """
@@ -87,11 +90,16 @@ class MangaAccess:
         chapter_access = Query()
         return self.table.search(chapter_access.downloaded.exists())
 
-    def get_chapter_by_title(self, title):
+    def get_chapter_by_slug(self, slug):
         """
         :return: return chapter which has matching title to :param title:
         """
         chapter_access = Query()
+
+        title = self.mangadb.get_key(slug, self.mangadb.map.name, single=True)
+        if title is None:
+            return
+
         return self.table.get(chapter_access.title == title)
 
     def get_chapter_by_url(self, url):
@@ -110,12 +118,14 @@ class MangaAccess:
         self.mangadb.purge_table(self.title)
 
     @staticmethod
-    def url(url):
+    def map(key):
         """
-        :return: MangaAccess associated with :param url:
+        :return: MangaAccess associated with :param key:
         """
+        table = MangaAccess.mangadb.map.name
+
         try:
-            title = MangaAccess.mangadb.get_key(url, MangaAccess.mangadb.map.name, single=True)
+            title = MangaAccess.mangadb.get_key(key, table, single=True)
             return MangaAccess(title)
         except KeyError:
             pass

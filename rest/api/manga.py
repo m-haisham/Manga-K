@@ -5,8 +5,8 @@ from database.access import MangaAccess
 from database.models import MangaModel, ChapterModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
-from ..encoding import manga_linked, UrlEncoding, chapter_link
 from store import chapter_path, sanitize
+from ..encoding import chapter_link, manga_link
 from ..error import error_message
 
 pref_parser = reqparse.RequestParser()
@@ -15,14 +15,13 @@ pref_parser.add_argument('favourite', type=bool)
 
 
 class Manga(Resource):
-    def get(self, title):
-        title = UrlEncoding.back(title)
-        access = MangaAccess(title)
+    def get(self, manga_slug):
+        access = MangaAccess.map(manga_slug)
 
         info = access.get_info()
         if info is None:
             access.purge()
-            return error_message(f'{title} not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'{manga_slug} not found'), status.HTTP_404_NOT_FOUND
 
         # update chapters
         if NetworkHelper.is_connected():
@@ -75,7 +74,7 @@ class MangaList(Resource):
 
         connected = NetworkHelper.is_connected()
 
-        access = MangaAccess.url(args['url'])
+        access = MangaAccess.map(args['url'])
         if access is not None:
             previous = access.get_info()
 
@@ -93,7 +92,8 @@ class MangaList(Resource):
         if previous is not None:
             model.persist(previous)
 
-        model = manga_linked(vars(model))
+        model = model.to_dict()
+        model['link'] = manga_link(model['title'])
         access.set_info(model)
 
         # chapters

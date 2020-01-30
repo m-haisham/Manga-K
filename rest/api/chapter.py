@@ -5,7 +5,6 @@ from database.access import MangaAccess
 from database.models import MangaModel, ChapterModel, PageModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
-from ..encoding import UrlEncoding
 from ..error import error_message
 
 
@@ -13,18 +12,15 @@ class Chapter(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('delete', type=bool, default=False)
 
-    def get(self, manga_title, chapter_title):
+    def get(self, manga_slug, chapter_slug):
 
         args = self.parser.parse_args()
 
-        manga_title = UrlEncoding.back(manga_title)
-        chapter_title = UrlEncoding.back(chapter_title)
+        access = MangaAccess.map(manga_slug)
 
-        access = MangaAccess(manga_title)
-
-        chapter_info = access.get_chapter_by_title(chapter_title)
+        chapter_info = access.get_chapter_by_slug(chapter_slug)
         if chapter_info is None:
-            return error_message(f'/{manga_title}/{chapter_title} not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'/{manga_slug}/{chapter_slug} not found'), status.HTTP_404_NOT_FOUND
 
         chapter_info['manga'] = access.get_info()['link']
 
@@ -46,4 +42,5 @@ class Chapter(Resource):
 
             chapter_info['pages'] = [vars(page) for page in pages]
 
+        del chapter_info['path']
         return chapter_info

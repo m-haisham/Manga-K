@@ -31,4 +31,4 @@ def sanitize(d):
 
 def slugify(s):
     s = str(s).strip().replace(' ', '_')
-    return re.sub(r'(?u)[^-\w.]', '', s)
+    return re.sub(r'(?u)[^-\w.]', '', s)  # TEST .lower()

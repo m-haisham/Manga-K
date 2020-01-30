@@ -17,9 +17,9 @@ def setup():
     # setup
     api.add_resource(MangaList, '/mangas')
     api.add_resource(FavouriteList, '/favourites')
-    api.add_resource(Manga, '/manga/<title>')
-    api.add_resource(Chapter, '/manga/<manga_title>/<chapter_title>')
-    api.add_resource(Page, '/manga/<manga_title>/<chapter_title>/<int:i>')
+    api.add_resource(Manga, '/manga/<manga_slug>')
+    api.add_resource(Chapter, '/manga/<manga_slug>/<chapter_slug>')
+    api.add_resource(Page, '/manga/<manga_slug>/<chapter_slug>/<int:i>')
 
     api.add_resource(Search, '/search/<int:i>')
     api.add_resource(Popular, '/popular', '/popular/<int:i>')

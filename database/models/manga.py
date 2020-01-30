@@ -22,6 +22,9 @@ class MangaModel(Manga):
         self.last_accessed = datetime.utcnow().strftime(DATETIME_FORMAT)
         self.added = previous['added']
 
+    def to_dict(self):
+        return vars(self).copy()
+
     @staticmethod
     def from_manga(manga, **kwargs):
         """
