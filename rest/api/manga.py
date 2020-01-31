@@ -18,7 +18,7 @@ class Manga(Resource):
     def get(self, manga_slug):
         access = MangaAccess.map(manga_slug)
         if access is None:
-            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+            return error_message(f'{manga_slug} does not exist', condition='manga'), \
                    status.HTTP_412_PRECONDITION_FAILED
 
         info = access.get_info()
@@ -26,6 +26,7 @@ class Manga(Resource):
             access.purge()
             return error_message(f'{manga_slug} not found'), status.HTTP_404_NOT_FOUND
 
+        info['updates'] = []
         # update chapters
         if NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
@@ -39,21 +40,31 @@ class Manga(Resource):
                 ) for chapter in chapters
             ]
 
-            access.update_chapters(models)
+            saved_urls = [chapter['url'] for chapter in access.get_chapters()]
+
+            updates = []
+            for chapter in models:
+                if chapter.url in saved_urls:
+                    saved_urls.remove(chapter.url)
+                else:
+                    updates.append(chapter)
+
+            access.update_chapters(updates)
+
+            info['updates'] = [sanitize(chapter.todict()) for chapter in updates]
 
         info['chapters'] = [sanitize(chapter) for chapter in access.get_chapters()]
         return info
 
-    def post(self, title):
+    def post(self, manga_slug):
         args = pref_parser.parse_args()
 
-        title = UrlEncoding.back(title)
-        access = MangaAccess(title)
+        access = MangaAccess.map(manga_slug)
 
         manga = access.get_info()
         if manga is None:
             access.purge()
-            return error_message(f'{title} not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'{manga_slug} not found'), status.HTTP_404_NOT_FOUND
 
         for key, value in args.items():
             if value is not None:
