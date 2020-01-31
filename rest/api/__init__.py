@@ -7,7 +7,7 @@ from .page import Page, PageList
 from .search import Search
 from .popular import Popular
 from .latest import Latest
-from .download import Download, DownloadsList, DownloadStatus
+from .download import Download, DownloadsList, DownloadStatus, DownloadDelete
 
 
 def setup():
@@ -29,3 +29,4 @@ def setup():
     api.add_resource(DownloadsList, '/downloads')
     api.add_resource(Download, '/download/<int:i>')
     api.add_resource(DownloadStatus, '/download/status')
+    api.add_resource(DownloadDelete, '/downloads/delete')

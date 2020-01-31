@@ -1,3 +1,5 @@
+import shutil
+
 from pathlib import Path
 from threading import Lock
 
@@ -9,6 +11,10 @@ from . import MangaAccess
 from .. import mainbase, mangabase
 
 from background import BackgroundDownload
+
+from typing import List
+
+from ..models import ChapterModel
 
 dbmodel = Query()
 
@@ -111,6 +117,24 @@ class DownloadAccess:
             flags['clear'] = clear
 
         return flags
+
+    async def delete(self, access: MangaAccess, chapters: List[dict]):
+        for chapter in chapters:
+            info = access.get_chapter_by_url(chapter)
+
+            if info['downloaded']:
+                info['downloaded'] = False
+
+                pages = info['pages']
+                for page in pages:
+                    page['path'] = ''
+                    page['link'] = ''
+
+                shutil.rmtree(info['path'])
+
+                chapter_model = ChapterModel.fromdict(info)
+                access.update_chapters_downloaded([chapter_model])
+                access.update_pages([info])
 
     @staticmethod
     def load_from_database():

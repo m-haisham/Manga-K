@@ -4,6 +4,7 @@ from queue import Queue
 from .chapter import ChapterDownload
 from .models import AtomicBoolean
 
+
 class BackgroundDownload(Thread):
     _instance = None
 
@@ -26,7 +27,6 @@ class BackgroundDownload(Thread):
             model = self.queue.get()
             m_access = MangaAccess(model.manga_title)
 
-            print(f'Downloading {model.url}')
             ChapterDownload(model, self.paused, self.clear).start()
 
             d_access.remove(model.url)
@@ -40,9 +40,9 @@ class BackgroundDownload(Thread):
                 self.clear.value = False
                 continue
 
+            # update database
             model.downloaded = True
             m_access.update_chapters_downloaded([model])
-            print(f'Download Complete {model.url}')
 
     @staticmethod
     def get():

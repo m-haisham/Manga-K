@@ -1,3 +1,5 @@
+import asyncio
+
 from flask_api import status
 from flask_restful import Resource, reqparse
 
@@ -12,7 +14,7 @@ download_access = DownloadAccess()
 
 parser = reqparse.RequestParser()
 parser.add_argument('manga_url', required=True)
-parser.add_argument('urls', action='append')
+parser.add_argument('urls', action='append', required=True)
 
 
 class DownloadsList(Resource):
@@ -89,3 +91,15 @@ class DownloadStatus(Resource):
         args = self.status_parser.parse_args()
 
         return download_access.set_status(args['pause'], args['clear'])
+
+
+class DownloadDelete(Resource):
+    def post(self):
+        args = parser.parse_args()
+
+        manga_access = MangaAccess.map(args['manga_url'])
+        if manga_access is None:
+            return error_message('Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
+
+        # async operation as deletion can take time
+        asyncio.run(download_access.delete(manga_access, args['urls']))

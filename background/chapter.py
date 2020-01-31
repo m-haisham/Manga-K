@@ -39,8 +39,6 @@ class ChapterDownload:
                     self.model.value += len(data)
                     f.write(data)
 
-                    print(self.model.value / self.model.max)
-
                     while self.pause.value:
                         if self.exit.value:
                             return

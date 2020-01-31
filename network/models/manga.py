@@ -7,6 +7,7 @@ class Manga:
         self.status = Status.UNKNOWN
         self.description = ''
         self.url = ''
+        self.thumbnail_url = ''
 
 
 class Status:

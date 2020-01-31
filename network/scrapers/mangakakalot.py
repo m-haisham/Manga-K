@@ -21,7 +21,6 @@ class Mangakakalot(ScraperSource):
     def get_manga_info(self, url: str) -> Manga:
         r = requests.get(url)
         soup = BeautifulSoup(r.content, "html.parser")
-
         type = _Source.identify(url)
 
         instance = Manga()
@@ -34,6 +33,7 @@ class Mangakakalot(ScraperSource):
 
             instance.url = url
             instance.title = titlebox.find("h1").text
+            instance.thumbnail_url = soup.find('div', {'class': 'manga-info-pic'}).find('img')['src']
 
             for box in titlebox.find_all('li'):
                 if box.text.startswith('Status :'):
@@ -50,10 +50,11 @@ class Mangakakalot(ScraperSource):
 
             instance.url = url
             instance.title = leftpanel.find('h1').text
+            instance.thumbnail_url = soup.find('span', {'class': 'info-image'}).find('img')['src']
 
             for box in leftpanel.find_all('tr'):
                 content = box.find_all('td')
-                if 'info-get_status' in content[0].find('i')['class']:
+                if 'info-status' in content[0].find('i')['class']:
                     instance.status = MangaStatus.parse(content[1].text)
 
             _descriptionbox = soup.find('div', {'id': 'panel-story-info-description'})

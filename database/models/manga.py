@@ -38,6 +38,7 @@ class MangaModel(Manga):
         new.status = manga.status
         new.description = manga.description
         new.url = manga.url
+        new.thumbnail_url = manga.thumbnail_url
 
         for key, value in kwargs.items():
             if value:
