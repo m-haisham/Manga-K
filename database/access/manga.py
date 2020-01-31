@@ -42,7 +42,7 @@ class MangaAccess:
     def update_chapters(self, chapters):
         """
         if chapter exists Updates the chapters in database
-        else adds the chapter to database
+        else adds the chapter to database and adds slog to map
 
         :param chapters: chapters to check against database
         :return: None
@@ -59,7 +59,7 @@ class MangaAccess:
                 }, chapter_access.url == chapter.url)
             else:
                 self.table.insert(chapter.todict())
-                self.mangadb.insert_key(slugify(chapter.title), chapter.title, self.mangadb.map.name)
+                self.mangadb.insert_key(f'{self.title}:{slugify(chapter.title)}', chapter.url, self.mangadb.map.name)
 
     def update_pages(self, chapters):
         """
@@ -96,11 +96,10 @@ class MangaAccess:
         """
         chapter_access = Query()
 
-        title = self.mangadb.get_key(slug, self.mangadb.map.name, single=True)
-        if title is None:
-            return
+        key = f'{self.title}:{slug}'
+        url = self.mangadb.get_key(key, self.mangadb.map.name, single=True)
 
-        return self.table.get(chapter_access.title == title)
+        return self.table.get(chapter_access.url == url)
 
     def get_chapter_by_url(self, url):
         """

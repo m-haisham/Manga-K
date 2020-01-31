@@ -17,6 +17,9 @@ pref_parser.add_argument('favourite', type=bool)
 class Manga(Resource):
     def get(self, manga_slug):
         access = MangaAccess.map(manga_slug)
+        if access is None:
+            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+                   status.HTTP_412_PRECONDITION_FAILED
 
         info = access.get_info()
         if info is None:

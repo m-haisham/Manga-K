@@ -17,10 +17,14 @@ class Chapter(Resource):
         args = self.parser.parse_args()
 
         access = MangaAccess.map(manga_slug)
+        if access is None:
+            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+                   status.HTTP_412_PRECONDITION_FAILED
 
         chapter_info = access.get_chapter_by_slug(chapter_slug)
         if chapter_info is None:
-            return error_message(f'/{manga_slug}/{chapter_slug} not found'), status.HTTP_404_NOT_FOUND
+            return error_message(f'/{manga_slug}/{chapter_slug} not found', condition='chapter'),\
+                   status.HTTP_412_PRECONDITION_FAILED
 
         chapter_info['manga'] = access.get_info()['link']
 
@@ -36,7 +40,9 @@ class Chapter(Resource):
 
             # if downloaded pages are already loaded
             if not chapter_info['downloaded']:
-                models = [PageModel.from_page(page) for page in pages]
+                models = [PageModel.from_page(page).to_dict() for page in pages]
+                chapter_info['pages'] = models
+
                 access.update_pages([chapter_info])
 
             chapter_info['pages'] = [vars(page) for page in pages]

@@ -12,7 +12,7 @@ class Manga:
 class Status:
     UNKNOWN = 'unknown'
     ONGOING = 'ongoing'
-    COMPLETE = 'complete'
+    COMPLETE = 'completed'
 
     @staticmethod
     def parse(s):
@@ -25,4 +25,4 @@ class Status:
         elif _s == Status.COMPLETE:
             return Status.COMPLETE
         else:
-            raise IdentificationError('Unable to identify get_status.')
+            raise IdentificationError('Unable to identify status.')

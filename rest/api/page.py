@@ -15,7 +15,14 @@ from rest.error import error_message
 class PageList(Resource):
     def get(self, manga_slug, chapter_slug):
         access = MangaAccess.map(manga_slug)
+        if access is None:
+            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+                   status.HTTP_412_PRECONDITION_FAILED
+
         chapter_info = access.get_chapter_by_slug(chapter_slug)
+        if chapter_info is None:
+            return error_message(f'{chapter_slug} does not exist', condition='chapter'),\
+                   status.HTTP_412_PRECONDITION_FAILED
 
         pages = []
         models = chapter_info['pages']
@@ -29,7 +36,9 @@ class PageList(Resource):
             pages = mangakakalot.get_page_list(ChapterModel.fromdict(chapter_info))
 
             if not chapter_info['downloaded']:
-                models = [PageModel.from_page(page) for page in pages]
+                models = [PageModel.from_page(page).to_dict() for page in pages]
+                chapter_info['pages'] = models
+
                 access.update_pages([chapter_info])
 
             pages = [vars(page) for page in pages]
@@ -44,7 +53,14 @@ class Page(Resource):
         i -= 1
 
         access = MangaAccess.map(manga_slug)
+        if access is None:
+            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+                   status.HTTP_412_PRECONDITION_FAILED
+
         chapter_info = access.get_chapter_by_slug(chapter_slug)
+        if chapter_info is None:
+            return error_message(f'{chapter_slug} does not exist', condition='chapter'),\
+                   status.HTTP_412_PRECONDITION_FAILED
 
         if chapter_info['downloaded']:
             if i < 0 or i >= len(chapter_info['pages']):
@@ -65,4 +81,5 @@ class Page(Resource):
                 attachment_filename=f'{i+1}.jpg'
             )
         else:
-            return error_message(''), status.HTTP_204_NO_CONTENT
+            return error_message('Chapter not downloaded', condition='download'),\
+                   status.HTTP_412_PRECONDITION_FAILED
