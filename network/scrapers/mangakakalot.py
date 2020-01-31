@@ -11,13 +11,11 @@ from ..exceptions import IdentificationError, NetworkError
 
 
 class Mangakakalot(ScraperSource):
-
     base = 'https://mangakakalot.com'
 
     def _encode(self, s):
         return re.sub(' ', '_', s)
 
-    @checked_connection
     def get_manga_info(self, url: str) -> Manga:
         r = requests.get(url)
         soup = BeautifulSoup(r.content, "html.parser")
@@ -62,7 +60,6 @@ class Mangakakalot(ScraperSource):
 
         return instance
 
-    @checked_connection
     def get_chapter_list(self, url) -> List[Chapter]:
         r = requests.get(url)
         soup = BeautifulSoup(r.content, "html.parser")
@@ -88,7 +85,6 @@ class Mangakakalot(ScraperSource):
 
         return chapter_list
 
-    @checked_connection
     def get_page_list(self, chapter: Chapter) -> List[Page]:
         r = requests.get(chapter.url)
         soup = BeautifulSoup(r.content, "html.parser")
@@ -107,7 +103,6 @@ class Mangakakalot(ScraperSource):
             pages.append(Page(row['src']))
         return pages
 
-    @checked_connection
     def get_search(self, word: str, i: int) -> List[Manga]:
         url = f'{self.base}/search/{self._encode(word)}?page={i}'
 
@@ -129,13 +124,12 @@ class Mangakakalot(ScraperSource):
 
         return results
 
-    @checked_connection
     def get_popular(self, i: int) -> List[Manga]:
         url = f'{self.base}/manga_list?type=topview&category=all&state=all&page={i}'
 
         r = requests.get(url)
         soup = BeautifulSoup(r.content, "html.parser")
-        
+
         boxes = soup.find_all('div', {'class': 'list-truyen-item-wrap'})
 
         results = []
@@ -149,7 +143,6 @@ class Mangakakalot(ScraperSource):
 
         return results
 
-    @checked_connection
     def get_latest(self, i: int) -> List[Manga]:
         url = f'{self.base}/manga_list?type=latest&category=all&state=all&page={i}'
 
@@ -168,6 +161,7 @@ class Mangakakalot(ScraperSource):
             results.append(manga)
 
         return results
+
 
 class _Source:
     Mangakakalot = 'mangakakalot'

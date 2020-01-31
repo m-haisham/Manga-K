@@ -21,6 +21,13 @@ class KeyDB(TinyDB):
         self.table(table).upsert(dict(key=key, value=value), where('key') == key)
 
     def get_key(self, key, table=TinyDB.DEFAULT_TABLE, single=False):
+        """
+        :param key: key to match
+        :param table: table to search in
+        :param single: return first value
+
+        :returns: array of values if single is false else returns first value
+        """
         docs = self.table(table).search(where('key') == key)
         if single:
             try:
@@ -31,4 +38,11 @@ class KeyDB(TinyDB):
             return [i['value'] for i in docs]
 
     def remove_key(self, key, table=TinyDB.DEFAULT_TABLE):
+        """
+        Removes all the docs with value key
+
+        :param key: key to match
+        :param table: table to remove in
+        :return: None
+        """
         self.table(table).remove(where('key') == key)

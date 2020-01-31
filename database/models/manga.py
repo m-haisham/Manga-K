@@ -2,7 +2,8 @@ from datetime import datetime
 
 from network import Manga
 
-DATETIME_FORMAT = '%Y%m%d'
+DATETIME_FORMAT = '%D %T'
+
 
 class MangaModel(Manga):
     def __init__(self):

@@ -8,11 +8,19 @@ from .. import mangabase
 
 
 class MangaAccess:
+    """
+    Provides access to manga specific operations
+    Only accesses manga database, its map and the specific table for the manga
+
+    Manga title is used as key for the table
+    Map is used to get the title of manga or url of chapter.
+    """
+
     mangadb = mangabase.get()
 
     def __init__(self, title: str):
         self.title = title
-        self.table = self.mangadb.table(title)
+        self.table = self.mangadb.table(title, cache_size=200)
 
     def set_info(self, info: dict):
         """

@@ -29,7 +29,8 @@ class DownloadAccess:
 
     def add(self, model):
         """
-        add download to queue
+        Add download to queue
+        Update path and link of pages of chapter
 
         :param model: model to download
         :return: true if added else false
@@ -139,7 +140,7 @@ class DownloadAccess:
     @staticmethod
     def load_from_database():
         """
-        laod from database and add to queue
+        load from database and add to queue
 
         :return:
         """

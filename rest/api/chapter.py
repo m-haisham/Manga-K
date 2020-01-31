@@ -1,37 +1,38 @@
 from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.access import MangaAccess
-from database.models import MangaModel, ChapterModel, PageModel
+from database.access import MangaAccess, RecentsAccess
+from database.models import MangaModel, ChapterModel, PageModel, RecentModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from ..error import error_message
 
 
 class Chapter(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('delete', type=bool, default=False)
 
     def get(self, manga_slug, chapter_slug):
 
-        args = self.parser.parse_args()
-
+        # get information
         access = MangaAccess.map(manga_slug)
         if access is None:
-            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+            return error_message(f'{manga_slug} does not exist', condition='manga'), \
                    status.HTTP_412_PRECONDITION_FAILED
 
         chapter_info = access.get_chapter_by_slug(chapter_slug)
         if chapter_info is None:
-            return error_message(f'/{manga_slug}/{chapter_slug} not found', condition='chapter'),\
+            return error_message(f'/{manga_slug}/{chapter_slug} not found', condition='chapter'), \
                    status.HTTP_412_PRECONDITION_FAILED
 
-        chapter_info['manga'] = access.get_info()['link']
-
+        manga_info = access.get_info()
+        chapter_info['manga'] = manga_info['link']
         models = chapter_info['pages']
 
-        # give link to pages if downloaded
-        if not args['delete'] and chapter_info['downloaded']:
+        # add to recents
+        recent_model = RecentModel.create(ChapterModel.fromdict(chapter_info), manga_info['title'], manga_info['link'])
+        RecentsAccess().add(recent_model)
+
+        # arrange information
+        if chapter_info['downloaded']:  # give link to pages if downloaded
             chapter_info['pages'] = [PageModel.from_dict(page).clean_dict() for page in models]
 
         elif NetworkHelper.is_connected():
@@ -48,4 +49,5 @@ class Chapter(Resource):
             chapter_info['pages'] = [vars(page) for page in pages]
 
         del chapter_info['path']
+
         return chapter_info

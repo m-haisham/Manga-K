@@ -5,8 +5,8 @@ from flask import send_file
 from flask_api import status
 from flask_restful import Resource
 
-from database.access import MangaAccess
-from database.models import PageModel, ChapterModel
+from database.access import MangaAccess, RecentsAccess
+from database.models import PageModel, ChapterModel, RecentModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from rest.error import error_message
@@ -14,21 +14,30 @@ from rest.error import error_message
 
 class PageList(Resource):
     def get(self, manga_slug, chapter_slug):
+
+        # get information
         access = MangaAccess.map(manga_slug)
         if access is None:
-            return error_message(f'{manga_slug} does not exist', condition='manga'),\
+            return error_message(f'{manga_slug} does not exist', condition='manga'), \
                    status.HTTP_412_PRECONDITION_FAILED
 
         chapter_info = access.get_chapter_by_slug(chapter_slug)
         if chapter_info is None:
-            return error_message(f'{chapter_slug} does not exist', condition='chapter'),\
+            return error_message(f'{chapter_slug} does not exist', condition='chapter'), \
                    status.HTTP_412_PRECONDITION_FAILED
+
+        manga_info = access.get_info()
+
+        # add to recents
+        recent_model = RecentModel.create(ChapterModel.fromdict(chapter_info), manga_info['title'], manga_info['link'])
+        RecentsAccess().add(recent_model)
+
+        # arrange information
 
         pages = []
         models = chapter_info['pages']
 
-        # give link to pages if downloaded
-        if chapter_info['downloaded']:
+        if chapter_info['downloaded']:  # give link to pages if downloaded
             pages = [PageModel.from_dict(page).clean_dict() for page in models]
 
         elif NetworkHelper.is_connected():

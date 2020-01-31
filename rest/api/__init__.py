@@ -8,7 +8,7 @@ from .search import Search
 from .popular import Popular
 from .latest import Latest
 from .download import Download, DownloadsList, DownloadStatus, DownloadDelete
-
+from .recent import RecentList
 
 def setup():
     # init
@@ -16,11 +16,13 @@ def setup():
 
     # setup
     api.add_resource(MangaList, '/mangas')
-    api.add_resource(FavouriteList, '/favourites')
     api.add_resource(Manga, '/manga/<manga_slug>')
     api.add_resource(Chapter, '/manga/<manga_slug>/<chapter_slug>')
     api.add_resource(PageList, '/manga/<manga_slug>/<chapter_slug>/pages')
     api.add_resource(Page, '/manga/<manga_slug>/<chapter_slug>/<int:i>')
+
+    api.add_resource(FavouriteList, '/favourites')
+    api.add_resource(RecentList, '/recents')
 
     api.add_resource(Search, '/search/<int:i>')
     api.add_resource(Popular, '/popular', '/popular/<int:i>')
@@ -28,5 +30,5 @@ def setup():
 
     api.add_resource(DownloadsList, '/downloads')
     api.add_resource(Download, '/download/<int:i>')
-    api.add_resource(DownloadStatus, '/download/status')
+    api.add_resource(DownloadStatus, '/downloads/status')
     api.add_resource(DownloadDelete, '/downloads/delete')

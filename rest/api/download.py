@@ -101,5 +101,16 @@ class DownloadDelete(Resource):
         if manga_access is None:
             return error_message('Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
 
-        # async operation as deletion can take time
+        # async operation, as deleting folders can take time
         asyncio.run(download_access.delete(manga_access, args['urls']))
+
+        # prepare output
+        chapters = []
+        for url in args['urls']:
+            chapter_model = manga_access.get_chapter_by_url(url)
+            chapter_model['downloaded'] = False
+            del chapter_model['pages']
+
+            chapters.append(chapter_model)
+
+        return chapters
