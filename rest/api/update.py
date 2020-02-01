@@ -12,6 +12,7 @@ from store import chapter_path
 class Updates(Resource):
     def get(self, manga_slug):
 
+        # get information
         access = MangaAccess.map(manga_slug)
         if access is None:
             return error_message(f'{manga_slug} does not exist', condition='manga'), \
@@ -20,6 +21,7 @@ class Updates(Resource):
         mangakakalot = Mangakakalot()
         manga_info = access.get_info()
 
+        # arrange
         saved_urls = [chapter['url'] for chapter in access.get_chapters()]
         parsed = [
             ChapterModel.from_chapter(
@@ -35,8 +37,6 @@ class Updates(Resource):
                 saved_urls.remove(chapter['url'])
             else:
                 updates.append(chapter)
-
-        access.update_chapters(updates)
 
         for chapter in updates:
             del chapter['path']

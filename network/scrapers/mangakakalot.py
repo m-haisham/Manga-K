@@ -119,6 +119,7 @@ class Mangakakalot(ScraperSource):
             manga.title = manga.title[0].strip(' \n')
 
             manga.url = box.find('a')['href']
+            manga.thumbnail_url = box.find('img')['src']
 
             results.append(manga)
 
@@ -138,6 +139,7 @@ class Mangakakalot(ScraperSource):
 
             manga.title = box.find('h3').text.strip(' \n')
             manga.url = box.find('a', href=True)['href']
+            manga.thumbnail_url = box.find('img')['src']
 
             results.append(manga)
 
@@ -157,6 +159,7 @@ class Mangakakalot(ScraperSource):
 
             manga.title = box.find('h3').text.strip(' \n')
             manga.url = box.find('a', href=True)['href']
+            manga.thumbnail_url = box.find('img')['src']
 
             results.append(manga)
 

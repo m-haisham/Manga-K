@@ -21,7 +21,7 @@ class Latest(Resource):
             d_manga = vars(manga)
 
             del d_manga['description']
-            del d_manga['get_status']
+            del d_manga['status']
 
             d_manga['link'] = manga_link(manga.title)
 
