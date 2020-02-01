@@ -22,6 +22,7 @@ class Popular(Resource):
 
             del d_manga['description']
             del d_manga['status']
+            del d_manga['genres']
 
             d_manga['link'] = manga_link(manga.title)
             d_manga['thumbnail_link'] = thumbnail_link(manga.title)

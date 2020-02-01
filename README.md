@@ -89,7 +89,7 @@ curl --location --request POST 'http://127.0.0.1:5000/manga/Fukushuu_o_Koinegau_
 ### GET _specific chapter_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Martial_Peak/Chapter_3/pages'
+curl --location --request GET 'http://127.0.0.1:5000/manga/Martial_Peak/Chapter_3'
 ```
 
 Provides information needed to create reader.

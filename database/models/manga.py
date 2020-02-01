@@ -35,11 +35,8 @@ class MangaModel(Manga):
         """
         new = MangaModel()
 
-        new.title = manga.title
-        new.status = manga.status
-        new.description = manga.description
-        new.url = manga.url
-        new.thumbnail_url = manga.thumbnail_url
+        for key in vars(Manga()).keys():
+            setattr(new, key, getattr(manga, key))
 
         for key, value in kwargs.items():
             if value:
@@ -55,13 +52,7 @@ class MangaModel(Manga):
         """
         new = MangaModel()
 
-        new.title = j['title']
-        new.status = j['get_status']
-        new.description = j['description']
-        new.url = j['url']
-        new.manhwa = j['manhwa']
-        new.favourite = j['favourite']
-        new.last_accessed = datetime.strptime(j['last_accessed'], DATETIME_FORMAT)
-        new.added = datetime.strptime(j['added'], DATETIME_FORMAT)
+        for key in vars(new).keys():
+            setattr(new, key, j[key])
 
         return new

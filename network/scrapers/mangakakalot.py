@@ -37,6 +37,9 @@ class Mangakakalot(ScraperSource):
                 if box.text.startswith('Status :'):
                     instance.status = MangaStatus.parse(box.text[9:])
 
+                elif box.text.startswith('Genres :'):
+                    instance.genres = [action.text for action in box.find_all('a', href=True)]
+
             _descriptionbox = soup.find('div', {'id': 'noidungm'})
             instance.description = _descriptionbox.text[len(_descriptionbox.find('h2').text):].strip()
 
@@ -54,6 +57,8 @@ class Mangakakalot(ScraperSource):
                 content = box.find_all('td')
                 if 'info-status' in content[0].find('i')['class']:
                     instance.status = MangaStatus.parse(content[1].text)
+                elif 'info-genres' in content[0].find('i')['class']:
+                    instance.genres = [action.text for action in content[1].find_all('a', href=True)]
 
             _descriptionbox = soup.find('div', {'id': 'panel-story-info-description'})
             instance.description = _descriptionbox.text[len(_descriptionbox.find('h3').text) + 1:].strip()

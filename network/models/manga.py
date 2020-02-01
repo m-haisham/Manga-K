@@ -6,6 +6,7 @@ class Manga:
         self.title = ''
         self.status = Status.UNKNOWN
         self.description = ''
+        self.genres = []
         self.url = ''
         self.thumbnail_url = ''
 
