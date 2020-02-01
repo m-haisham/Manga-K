@@ -15,3 +15,7 @@ def chapter_link(manga_title, chapter_title):
 
 def page_link(manga_title, chapter_title, page_number):
     return f'/manga/{slugify(manga_title)}/{slugify(chapter_title)}/{page_number}'
+
+
+def thumbnail_link(manga_title):
+    return f'/manga/{slugify(manga_title)}/thumbnail'

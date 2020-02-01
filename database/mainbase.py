@@ -9,7 +9,8 @@ class Mainbase(KeyDB):
         super(Mainbase, self).__init__(*args, **kwargs)
 
         self.downloads = self.table('downloads', cache_size=100)
-        self.recents = self.table('recents')
+        self.thumbnail = self.table('thumbnail')
+        self.recents = self.table('recents', cache_size=50)
 
 
 def get():

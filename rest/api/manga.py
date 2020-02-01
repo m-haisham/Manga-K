@@ -1,12 +1,12 @@
 from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.access import MangaAccess
+from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from store import chapter_path, sanitize
-from ..encoding import chapter_link, manga_link
+from ..encoding import chapter_link, manga_link, thumbnail_link
 from ..error import error_message
 
 pref_parser = reqparse.RequestParser()
@@ -30,6 +30,8 @@ class Manga(Resource):
         # update chapters
         if NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
+
+            # TODO update info and thumbnail
 
             chapters = mangakakalot.get_chapter_list(info['url'])
             models = [
@@ -108,6 +110,7 @@ class MangaList(Resource):
 
         model = model.to_dict()
         model['link'] = manga_link(model['title'])
+        model['thumbnail_link'] = thumbnail_link(model['title'])
         access.set_info(model)
 
         # chapters
@@ -121,5 +124,8 @@ class MangaList(Resource):
         ]
 
         access.update_chapters(models)
+
+        # set thumbnail
+        ThumbnailAccess(model['title'], model['thumbnail_url'])
 
         return model

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Union, List
 
 import tinydb
 from tinydb import Query, TinyDB
@@ -33,13 +34,13 @@ class MangaAccess:
         self.mangadb.insert_key(slugify(info['title']), self.title, self.mangadb.map.name)
         self.mangadb.insert_key('info', info, self.title)
 
-    def get_info(self, recorded=True) -> dict:
+    def get_info(self, recorded=True) -> Union[dict, None]:
         """
         :param recorded: whether to record this access to the manga
         :return: the saved state of information
         """
         try:
-            info = self.mangadb.get_key('info', self.title, single=True)
+            info = self.mangadb.get_key('info', self.title)
             if recorded:
                 info['last_accessed'] = datetime.utcnow().strftime('%Y%m%d')
                 self.set_info(info)
@@ -91,25 +92,27 @@ class MangaAccess:
         for chapter in chapters:
             self.table.update({'downloaded': chapter.downloaded}, chapter_access.url == chapter.url)
 
-    def get_chapters(self):
+    def get_chapters(self) -> List[dict]:
         """
         :return: current stored chapters in the database
         """
         chapter_access = Query()
         return self.table.search(chapter_access.downloaded.exists())
 
-    def get_chapter_by_slug(self, slug):
+    def get_chapter_by_slug(self, slug) -> Union[dict, None]:
         """
         :return: return chapter which has matching title to :param title:
         """
         chapter_access = Query()
+        try:
+            key = f'{self.title}:{slug}'
+            url = self.mangadb.get_key(key, self.mangadb.map.name)
 
-        key = f'{self.title}:{slug}'
-        url = self.mangadb.get_key(key, self.mangadb.map.name, single=True)
+            return self.table.get(chapter_access.url == url)
+        except KeyError:
+            pass
 
-        return self.table.get(chapter_access.url == url)
-
-    def get_chapter_by_url(self, url):
+    def get_chapter_by_url(self, url) -> Union[dict, None]:
         """
         :return: return chapter which has matching url to :param url:
         """
@@ -132,7 +135,7 @@ class MangaAccess:
         table = MangaAccess.mangadb.map.name
 
         try:
-            title = MangaAccess.mangadb.get_key(key, table, single=True)
+            title = MangaAccess.mangadb.get_key(key, table)
             return MangaAccess(title)
         except KeyError:
             pass

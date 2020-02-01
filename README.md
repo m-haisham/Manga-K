@@ -32,6 +32,14 @@ chapters all chapters including the updates
 
 With every call to this Uri updates are added to database, so a second call to this would not give the updates. If you need to get updates more than once goto **manga updates**.
 
+### GET _thumbnail_
+
+```bash
+curl --location --request GET 'http://127.0.0.1:5000/manga/Goblin_Slayer/thumbnail'
+```
+
+Employs a caching mechanism so it is recommended to use this over direct url.
+
 ### POST _new manga_
 
 ```bash

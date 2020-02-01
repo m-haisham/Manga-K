@@ -20,22 +20,18 @@ class KeyDB(TinyDB):
         """
         self.table(table).upsert(dict(key=key, value=value), where('key') == key)
 
-    def get_key(self, key, table=TinyDB.DEFAULT_TABLE, single=False):
+    def get_key(self, key, table=TinyDB.DEFAULT_TABLE):
         """
         :param key: key to match
         :param table: table to search in
-        :param single: return first value
 
         :returns: array of values if single is false else returns first value
         """
-        docs = self.table(table).search(where('key') == key)
-        if single:
-            try:
-                return docs[0]['value']
-            except IndexError:
-                raise KeyError(f'"{key}" not found')
-        else:
-            return [i['value'] for i in docs]
+        item = self.table(table).get(where('key') == key)
+        if item is None:
+            raise KeyError
+
+        return item['value']
 
     def remove_key(self, key, table=TinyDB.DEFAULT_TABLE):
         """
