@@ -92,6 +92,18 @@ class MangaAccess:
         for chapter in chapters:
             self.table.update({'downloaded': chapter.downloaded}, chapter_access.url == chapter.url)
 
+    def update_chapters_read(self, chapters):
+        """
+        updates the read status of the given chapters
+        if chapter doesnt exist it is ignored
+
+        :param chapters: chapters to update
+        :return: None
+        """
+        chapter_access = Query()
+        for chapter in chapters:
+            self.table.update({'read': chapter.read}, chapter_access.url == chapter.url)
+
     def get_chapters(self) -> List[dict]:
         """
         :return: current stored chapters in the database

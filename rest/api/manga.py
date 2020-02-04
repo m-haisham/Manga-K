@@ -19,7 +19,7 @@ class Manga(Resource):
         access = MangaAccess.map(manga_slug)
         if access is None:
             return error_message(f'{manga_slug} does not exist', condition='manga'), \
-                   status.HTTP_412_PRECONDITION_FAILED
+                   status.HTTP_404_NOT_FOUND
 
         info = access.get_info()
         if info is None:

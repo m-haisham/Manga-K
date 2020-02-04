@@ -6,6 +6,7 @@ class ChapterModel(Chapter):
         super(ChapterModel, self).__init__()
 
         self.downloaded = False
+        self.read = False
         self.link = ''
         self.path = ''
         self.pages = []

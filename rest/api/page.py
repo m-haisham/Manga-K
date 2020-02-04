@@ -19,21 +19,26 @@ class PageList(Resource):
         access = MangaAccess.map(manga_slug)
         if access is None:
             return error_message(f'{manga_slug} does not exist', condition='manga'), \
-                   status.HTTP_412_PRECONDITION_FAILED
+                   status.HTTP_404_NOT_FOUND
 
         chapter_info = access.get_chapter_by_slug(chapter_slug)
         if chapter_info is None:
             return error_message(f'{chapter_slug} does not exist', condition='chapter'), \
-                   status.HTTP_412_PRECONDITION_FAILED
+                   status.HTTP_404_NOT_FOUND
 
         manga_info = access.get_info()
 
+        chapter_model = ChapterModel.fromdict(chapter_info)
+        chapter_model.read = True
+
         # add to recents
-        recent_model = RecentModel.create(ChapterModel.fromdict(chapter_info), manga_info['title'], manga_info['link'])
+        recent_model = RecentModel.create(chapter_model, manga_info['title'], manga_info['link'])
         RecentsAccess().add(recent_model)
 
-        # arrange information
+        # set read flag to true
+        access.update_chapters_read([chapter_model])
 
+        # arrange information
         pages = []
         models = chapter_info['pages']
 
@@ -64,12 +69,12 @@ class Page(Resource):
         access = MangaAccess.map(manga_slug)
         if access is None:
             return error_message(f'{manga_slug} does not exist', condition='manga'),\
-                   status.HTTP_412_PRECONDITION_FAILED
+                   status.HTTP_404_NOT_FOUND
 
         chapter_info = access.get_chapter_by_slug(chapter_slug)
         if chapter_info is None:
             return error_message(f'{chapter_slug} does not exist', condition='chapter'),\
-                   status.HTTP_412_PRECONDITION_FAILED
+                   status.HTTP_404_NOT_FOUND
 
         if chapter_info['downloaded']:
             if i < 0 or i >= len(chapter_info['pages']):
@@ -91,4 +96,4 @@ class Page(Resource):
             )
         else:
             return error_message('Chapter not downloaded', condition='download'),\
-                   status.HTTP_412_PRECONDITION_FAILED
+                   status.HTTP_404_NOT_FOUND
