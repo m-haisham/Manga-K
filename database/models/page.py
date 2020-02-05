@@ -10,7 +10,7 @@ class PageModel(db.Model):
     link = db.Column(db.String())
     path = db.Column(db.String())
 
-    chapter_id = db.Column(db.Integer, db.ForeignKey('chaptermodel.id'), nullable=False)
+    chapter_id = db.Column(db.Integer, db.ForeignKey('chapter_model.id'), nullable=False)
 
     def __init__(self):
         super(PageModel, self).__init__()

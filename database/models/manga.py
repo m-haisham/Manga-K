@@ -16,6 +16,7 @@ class MangaModel(db.Model):
     description = db.Column(db.String())
     genres = db.Column(ArrayType())
     url = db.Column(db.String(), unique=True, nullable=False)
+
     thumbnail_url = db.Column(db.String())
 
     manhwa = db.Column(db.Boolean, default=False)
@@ -23,15 +24,7 @@ class MangaModel(db.Model):
     added = db.Column(db.DateTime, default=datetime.utcnow)
 
     chapters = db.relationship('ChapterModel', backref='manga', lazy=True)
-    slug = db.relationship('MangaMap', backref='manga', lazy=True)
-
-    def __init__(self):
-        super(MangaModel, self).__init__()
-
-        self.manhwa = False
-        self.favourite = False
-        self.last_accessed = datetime.utcnow().strftime(DATETIME_FORMAT)
-        self.added = datetime.utcnow().strftime(DATETIME_FORMAT)
+    map = db.relationship('MangaMap', backref='manga', lazy=True)
 
     def persist(self, previous):
         """
@@ -39,7 +32,6 @@ class MangaModel(db.Model):
         """
         self.manhwa = previous['manhwa']
         self.favourite = previous['favourite']
-        self.last_accessed = datetime.utcnow().strftime(DATETIME_FORMAT)
         self.added = previous['added']
 
     def to_dict(self):

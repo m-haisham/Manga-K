@@ -1,41 +1,18 @@
 from pathlib import Path
 
-from database import mainbase
-from store import manga_path, slugify
-
 import requests
 
 
 class ThumbnailAccess:
-    maindb = mainbase.get()
-    thumbnails_table = mainbase.get().thumbnail.name
 
     def __init__(self, title, url):
         """
         :param title: title of manga (Normal/Slugged)
         :param url: url of thumbnail
         """
-        self.title = slugify(title)
-        self.path = manga_path(title) / Path('thumbnail.jpg')
         self.url = url
-
-        #: Used to suggest whether the file exists or not
-        self.downloaded = self.path.exists() and self.path.is_file()
-
-        try:
-            previous_url = self.maindb.get_key(self.title, self.thumbnails_table)
-        except KeyError:  # no url saved
-            pass
-        else:
-            if previous_url != self.url:  # url has changed
-                if self.downloaded:  # file exists
-
-                    #: remove file
-                    self.path.unlink()
-                    self.downloaded = False
-
-        # save to database
-        self.maindb.insert_key(self.title, self.url, self.thumbnails_table)
+        self.path = Path('.')
+        pass
 
     def save(self):
         """
@@ -73,8 +50,4 @@ class ThumbnailAccess:
         :param title: title of manga (Normal/Slugged)
         :return: :class:`ThumbnailAccess` from database
         """
-        try:
-            url = ThumbnailAccess.maindb.get_key(slugify(title), ThumbnailAccess.thumbnails_table)
-            return ThumbnailAccess(title, url)
-        except KeyError:
-            pass
+        pass

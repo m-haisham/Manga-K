@@ -1,6 +1,7 @@
 import json
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy_session import flask_scoped_session
 from sqlalchemy import TypeDecorator, String
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -19,18 +20,23 @@ class Database:
 
 
 class LocalSession:
-    session = None
+    Factory = None
+    instance = None
+    request = None
 
     def __enter__(self):
-        self.session()
+        self.instance = self.Factory()
+
+        return self.instance
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.session.remove()
+        self.Factory.remove()
 
 
 def set(app):
     Database._instance = Database(app)
-    LocalSession.session = scoped_session(sessionmaker(bind=Database.get().engine))
+    LocalSession.Factory = scoped_session(sessionmaker(bind=Database.get().engine))
+    LocalSession.request = flask_scoped_session(sessionmaker(bind=Database.get().engine), app)
 
 
 class ArrayType(TypeDecorator):

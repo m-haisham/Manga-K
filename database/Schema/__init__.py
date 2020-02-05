@@ -1,0 +1,1 @@
+from .manga import manga_schema, mangas_schema

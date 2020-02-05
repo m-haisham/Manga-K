@@ -1,9 +1,19 @@
 from datetime import datetime
 
-from database.models import ChapterModel
+from database import Database
+
+db = Database.get()
 
 
-class RecentModel(ChapterModel):
+class RecentModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    manga = db.relationship('MangaModel', backref='recent', lazy=True)
+    chapter = db.relationship('ChapterModel', backref='recent', lazy=True)
+
+    manga_id = db.Column(db.Integer, db.ForeignKey('manga_model.id'), nullable=False)
+    chapter_id = db.Column(db.Integer, db.ForeignKey('chapter_model.id'), nullable=False)
+
     DATE_FORMATTER = '%D %T'
 
     def __init__(self):

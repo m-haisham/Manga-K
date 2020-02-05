@@ -1,12 +1,14 @@
+from flask import jsonify
 from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.access import MangaAccess, ThumbnailAccess
+from database.Schema import mangas_schema, manga_schema
+from database.access import MangaAccess
 from database.models import MangaModel, ChapterModel
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from store import chapter_path, sanitize
-from ..encoding import chapter_link, manga_link, thumbnail_link
+from ..encoding import chapter_link
 from ..error import error_message
 
 pref_parser = reqparse.RequestParser()
@@ -83,49 +85,45 @@ url_parser.add_argument('url', type=str)
 
 class MangaList(Resource):
     def get(self):
-        return [MangaAccess(title).get_info(recorded=False) for title in MangaAccess.all()]
+        result = mangas_schema.dump(MangaAccess.all())
+        return jsonify(result)
 
     def post(self):
         args = url_parser.parse_args()
 
         connected = NetworkHelper.is_connected()
 
-        access = MangaAccess.map(args['url'])
-        if access is not None:
-            previous = access.get_info()
+        model = MangaAccess.map(args['url'])
+        if model is not None:
 
-            # no internet connection, return previously saved
-            if not connected and previous is not None:
-                return previous
+            if not connected:
+                return manga_schema.dump(model)
 
         mangakakalot = Mangakakalot()
         manga = mangakakalot.get_manga_info(args['url'])
 
-        model = MangaModel.from_manga(manga)
+        manga_model = MangaModel.from_manga(manga)
 
-        access = MangaAccess(manga.title)
-        previous = access.get_info()
-        if previous is not None:
-            model.persist(previous)
+        access, inserted = MangaAccess.gesert(manga_model)
 
-        model = model.to_dict()
-        model['link'] = manga_link(model['title'])
-        model['thumbnail_link'] = thumbnail_link(model['title'])
-        access.set_info(model)
+        if not inserted:
+            # update and persist
+            manga_model = access.update(**vars(manga))
 
-        # chapters
+        # insert chapters
         chapters = mangakakalot.get_chapter_list(manga.url)
         models = [
             ChapterModel.from_chapter(
                 chapter,
-                link=chapter_link(manga.title, chapter.title),
+                manga_id=manga_model.id,
                 path=str(chapter_path(manga.title, chapter.title))
             ) for chapter in chapters
         ]
 
-        access.update_chapters(models)
+        access.insert_chapters(models)
 
-        # set thumbnail
-        ThumbnailAccess(model['title'], model['thumbnail_url'])
+        # # set thumbnail
+        # ThumbnailAccess(model['title'], model['thumbnail_url'])
 
-        return model
+        result = manga_schema.dump(manga_model)
+        return result

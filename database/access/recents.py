@@ -1,15 +1,6 @@
-from tinydb import Query
-
-from database import mainbase
-from database.models import RecentModel
-
-_recent = Query()
-
-
 class RecentsAccess:
-    recents = mainbase.get().recents
 
-    def add(self, recent_model: RecentModel):
+    def add(self, recent_model):
         """
         Adds model to recents
         Non repeating
@@ -17,10 +8,10 @@ class RecentsAccess:
         :param recent_model: model to add
         :return: None
         """
-        self.recents.upsert(recent_model.to_dict(), _recent.manga_title == recent_model.manga_title)
+        pass
 
     def all(self):
         """
         :return: all recents
         """
-        return self.recents.all()
+        pass

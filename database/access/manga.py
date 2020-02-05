@@ -1,11 +1,7 @@
-from datetime import datetime
 from typing import Union, List
 
-import tinydb
-from tinydb import Query, TinyDB
-
-from store import slugify
-from .. import mangabase
+from database import LocalSession
+from database.models import MangaModel, MangaMap, ChapterMap, ChapterModel
 
 
 class MangaAccess:
@@ -17,11 +13,11 @@ class MangaAccess:
     Map is used to get the title of manga or url of chapter.
     """
 
-    mangadb = mangabase.get()
-
-    def __init__(self, title: str):
-        self.title = title
-        self.table = self.mangadb.table(title, cache_size=200)
+    def __init__(self, id: int):
+        """
+        :param id: id of manga
+        """
+        self.id = id
 
     def set_info(self, info: dict):
         """
@@ -30,23 +26,14 @@ class MangaAccess:
         :param info: information to be saved about this manga
         :return: None
         """
-        self.mangadb.insert_key(info['url'], self.title, self.mangadb.map.name)
-        self.mangadb.insert_key(slugify(info['title']), self.title, self.mangadb.map.name)
-        self.mangadb.insert_key('info', info, self.title)
+        pass
 
-    def get_info(self, recorded=True) -> Union[dict, None]:
+    def get_info(self) -> Union[dict, None]:
         """
         :param recorded: whether to record this access to the manga
         :return: the saved state of information
         """
-        try:
-            info = self.mangadb.get_key('info', self.title)
-            if recorded:
-                info['last_accessed'] = datetime.utcnow().strftime('%Y%m%d')
-                self.set_info(info)
-            return info
-        except KeyError:
-            pass
+        pass
 
     def update_chapters(self, chapters):
         """
@@ -56,19 +43,7 @@ class MangaAccess:
         :param chapters: chapters to check against database
         :return: None
         """
-        chapter_access = Query()
-        for chapter in chapters:
-            # check if exists
-            matches = self.table.contains(chapter_access.url == chapter.url)
-
-            if matches:
-                self.table.update({
-                    'title': chapter.title,
-                    'link': chapter.link
-                }, chapter_access.url == chapter.url)
-            else:
-                self.table.insert(chapter.todict())
-                self.mangadb.insert_key(f'{self.title}:{slugify(chapter.title)}', chapter.url, self.mangadb.map.name)
+        pass
 
     def update_pages(self, chapters):
         """
@@ -76,9 +51,7 @@ class MangaAccess:
 
         :return: None
         """
-        chapter_access = Query()
-        for chapter in chapters:
-            self.table.update({'pages': chapter['pages']}, chapter_access.url == chapter['url'])
+        pass
 
     def update_chapters_downloaded(self, chapters):
         """
@@ -88,9 +61,7 @@ class MangaAccess:
         :param chapters: chapters to update
         :return: None
         """
-        chapter_access = Query()
-        for chapter in chapters:
-            self.table.update({'downloaded': chapter.downloaded}, chapter_access.url == chapter.url)
+        pass
 
     def update_chapters_read(self, chapters):
         """
@@ -100,62 +71,110 @@ class MangaAccess:
         :param chapters: chapters to update
         :return: None
         """
-        chapter_access = Query()
-        for chapter in chapters:
-            self.table.update({'read': chapter.read}, chapter_access.url == chapter.url)
+        pass
 
     def get_chapters(self) -> List[dict]:
         """
         :return: current stored chapters in the database
         """
-        chapter_access = Query()
-        return self.table.search(chapter_access.downloaded.exists())
+        pass
 
     def get_chapter_by_slug(self, slug) -> Union[dict, None]:
         """
         :return: return chapter which has matching title to :param title:
         """
-        chapter_access = Query()
-        try:
-            key = f'{self.title}:{slug}'
-            url = self.mangadb.get_key(key, self.mangadb.map.name)
-
-            return self.table.get(chapter_access.url == url)
-        except KeyError:
-            pass
+        pass
 
     def get_chapter_by_url(self, url) -> Union[dict, None]:
         """
         :return: return chapter which has matching url to :param url:
         """
-        chapter_access = Query()
-        return self.table.get(chapter_access.url == url)
+        pass
 
-    def purge(self):
+    def update(self, **kwargs):
+        model = LocalSession.request.query(MangaModel).get(self.id)
+
+        for key, value in kwargs.items():
+            if key in ['id', 'url']:
+                continue
+
+            if hasattr(model, key) and value is not None:
+                setattr(model, key, value)
+
+        LocalSession.request.commit()
+
+        return model
+
+    def insert_chapters(self, models):
         """
-        removes current manga table from database
+        inserts the models if the model does not exist
 
+        :param models: chapter models to insert
         :return: None
         """
-        self.mangadb.purge_table(self.title)
+        session = LocalSession.request
+
+        for model in models:
+            chapter_map = session.query(ChapterMap).filter_by(key=model.url).first()
+            if chapter_map is None:  # insert
+                session.add(model)
+                session.flush()
+
+                chapter_map = ChapterMap(model.url, model.id)
+                session.add(chapter_map)
+            else:
+                model = session.query(ChapterModel).get(chapter_map.chapter_id)
+
+        session.commit()
 
     @staticmethod
-    def map(key):
+    def gesert(model: MangaModel) -> tuple:
+        """
+        :param model: model to insert
+        :return: access, inserted: bool
+        """
+        manga_map = MangaAccess.map(model.url)
+        if manga_map is None:
+            LocalSession.request.add(model)
+            LocalSession.request.flush()
+
+            mapping = MangaMap(model.url, model.id)
+            LocalSession.request.add(mapping)
+
+            LocalSession.request.commit()
+
+            return MangaAccess(model.id), True
+        else:
+            return MangaAccess(manga_map.manga_id), False
+
+    @staticmethod
+    def exists(**kwargs) -> bool:
+        """
+        Return if doesnt exist insert new
+        :param model: model to insert
+        :return: model
+        """
+        model = LocalSession.request.query(MangaModel).filter_by(**kwargs).first()
+
+        if model is None:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def map(key) -> MangaMap:
         """
         :return: MangaAccess associated with :param key:
         """
-        table = MangaAccess.mangadb.map.name
+        map = LocalSession.request.query(MangaMap).filter_by(key=key).first()
 
-        try:
-            title = MangaAccess.mangadb.get_key(key, table)
-            return MangaAccess(title)
-        except KeyError:
-            pass
+        return map
 
     @staticmethod
     def all():
         """
         :return: name of all manga tables in database
         """
-        return [table for table in MangaAccess.mangadb.tables() if
-                table not in [TinyDB.DEFAULT_TABLE, MangaAccess.mangadb.map.name]]
+        mangas = LocalSession.request.query(MangaModel).all()
+
+        return mangas
