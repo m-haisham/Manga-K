@@ -9,12 +9,24 @@ from database.models.thumbnail import Thumbnail
 class ThumbnailAccess:
 
     @staticmethod
-    def upsert(thumbnail):
+    def upsert(thumbnail, commit=True):
         old = LocalSession.session.query(Thumbnail).filter_by(manga_id=thumbnail.manga_id).first()
         if old is None:
             LocalSession.session.add(thumbnail)
         else:
             old.url = thumbnail.url
+
+        if commit:
+            LocalSession.session.commit()
+
+    @staticmethod
+    def update(thumbnail, **kwargs):
+        for key, value in kwargs.items():
+            if key in ['id', 'url']:
+                continue
+
+            if hasattr(thumbnail, key) and value is not None:
+                setattr(thumbnail, key, value)
 
         LocalSession.session.commit()
 

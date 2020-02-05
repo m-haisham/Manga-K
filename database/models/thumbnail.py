@@ -15,10 +15,10 @@ class Thumbnail(db.Model):
 
     manga_id = db.Column(db.Integer, db.ForeignKey('manga_model.id'), nullable=False)
 
-    def __init__(self, title, url, manga_id):
-        self.path = self.thumbnail_path(title)
-        self.url = url
-        self.manga_id = manga_id
+    def __init__(self, manga):
+        self.path = self.thumbnail_path(manga.path)
+        self.url = manga.url
+        self.manga_id = manga.id
 
     @staticmethod
     def thumbnail_path(manga_path):

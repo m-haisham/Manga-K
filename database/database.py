@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy_session import flask_scoped_session
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 
@@ -28,5 +29,5 @@ class LocalSession:
 
 def set(app):
     Database._instance = Database(app)
-    LocalSession.session = Database.get().session
     LocalSession.Factory = scoped_session(sessionmaker(bind=Database.get().engine))
+    LocalSession.session = flask_scoped_session(LocalSession.Factory, app)

@@ -166,6 +166,10 @@ class MangaAccess:
         return map
 
     @staticmethod
+    def filter(**kwargs):
+        return LocalSession.session.query(MangaModel).filter_by(**kwargs).all()
+
+    @staticmethod
     def all():
         """
         :return: name of all manga tables in database

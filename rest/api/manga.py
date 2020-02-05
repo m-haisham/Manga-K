@@ -1,16 +1,13 @@
 from flask import jsonify
-from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.Schema import mangas_schema, manga_schema, chapters_schema
+from database.schema import mangas_schema, manga_schema, chapters_schema
 from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel
 from database.models.thumbnail import Thumbnail
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
-from store import chapter_path, sanitize
-from ..encoding import chapter_link
-from ..error import error_message
+from store import chapter_path
 
 pref_parser = reqparse.RequestParser()
 pref_parser.add_argument('manhwa', type=bool)
@@ -24,12 +21,18 @@ class Manga(Resource):
         model = access.get_or_404()
         info = manga_schema.dump(model)
 
-        info['updates'] = []
         # update chapters
         if NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
 
-            # TODO update info and thumbnail
+            manga = mangakakalot.get_manga_info(model.url)
+            manga_model = access.update(**vars(manga))
+
+            info = manga_schema.dump(manga_model)
+
+            # set thumbnail
+            thumbnail = Thumbnail(manga_model)
+            ThumbnailAccess.upsert(thumbnail)
 
             saved_urls = [chapter.url for chapter in access.get_chapters()]
             parsed = mangakakalot.get_chapter_list(model.url)
@@ -47,6 +50,8 @@ class Manga(Resource):
 
             access.insert_chapters(updates)
             info['updates'] = chapters_schema.dump(updates)
+        else:
+            info['updates'] = []
 
         info['chapters'] = chapters_schema.dump(access.get_chapters())
         return info
@@ -89,7 +94,6 @@ class MangaList(Resource):
         manga_model = MangaModel.from_manga(manga)
 
         access, inserted = MangaAccess.gesert(manga_model)
-
         if not inserted:
             # update and persist
             manga_model = access.update(**vars(manga))
@@ -107,7 +111,7 @@ class MangaList(Resource):
         access.insert_chapters(models)
 
         # set thumbnail
-        thumbnail = Thumbnail(manga_model.title, manga_model.url, manga_model.id)
+        thumbnail = Thumbnail(manga_model)
         ThumbnailAccess.upsert(thumbnail)
 
         result = manga_schema.dump(manga_model)

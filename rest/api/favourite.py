@@ -1,11 +1,11 @@
 from flask_restful import Resource
 
 from database.access import MangaAccess
+from database.schema import mangas_schema
 
 
 class FavouriteList(Resource):
     def get(self):
-        all_mangas = [MangaAccess(title).get_info(recorded=False) for title in MangaAccess.all()]
+        favourites = MangaAccess.filter(favourite=True)
 
-        favourites = filter(lambda info: info is not None and info['favourite'], all_mangas)
-        return list(favourites)
+        return mangas_schema.dump(favourites)

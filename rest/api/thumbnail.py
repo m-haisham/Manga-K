@@ -33,4 +33,7 @@ class Thumbnail(Resource):
     def post(self, manga_id):
         args = self.parser.parse_args()
 
-        return []
+        model = MangaAccess(manga_id).get_or_404()
+        thumbnail = model.thumbnail[0]
+
+        ThumbnailAccess.update(thumbnail, url=args['url'])
