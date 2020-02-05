@@ -75,8 +75,10 @@ class Chapter(Resource):
                    status.HTTP_404_NOT_FOUND
 
         if args['read'] is not None:
+            chapter_info['read'] = args['read']
             chapter_model = ChapterModel.fromdict(chapter_info)
-            chapter_model.read = args['read']
 
             # set read flag to true
             access.update_chapters_read([chapter_model])
+
+        return chapter_info

@@ -4,6 +4,7 @@ from pathlib import Path
 from threading import Lock
 
 from tinydb import Query
+from tinyrecord import transaction
 
 from background.models import DownloadModel
 from rest.encoding import page_link
@@ -45,7 +46,8 @@ class DownloadAccess:
         if access.get_chapter_by_url(model.url)['downloaded']:
             return False
 
-        self.maindb.downloads.upsert(model.todict(), dbmodel.url == model.url)
+        with transaction(self.maindb.downloads):
+            self.maindb.downloads.upsert(model.todict(), dbmodel.url == model.url)
 
         self.dthread.queue.put(model)
         self.downloads.append(model)
@@ -79,11 +81,12 @@ class DownloadAccess:
         :param url: url to be removed
         :return: None
         """
-        self.maindb.downloads.remove(dbmodel.url == url)
-        for i, download in enumerate(self.downloads):
-            if download.url == url:
-                del self.downloads[i]
-                break
+        with transaction(self.maindb.downloads):
+            self.maindb.downloads.remove(dbmodel.url == url)
+            for i, download in enumerate(self.downloads):
+                if download.url == url:
+                    del self.downloads[i]
+                    break
 
     def remove_from_queue(self, i):
         """
@@ -144,8 +147,9 @@ class DownloadAccess:
 
         :return:
         """
-        models = [DownloadModel.fromdict(model) for model in DownloadAccess.maindb.downloads.all()]
-        access = DownloadAccess()
+        with transaction(DownloadAccess.maindb.downloads):
+            models = [DownloadModel.fromdict(model) for model in DownloadAccess.maindb.downloads.all()]
+            access = DownloadAccess()
 
-        for model in models:
-            access.add(model)
+            for model in models:
+                access.add(model)
