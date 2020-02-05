@@ -1,7 +1,17 @@
-from network import Page
+from database import Database
+
+db = Database.get()
 
 
-class PageModel(Page):
+class PageModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    url = db.Column(db.String(), unique=True)
+    link = db.Column(db.String())
+    path = db.Column(db.String())
+
+    chapter_id = db.Column(db.Integer, db.ForeignKey('chaptermodel.id'), nullable=False)
+
     def __init__(self):
         super(PageModel, self).__init__()
 

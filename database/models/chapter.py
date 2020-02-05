@@ -1,7 +1,24 @@
-from network import Chapter
+from database import Database
+
+db = Database.get()
 
 
-class ChapterModel(Chapter):
+class ChapterModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(), nullable=False)
+    url = db.Column(db.String(), unique=True, nullable=False)
+
+    read = db.Column(db.Boolean, default=False)
+    downloaded = db.Column(db.Boolean, default=False)
+    link = db.Column(db.String())
+    path = db.Column(db.String())
+
+    manga_id = db.Column(db.Integer, db.ForeignKey('mangamodel.id'), nullable=False)
+
+    pages = db.relationship('PageModel', backref='chapter', lazy=True)
+    slug = db.relationship('ChapterMap', backref='chapter', lazy=True)
+
     def __init__(self):
         super(ChapterModel, self).__init__()
 
@@ -48,3 +65,6 @@ class ChapterModel(Chapter):
         new.pages = j['pages']
 
         return new
+
+    def __repr__(self):
+        return f"Chapter('{self.title}', '{self.url}')"

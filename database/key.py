@@ -1,6 +1,7 @@
 from tinydb import TinyDB, where
 from tinyrecord import transaction
 
+
 class KeyDB(TinyDB):
     """
     Add key-value feature to database

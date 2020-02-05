@@ -1,11 +1,30 @@
 from datetime import datetime
 
 from network import Manga
+from ..database import Database, ArrayType
 
 DATETIME_FORMAT = '%D %T'
 
+db = Database.get()
 
-class MangaModel(Manga):
+
+class MangaModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(), nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.String())
+    genres = db.Column(ArrayType())
+    url = db.Column(db.String(), unique=True, nullable=False)
+    thumbnail_url = db.Column(db.String())
+
+    manhwa = db.Column(db.Boolean, default=False)
+    favourite = db.Column(db.Boolean, default=False)
+    added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    chapters = db.relationship('ChapterModel', backref='manga', lazy=True)
+    slug = db.relationship('MangaMap', backref='manga', lazy=True)
+
     def __init__(self):
         super(MangaModel, self).__init__()
 
@@ -56,3 +75,6 @@ class MangaModel(Manga):
             setattr(new, key, j[key])
 
         return new
+
+    def __repr__(self):
+        return f"Manga('{self.title}', '{self.url}')"
