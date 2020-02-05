@@ -85,7 +85,7 @@ class Page(Resource):
 
             page = chapter_info['pages'][i]
 
-            with Path(page['path']).open('rb') as fb:
+            with Path(page['thumbnail_path']).open('rb') as fb:
                 stream = fb.read()
 
             return send_file(

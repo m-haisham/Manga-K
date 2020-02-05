@@ -12,6 +12,6 @@ class RecentList(Resource):
         recents = RecentsAccess().all()
         for recent in recents:
             del recent['pages']
-            del recent['path']
+            del recent['thumbnail_path']
 
         return recents

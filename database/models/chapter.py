@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from database import Database
+from ..types import PathType
 
 db = Database.get()
 
@@ -11,7 +14,8 @@ class ChapterModel(db.Model):
 
     read = db.Column(db.Boolean, default=False)
     downloaded = db.Column(db.Boolean, default=False)
-    path = db.Column(db.String())
+    path = db.Column(PathType())
+    added = db.Column(db.DateTime, default=datetime.utcnow)
 
     manga_id = db.Column(db.Integer, db.ForeignKey('manga_model.id'), nullable=False)
 
@@ -61,7 +65,7 @@ class ChapterModel(db.Model):
         new.url = j['url']
         new.downloaded = j['downloaded']
         new.link = j['link']
-        new.path = j['path']
+        new.path = j['thumbnail_path']
         new.pages = j['pages']
 
         return new

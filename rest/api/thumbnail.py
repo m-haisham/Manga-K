@@ -2,9 +2,9 @@ import io
 
 from flask import send_file
 from flask_api import status
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, abort
 
-from database.access import ThumbnailAccess
+from database.access import ThumbnailAccess, MangaAccess
 from rest.error import error_message
 
 
@@ -12,23 +12,25 @@ class Thumbnail(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('url', help='thumbnail url', required=True)
 
-    def get(self, manga_slug):
+    def get(self, manga_id):
 
-        thumbnail = ThumbnailAccess.data(manga_slug)
+        model = MangaAccess(manga_id).get_or_404()
+        thumbnail = model.thumbnail[0]
+
         if thumbnail is None:
-            return error_message('Not Found'), status.HTTP_404_NOT_FOUND
+            abort(status.HTTP_404_NOT_FOUND)
 
-        if not thumbnail.downloaded:
-            thumbnail.save()
+        if thumbnail.url != model.thumbnail_url or not ThumbnailAccess.exists(thumbnail.path):
+            ThumbnailAccess.save(model.thumbnail_url, thumbnail.path)
 
         return send_file(
-            io.BytesIO(thumbnail.byte_stream()),
+            io.BytesIO(ThumbnailAccess.byte_stream(thumbnail.path)),
             as_attachment=True,
             attachment_filename='thumbnail.jpg',
             mimetype='image/jpeg'
         )
 
-    def post(self, manga_slug):
+    def post(self, manga_id):
         args = self.parser.parse_args()
 
-        ThumbnailAccess(manga_slug, args['url'])
+        return []

@@ -1,7 +1,9 @@
 from datetime import datetime
 
 from network import Manga
-from ..database import Database, ArrayType
+from store import manga_path
+from ..database import Database
+from ..types import ArrayType, PathType
 
 DATETIME_FORMAT = '%D %T'
 
@@ -16,6 +18,7 @@ class MangaModel(db.Model):
     description = db.Column(db.String())
     genres = db.Column(ArrayType())
     url = db.Column(db.String(), unique=True, nullable=False)
+    path = db.Column(PathType())
 
     thumbnail_url = db.Column(db.String())
 
@@ -50,8 +53,10 @@ class MangaModel(db.Model):
             setattr(new, key, getattr(manga, key))
 
         for key, value in kwargs.items():
-            if value:
+            if value is not None:
                 setattr(new, key, value)
+
+        new.path = manga_path(manga.title)
 
         return new
 

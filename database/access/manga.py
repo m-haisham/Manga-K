@@ -1,3 +1,5 @@
+from flask import abort
+from flask_api import status
 from typing import Union, List
 
 from database import LocalSession
@@ -19,21 +21,12 @@ class MangaAccess:
         """
         self.id = id
 
-    def set_info(self, info: dict):
-        """
-        Saves and overwrites information on manga
+    def get_or_404(self):
+        model = LocalSession.session.query(MangaModel).get(self.id)
+        if model is None:
+            abort(status.HTTP_404_NOT_FOUND)
 
-        :param info: information to be saved about this manga
-        :return: None
-        """
-        pass
-
-    def get_info(self) -> Union[dict, None]:
-        """
-        :param recorded: whether to record this access to the manga
-        :return: the saved state of information
-        """
-        pass
+        return model
 
     def update_chapters(self, chapters):
         """
@@ -73,12 +66,6 @@ class MangaAccess:
         """
         pass
 
-    def get_chapters(self) -> List[dict]:
-        """
-        :return: current stored chapters in the database
-        """
-        pass
-
     def get_chapter_by_slug(self, slug) -> Union[dict, None]:
         """
         :return: return chapter which has matching title to :param title:
@@ -91,20 +78,6 @@ class MangaAccess:
         """
         pass
 
-    def update(self, **kwargs):
-        model = LocalSession.request.query(MangaModel).get(self.id)
-
-        for key, value in kwargs.items():
-            if key in ['id', 'url']:
-                continue
-
-            if hasattr(model, key) and value is not None:
-                setattr(model, key, value)
-
-        LocalSession.request.commit()
-
-        return model
-
     def insert_chapters(self, models):
         """
         inserts the models if the model does not exist
@@ -112,7 +85,7 @@ class MangaAccess:
         :param models: chapter models to insert
         :return: None
         """
-        session = LocalSession.request
+        session = LocalSession.session
 
         for model in models:
             chapter_map = session.query(ChapterMap).filter_by(key=model.url).first()
@@ -127,6 +100,28 @@ class MangaAccess:
 
         session.commit()
 
+    def get_chapters(self) -> List[ChapterModel]:
+        """
+        :return: current stored chapters in the database
+        """
+        model = LocalSession.session.query(MangaModel).get(self.id)
+        return model.chapters
+
+
+    def update(self, **kwargs):
+        model = LocalSession.session.query(MangaModel).get(self.id)
+
+        for key, value in kwargs.items():
+            if key in ['id', 'url']:
+                continue
+
+            if hasattr(model, key) and value is not None:
+                setattr(model, key, value)
+
+        LocalSession.session.commit()
+
+        return model
+
     @staticmethod
     def gesert(model: MangaModel) -> tuple:
         """
@@ -135,13 +130,13 @@ class MangaAccess:
         """
         manga_map = MangaAccess.map(model.url)
         if manga_map is None:
-            LocalSession.request.add(model)
-            LocalSession.request.flush()
+            LocalSession.session.add(model)
+            LocalSession.session.flush()
 
             mapping = MangaMap(model.url, model.id)
-            LocalSession.request.add(mapping)
+            LocalSession.session.add(mapping)
 
-            LocalSession.request.commit()
+            LocalSession.session.commit()
 
             return MangaAccess(model.id), True
         else:
@@ -154,7 +149,7 @@ class MangaAccess:
         :param model: model to insert
         :return: model
         """
-        model = LocalSession.request.query(MangaModel).filter_by(**kwargs).first()
+        model = LocalSession.session.query(MangaModel).filter_by(**kwargs).first()
 
         if model is None:
             return False
@@ -166,7 +161,7 @@ class MangaAccess:
         """
         :return: MangaAccess associated with :param key:
         """
-        map = LocalSession.request.query(MangaMap).filter_by(key=key).first()
+        map = LocalSession.session.query(MangaMap).filter_by(key=key).first()
 
         return map
 
@@ -175,6 +170,6 @@ class MangaAccess:
         """
         :return: name of all manga tables in database
         """
-        mangas = LocalSession.request.query(MangaModel).all()
+        mangas = LocalSession.session.query(MangaModel).all()
 
         return mangas

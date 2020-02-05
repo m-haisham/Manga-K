@@ -6,7 +6,7 @@ import requests
 class ChapterDownload:
     def __init__(self, m_download, pause, exit):
         self.model = m_download
-        self.path = Path(self.model.path)
+        self.path = Path(self.model.thumbnail_path)
 
         self.pause = pause
         self.exit = exit

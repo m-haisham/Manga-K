@@ -1,4 +1,5 @@
 from database import Database
+from database.types import PathType
 
 db = Database.get()
 
@@ -8,7 +9,7 @@ class PageModel(db.Model):
 
     url = db.Column(db.String(), unique=True)
     link = db.Column(db.String())
-    path = db.Column(db.String())
+    path = db.Column(PathType())
 
     chapter_id = db.Column(db.Integer, db.ForeignKey('chapter_model.id'), nullable=False)
 
@@ -20,7 +21,7 @@ class PageModel(db.Model):
 
     def clean_dict(self) -> dict:
         model = vars(self).copy()
-        del model['path']
+        del model['thumbnail_path']
 
         return model
 
@@ -34,7 +35,7 @@ class PageModel(db.Model):
         model = PageModel()
 
         model.url = d['url']
-        model.path = d['path']
+        model.path = d['thumbnail_path']
         model.link = d['link']
 
         return model
@@ -42,7 +43,7 @@ class PageModel(db.Model):
     @staticmethod
     def create(page, **kwargs):
         model = PageModel.from_page(page)
-        model.path = kwargs['path']
+        model.path = kwargs['thumbnail_path']
         model.link = kwargs['link']
 
         return model

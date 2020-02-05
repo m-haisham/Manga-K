@@ -2,9 +2,10 @@ from flask import jsonify
 from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.Schema import mangas_schema, manga_schema
-from database.access import MangaAccess
+from database.Schema import mangas_schema, manga_schema, chapters_schema
+from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel
+from database.models.thumbnail import Thumbnail
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from store import chapter_path, sanitize
@@ -17,16 +18,11 @@ pref_parser.add_argument('favourite', type=bool)
 
 
 class Manga(Resource):
-    def get(self, manga_slug):
-        access = MangaAccess.map(manga_slug)
-        if access is None:
-            return error_message(f'{manga_slug} does not exist', condition='manga'), \
-                   status.HTTP_404_NOT_FOUND
+    def get(self, manga_id):
+        access = MangaAccess(manga_id)
 
-        info = access.get_info()
-        if info is None:
-            access.purge()
-            return error_message(f'{manga_slug} not found'), status.HTTP_404_NOT_FOUND
+        model = access.get_or_404()
+        info = manga_schema.dump(model)
 
         info['updates'] = []
         # update chapters
@@ -35,48 +31,37 @@ class Manga(Resource):
 
             # TODO update info and thumbnail
 
-            chapters = mangakakalot.get_chapter_list(info['url'])
-            models = [
-                ChapterModel.from_chapter(
-                    chapter,
-                    link=chapter_link(info['title'], chapter.title),
-                    path=str(chapter_path(info['title'], chapter.title))
-                ) for chapter in chapters
-            ]
-
-            saved_urls = [chapter['url'] for chapter in access.get_chapters()]
+            saved_urls = [chapter.url for chapter in access.get_chapters()]
+            parsed = mangakakalot.get_chapter_list(model.url)
 
             updates = []
-            for chapter in models:
+            for chapter in parsed:
                 if chapter.url in saved_urls:
                     saved_urls.remove(chapter.url)
                 else:
-                    updates.append(chapter)
+                    updates.append(ChapterModel.from_chapter(
+                        chapter,
+                        manga_id=model.id,
+                        path=chapter_path(model.title, chapter.title)
+                    ))
 
-            access.update_chapters(updates)
+            access.insert_chapters(updates)
+            info['updates'] = chapters_schema.dump(updates)
 
-            info['updates'] = [sanitize(chapter.todict()) for chapter in updates]
-
-        info['chapters'] = [sanitize(chapter) for chapter in access.get_chapters()]
+        info['chapters'] = chapters_schema.dump(access.get_chapters())
         return info
 
-    def post(self, manga_slug):
+    def post(self, manga_id):
         args = pref_parser.parse_args()
 
-        access = MangaAccess.map(manga_slug)
+        access = MangaAccess(manga_id)
 
-        manga = access.get_info()
-        if manga is None:
-            access.purge()
-            return error_message(f'{manga_slug} not found'), status.HTTP_404_NOT_FOUND
+        # Check if manga exists
+        access.get_or_404()
 
-        for key, value in args.items():
-            if value is not None:
-                manga[key] = value
+        model = access.update(**args)
 
-        access.set_info(manga)
-
-        return manga
+        return manga_schema.dump(model)
 
 
 url_parser = reqparse.RequestParser()
@@ -95,7 +80,6 @@ class MangaList(Resource):
 
         model = MangaAccess.map(args['url'])
         if model is not None:
-
             if not connected:
                 return manga_schema.dump(model)
 
@@ -116,14 +100,15 @@ class MangaList(Resource):
             ChapterModel.from_chapter(
                 chapter,
                 manga_id=manga_model.id,
-                path=str(chapter_path(manga.title, chapter.title))
+                path=chapter_path(manga.title, chapter.title)
             ) for chapter in chapters
         ]
 
         access.insert_chapters(models)
 
-        # # set thumbnail
-        # ThumbnailAccess(model['title'], model['thumbnail_url'])
+        # set thumbnail
+        thumbnail = Thumbnail(manga_model.title, manga_model.url, manga_model.id)
+        ThumbnailAccess.upsert(thumbnail)
 
         result = manga_schema.dump(manga_model)
         return result

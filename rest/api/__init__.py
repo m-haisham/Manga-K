@@ -19,9 +19,9 @@ def setup():
 
     # setup
     api.add_resource(MangaList, '/mangas')
-    api.add_resource(Manga, '/manga/<manga_slug>')
-    api.add_resource(Updates, '/manga/<manga_slug>/updates')
-    api.add_resource(Thumbnail, '/manga/<manga_slug>/thumbnail')
+    api.add_resource(Manga, '/manga/<int:manga_id>')
+    api.add_resource(Updates, '/updates/<int:manga_id>')
+    api.add_resource(Thumbnail, '/thumbnail/<int:manga_id>')
     api.add_resource(Chapter, '/manga/<manga_slug>/<chapter_slug>')
     api.add_resource(PageList, '/manga/<manga_slug>/<chapter_slug>/pages')
     api.add_resource(Page, '/manga/<manga_slug>/<chapter_slug>/<int:i>')

@@ -12,7 +12,7 @@ BASE_PATH = Path('static')
 def manga_path(manga_title) -> Path:
     """
     :param manga_title: title of manga
-    :return: filesystem save path of manga
+    :return: filesystem save thumbnail_path of manga
     """
     return BASE_PATH / Path(slugify(manga_title))
 
@@ -21,13 +21,13 @@ def chapter_path(manga_title, chapter_title) -> Path:
     """
     :param manga_title: title of manga
     :param chapter_title: title of chapter
-    :return: filesystem save path of chapter
+    :return: filesystem save thumbnail_path of chapter
     """
     return BASE_PATH / Path(slugify(manga_title)) / Path(slugify(chapter_title))
 
 
 def sanitize(d: dict) -> dict:
-    del d['path']
+    del d['thumbnail_path']
     return d
 
 

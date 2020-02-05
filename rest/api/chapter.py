@@ -56,7 +56,7 @@ class Chapter(Resource):
 
             chapter_info['pages'] = [vars(page) for page in pages]
 
-        del chapter_info['path']
+        del chapter_info['thumbnail_path']
 
         return chapter_info
 

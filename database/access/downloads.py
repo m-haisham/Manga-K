@@ -31,7 +31,7 @@ class DownloadAccess:
     def add(self, model):
         """
         Add download to queue
-        Update path and link of pages of chapter
+        Update thumbnail_path and link of pages of chapter
 
         :param model: model to download
         :return: true if added else false
@@ -53,7 +53,7 @@ class DownloadAccess:
         self.downloads.append(model)
 
         for i, page in enumerate(model.pages):
-            page.path = str(model.path / Path(f'{i + 1}.jpg'))
+            page.thumbnail_path = str(model.thumbnail_path / Path(f'{i + 1}.jpg'))
             page.link = page_link(model.manga_title, model.title, i+1)
 
         access.update_pages([model.todict()])
@@ -131,10 +131,10 @@ class DownloadAccess:
 
                 pages = info['pages']
                 for page in pages:
-                    page['path'] = ''
+                    page['thumbnail_path'] = ''
                     page['link'] = ''
 
-                shutil.rmtree(info['path'])
+                shutil.rmtree(info['thumbnail_path'])
 
                 chapter_model = ChapterModel.fromdict(info)
                 access.update_chapters_downloaded([chapter_model])

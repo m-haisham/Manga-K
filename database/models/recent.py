@@ -8,6 +8,7 @@ db = Database.get()
 class RecentModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
+    time = db.Column(db.DateTime, nullable=False)
     manga = db.relationship('MangaModel', backref='recent', lazy=True)
     chapter = db.relationship('ChapterModel', backref='recent', lazy=True)
 
