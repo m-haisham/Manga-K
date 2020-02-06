@@ -1,5 +1,5 @@
-from .helper import NetworkHelper
 from .exceptions import NetworkError
+from .helper import NetworkHelper
 
 
 def checked_connection(func):

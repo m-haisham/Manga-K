@@ -5,9 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from .frame import ScraperSource
-from ..decorators import checked_connection
+from ..exceptions import IdentificationError
 from ..models import Chapter, Page, Manga, MangaStatus
-from ..exceptions import IdentificationError, NetworkError
 
 
 class Mangakakalot(ScraperSource):

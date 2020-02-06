@@ -1,20 +1,18 @@
 import shutil
-
 from pathlib import Path
 from threading import Lock
+from typing import List
 
 from tinydb import Query
 from tinyrecord import transaction
 
+from background import BackgroundDownload
 from database.models import DownloadModel
 from rest.encoding import page_link
 from . import MangaAccess
-
-from background import BackgroundDownload
-
-from typing import List
-
+from .. import LocalSession
 from ..models import ChapterModel
+from ..schema import download_schema
 
 dbmodel = Query()
 
@@ -28,32 +26,36 @@ class DownloadAccess:
     def add(self, model):
         """
         Add download to queue
-        Update thumbnail_path and link of pages of chapter
+        Update path and link of pages of chapter
 
         :param model: model to download
         :return: true if added else false
         """
-        access = MangaAccess(model.manga_title)
+        chapter = LocalSession.session.query(ChapterModel).get(model.chapter_id)
+
+        if chapter.manga_id != model.manga_id:
+            return False
 
         # already in progress
-        if any([download.url == model.url for download in self.downloads]):
+        if any([download['chapter_id'] == model.chapter_id for download in self.downloads]):
             return False
 
         # already downloaded
-        if access.get_chapter_by_url(model.url)['downloaded']:
+        if chapter.downloaded:
             return False
 
-        with transaction(self.maindb.downloads):
-            self.maindb.downloads.upsert(model.todict(), dbmodel.url == model.url)
+        LocalSession.session.add(model)
+        LocalSession.session.flush()
 
-        self.dthread.queue.put(model)
-        self.downloads.append(model)
+        model_dict = download_schema.dump(model)
+        self.dthread.queue.put(model_dict)
+        self.downloads.append(model_dict)
 
-        for i, page in enumerate(model.pages):
-            page.thumbnail_path = str(model.thumbnail_path / Path(f'{i + 1}.jpg'))
-            page.link = page_link(model.manga_title, model.title, i+1)
+        for i, page in enumerate(chapter.pages):
+            page.path = chapter.path / Path(f'{i + 1}.jpg')
+            page.link = page_link(model.manga_id, model.chapter_id, i+1)
 
-        access.update_pages([model.todict()])
+        LocalSession.session.commit()
         return True
 
     def get(self, i):
@@ -126,10 +128,10 @@ class DownloadAccess:
 
                 pages = info['pages']
                 for page in pages:
-                    page['thumbnail_path'] = ''
+                    page['path'] = ''
                     page['link'] = ''
 
-                shutil.rmtree(info['thumbnail_path'])
+                shutil.rmtree(info['path'])
 
                 chapter_model = ChapterModel.fromdict(info)
                 access.update_chapters_downloaded([chapter_model])
@@ -142,9 +144,8 @@ class DownloadAccess:
 
         :return:
         """
-        with transaction(DownloadAccess.maindb.downloads):
-            models = [DownloadModel.fromdict(model) for model in DownloadAccess.maindb.downloads.all()]
-            access = DownloadAccess()
+        models = LocalSession.session.query(DownloadModel).all()
+        access = DownloadAccess()
 
-            for model in models:
-                access.add(model)
+        for model in models:
+            access.add(model)

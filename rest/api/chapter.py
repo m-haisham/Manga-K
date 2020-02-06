@@ -1,13 +1,11 @@
-from flask_api import status
 from flask_restful import Resource, reqparse
 
 from database import LocalSession
 from database.access import MangaAccess, RecentsAccess
-from database.models import MangaModel, ChapterModel, PageModel, RecentModel
-from database.schema import chapter_schema, pages_schema
+from database.models import PageModel, RecentModel
+from database.schema import chapter_schema, pages_schema, pages_downloaded_schema
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
-from ..error import error_message
 
 
 class Chapter(Resource):
@@ -31,7 +29,7 @@ class Chapter(Resource):
 
         # arrange information
         if chapter_model.downloaded:  # give link to pages if downloaded
-            chapter_info['pages'] = chapter_model.pages
+            chapter_info['pages'] = pages_downloaded_schema.dump(chapter_model.pages)
 
         elif NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()

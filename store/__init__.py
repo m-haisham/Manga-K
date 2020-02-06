@@ -27,7 +27,7 @@ def chapter_path(manga_title, chapter_title) -> Path:
 
 
 def sanitize(d: dict) -> dict:
-    del d['thumbnail_path']
+    del d['path']
     return d
 
 

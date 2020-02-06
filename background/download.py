@@ -1,8 +1,8 @@
-from threading import Thread
 from queue import Queue
+from threading import Thread
 
 from database import LocalSession
-from database.models import ChapterModel, MangaModel
+from database.models import ChapterModel, DownloadModel
 from .chapter import ChapterDownload
 from .models import AtomicBoolean
 
@@ -27,16 +27,18 @@ class BackgroundDownload(Thread):
 
         # download loop
         while True:
-            with LocalSession.instance as session:
-                model = self.queue.get()
+            model = self.queue.get()
 
-                mg = session.query(ChapterModel).get(model['chapter_id'])
-                ch = mg.get()
+            while self.paused.value:
+                pass
+
+            with LocalSession.instance as session:
+                ch = session.query(ChapterModel).get(model['chapter_id'])
                 pg = ch.pages
 
             ChapterDownload(model, ch, pg, self.paused, self.clear).start()
 
-            download_access.remove(model.chapter_id)
+            download_access.remove(model['chapter_id'])
             if self.clear.value:
                 # clear the queue
                 while not self.queue.empty():
@@ -52,6 +54,8 @@ class BackgroundDownload(Thread):
                 chapter = session.query(ChapterModel).get(model['chapter_id'])
                 chapter.downloaded = True
 
+                download = session.query(DownloadModel).filter_by(chapter_id=model['chapter_id']).first()
+                session.delete(download)
                 session.commit()
 
     @staticmethod

@@ -1,6 +1,7 @@
+from typing import List
+
 from flask import abort
 from flask_api import status
-from typing import Union, List
 
 from database import LocalSession
 from database.models import MangaModel, MangaMap, ChapterMap, ChapterModel
@@ -81,7 +82,6 @@ class MangaAccess:
                 setattr(model, key, value)
 
         LocalSession.session.commit()
-
         return model
 
     @staticmethod

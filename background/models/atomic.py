@@ -15,4 +15,3 @@ class AtomicBoolean:
     def value(self, v):
         with self._lock:
             self._value = v
-            return self._value

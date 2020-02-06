@@ -1,4 +1,3 @@
-import app
 from database import Database
 db = Database.get()
 

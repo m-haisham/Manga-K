@@ -20,7 +20,6 @@ class ChapterDownload:
         total_length = 0
 
         model_pages = []
-
         # full length
         for page in self.pages:
             url = page.url

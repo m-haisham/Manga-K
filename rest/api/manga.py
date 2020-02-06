@@ -1,10 +1,10 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 
-from database.schema import mangas_schema, manga_schema, chapters_schema
 from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel
 from database.models.thumbnail import Thumbnail
+from database.schema import mangas_schema, manga_schema, chapters_schema
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from store import chapter_path

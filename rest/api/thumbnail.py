@@ -5,7 +5,6 @@ from flask_api import status
 from flask_restful import Resource, reqparse, abort
 
 from database.access import ThumbnailAccess, MangaAccess
-from rest.error import error_message
 
 
 class Thumbnail(Resource):

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import requests
 
 from database import LocalSession

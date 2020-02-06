@@ -21,7 +21,7 @@ class PageModel(db.Model):
 
     def clean_dict(self) -> dict:
         model = vars(self).copy()
-        del model['thumbnail_path']
+        del model['path']
 
         return model
 
@@ -35,7 +35,7 @@ class PageModel(db.Model):
         model = PageModel()
 
         model.url = d['url']
-        model.path = d['thumbnail_path']
+        model.path = d['path']
         model.link = d['link']
 
         return model
@@ -43,7 +43,7 @@ class PageModel(db.Model):
     @staticmethod
     def create(page, **kwargs):
         model = PageModel.from_page(page)
-        model.path = kwargs['thumbnail_path']
+        model.path = kwargs['path']
         model.link = kwargs['link']
 
         return model

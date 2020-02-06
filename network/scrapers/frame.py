@@ -1,7 +1,6 @@
-from ..models import Manga, Chapter, Page
-from ..decorators import checked_connection
-
 from typing import List
+
+from ..models import Manga, Chapter, Page
 
 
 class ScraperSource:

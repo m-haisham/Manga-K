@@ -65,7 +65,7 @@ class ChapterModel(db.Model):
         new.url = j['url']
         new.downloaded = j['downloaded']
         new.link = j['link']
-        new.path = j['thumbnail_path']
+        new.path = j['path']
         new.pages = j['pages']
 
         return new

@@ -7,7 +7,6 @@ from database.models import MangaModel
 from database.models.thumbnail import Thumbnail
 from database.schema import discover_schema
 from network.scrapers import Mangakakalot
-from rest.encoding import manga_link, thumbnail_link
 from rest.error import error_message
 
 
