@@ -1,10 +1,12 @@
+import asyncio
+
 from flask_restful import Resource, reqparse
 
 from background import BackgroundDownload
 from database import LocalSession
 from database.access import DownloadAccess, MangaAccess
 from database.models import DownloadModel, ChapterModel, PageModel
-from database.schema import download_schema, downloads_schema, nodownload_schema
+from database.schema import download_schema, downloads_schema, nodownload_schema, chapters_schema
 from network.scrapers import Mangakakalot
 
 download_access = DownloadAccess()
@@ -93,5 +95,19 @@ class DownloadStatus(Resource):
 
 
 class DownloadDelete(Resource):
+    delete_parser = reqparse.RequestParser()
+    delete_parser.add_argument('ids', action='append', required=True)
+
     def post(self):
-        pass
+        args = self.delete_parser.parse_args()
+
+        chapters = LocalSession.session.query(ChapterModel).filter(ChapterModel.id.in_(args['ids'])).all()
+
+        asyncio.run(download_access.delete([chapter.path for chapter in chapters]))
+
+        for chapter in chapters:
+            chapter.downloaded = False
+
+        LocalSession.session.commit()
+
+        return chapters_schema.dump(chapters)

@@ -209,9 +209,9 @@ Returns information of chapters set to download
 
 #### REQUIRES
 
-manga_url url of the manga being added to download
+manga_id id of the manga being added to download
 
-urls list of urls belonging to chapters to be downloaded
+chapter_ids list of ids belonging to chapters to be downloaded
 
 #### Headers
 
@@ -232,10 +232,7 @@ urls list of urls belonging to chapters to be downloaded
 curl --location --request POST 'http://127.0.0.1:5000/downloads/delete' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-	"manga_url": "https://mangakakalot.com/manga/martial_peak",
-    "urls": [
-    	"https://mangakakalot.com/chapter/martial_peak/chapter_3"
-    ]
+    "ids": [1, 2]
 }'
 ```
 
@@ -243,9 +240,7 @@ Returns information of chapters set to delete
 
 #### REQUIRES
 
-manga_url url of the manga being added to download
-
-urls list of urls belonging to chapters to be downloaded
+chapter ids to delete
 
 #### Headers
 
@@ -255,8 +250,7 @@ urls list of urls belonging to chapters to be downloaded
 
 ```json
 {
-  "manga_url": "https://mangakakalot.com/manga/martial_peak",
-  "urls": ["https://mangakakalot.com/chapter/martial_peak/chapter_3"]
+    "ids": [1, 2]
 }
 ```
 
