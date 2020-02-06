@@ -11,7 +11,7 @@ class Thumbnail(db.Model):
 
     url = db.Column(db.String(), unique=True, nullable=False)
     path = db.Column(PathType(), nullable=False)
-    manga = db.relationship('MangaModel', backref='thumbnail', lazy=True)
+    manga = db.relationship('MangaModel', backref=db.backref('thumbnail', uselist=False), lazy=True)
 
     manga_id = db.Column(db.Integer, db.ForeignKey('manga_model.id'), nullable=False)
 

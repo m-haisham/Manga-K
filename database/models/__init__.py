@@ -6,3 +6,4 @@ from .page import PageModel
 from .chapter import ChapterModel
 from .manga import MangaModel
 from .recent import RecentModel
+from .download import DownloadModel

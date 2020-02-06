@@ -13,11 +13,11 @@ class PageModel(db.Model):
 
     chapter_id = db.Column(db.Integer, db.ForeignKey('chapter_model.id'), nullable=False)
 
-    def __init__(self):
-        super(PageModel, self).__init__()
+    def __init__(self, url, chapter_id, **kwargs):
+        super(PageModel, self).__init__(**kwargs)
 
-        self.link = ''
-        self.path = ''
+        self.url = url
+        self.chapter_id = chapter_id
 
     def clean_dict(self) -> dict:
         model = vars(self).copy()

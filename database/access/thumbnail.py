@@ -22,7 +22,7 @@ class ThumbnailAccess:
     @staticmethod
     def update(thumbnail, **kwargs):
         for key, value in kwargs.items():
-            if key in ['id', 'url']:
+            if key in ['id']:
                 continue
 
             if hasattr(thumbnail, key) and value is not None:

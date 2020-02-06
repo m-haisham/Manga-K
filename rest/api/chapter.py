@@ -1,8 +1,10 @@
 from flask_api import status
 from flask_restful import Resource, reqparse
 
+from database import LocalSession
 from database.access import MangaAccess, RecentsAccess
 from database.models import MangaModel, ChapterModel, PageModel, RecentModel
+from database.schema import chapter_schema, pages_schema
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from ..error import error_message
@@ -12,73 +14,51 @@ class Chapter(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('read', type=bool)
 
-    def get(self, manga_slug, chapter_slug):
+    def get(self, manga_id, chapter_id):
 
         # get information
-        access = MangaAccess.map(manga_slug)
-        if access is None:
-            return error_message(f'{manga_slug} does not exist', condition='manga'), \
-                   status.HTTP_404_NOT_FOUND
+        access = MangaAccess(manga_id)
+        manga_model = access.get_or_404()
 
-        chapter_info = access.get_chapter_by_slug(chapter_slug)
-        if chapter_info is None:
-            return error_message(f'/{manga_slug}/{chapter_slug} not found', condition='chapter'), \
-                   status.HTTP_404_NOT_FOUND
+        chapter_model = access.chapter_or_404(chapter_id)
 
-        manga_info = access.get_info()
-        chapter_info['manga'] = manga_info['link']
-        models = chapter_info['pages']
-
-        chapter_model = ChapterModel.fromdict(chapter_info)
+        chapter_info = chapter_schema.dump(chapter_model)
         chapter_model.read = True
 
         # add to recents
-        recent_model = RecentModel.create(ChapterModel.fromdict(chapter_info), manga_info['title'], manga_info['link'])
-        RecentsAccess().add(recent_model)
-
-        # set read flag to true
-        access.update_chapters_read([chapter_model])
+        recent = RecentModel.create(manga_id, chapter_id)
+        RecentsAccess.upsert(recent, commit=False)
 
         # arrange information
-        if chapter_info['downloaded']:  # give link to pages if downloaded
-            chapter_info['pages'] = [PageModel.from_dict(page).clean_dict() for page in models]
+        if chapter_model.downloaded:  # give link to pages if downloaded
+            chapter_info['pages'] = chapter_model.pages
 
         elif NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
-            pages = mangakakalot.get_page_list(ChapterModel.fromdict(chapter_info))
+            pages = mangakakalot.get_page_list(chapter_model)
 
-            # if downloaded pages are already loaded
-            if not chapter_info['downloaded']:
-                models = [PageModel.from_page(page).to_dict() for page in pages]
-                chapter_info['pages'] = models
+            page_models = [PageModel(page.url, chapter_id) for page in pages]
 
-                access.update_pages([chapter_info])
+            for page_model in page_models:
+                old = LocalSession.session.query(PageModel).filter_by(url=page_model.url).first()
+                if old is None:
+                    LocalSession.session.add(page_model)
 
-            chapter_info['pages'] = [vars(page) for page in pages]
+            chapter_info['pages'] = pages_schema.dump(page_models)
+        else:
+            chapter_info['pages'] = pages_schema.dump(chapter_model.pages)
 
-        del chapter_info['thumbnail_path']
-
+        LocalSession.session.commit()
         return chapter_info
 
-    def post(self, manga_slug, chapter_slug):
+    def post(self, manga_id, chapter_id):
         args = self.parser.parse_args()
 
         # get information
-        access = MangaAccess.map(manga_slug)
-        if access is None:
-            return error_message(f'{manga_slug} does not exist', condition='manga'), \
-                   status.HTTP_404_NOT_FOUND
+        access = MangaAccess(manga_id)
+        chapter_model = access.chapter_or_404(chapter_id)
 
-        chapter_info = access.get_chapter_by_slug(chapter_slug)
-        if chapter_info is None:
-            return error_message(f'/{manga_slug}/{chapter_slug} not found', condition='chapter'), \
-                   status.HTTP_404_NOT_FOUND
+        chapter_model.read = args['read']
+        LocalSession.session.commit()
 
-        if args['read'] is not None:
-            chapter_info['read'] = args['read']
-            chapter_model = ChapterModel.fromdict(chapter_info)
-
-            # set read flag to true
-            access.update_chapters_read([chapter_model])
-
-        return chapter_info
+        return chapter_schema.dump(chapter_model)

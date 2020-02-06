@@ -19,7 +19,10 @@ class MangaAccess:
         """
         :param id: id of manga
         """
-        self.id = id
+        self.id = int(id)
+
+    def get(self):
+        return LocalSession.session.query(MangaModel).get(self.id)
 
     def get_or_404(self):
         model = LocalSession.session.query(MangaModel).get(self.id)
@@ -28,55 +31,15 @@ class MangaAccess:
 
         return model
 
-    def update_chapters(self, chapters):
-        """
-        if chapter exists Updates the chapters in database
-        else adds the chapter to database and adds slog to map
+    def chapter_or_404(self, id):
+        model = LocalSession.session.query(ChapterModel).get(id)
+        if model is None:
+            abort(status.HTTP_404_NOT_FOUND)
 
-        :param chapters: chapters to check against database
-        :return: None
-        """
-        pass
+        if model.manga_id != self.id:
+            abort(status.HTTP_403_FORBIDDEN)
 
-    def update_pages(self, chapters):
-        """
-        Update pages of :param chapters:
-
-        :return: None
-        """
-        pass
-
-    def update_chapters_downloaded(self, chapters):
-        """
-        updates the downloaded get_status of the given chapters
-        if chapter doesnt exist it is ignored
-
-        :param chapters: chapters to update
-        :return: None
-        """
-        pass
-
-    def update_chapters_read(self, chapters):
-        """
-        updates the read status of the given chapters
-        if chapter doesnt exist it is ignored
-
-        :param chapters: chapters to update
-        :return: None
-        """
-        pass
-
-    def get_chapter_by_slug(self, slug) -> Union[dict, None]:
-        """
-        :return: return chapter which has matching title to :param title:
-        """
-        pass
-
-    def get_chapter_by_url(self, url) -> Union[dict, None]:
-        """
-        :return: return chapter which has matching url to :param url:
-        """
-        pass
+        return model
 
     def insert_chapters(self, models):
         """
@@ -106,7 +69,6 @@ class MangaAccess:
         """
         model = LocalSession.session.query(MangaModel).get(self.id)
         return model.chapters
-
 
     def update(self, **kwargs):
         model = LocalSession.session.query(MangaModel).get(self.id)

@@ -17,6 +17,7 @@ class Database:
 
 
 class LocalSession:
+    instance = None
     Factory = None
     session = None
 
@@ -29,5 +30,6 @@ class LocalSession:
 
 def set(app):
     Database._instance = Database(app)
+    LocalSession.instance = LocalSession()
     LocalSession.Factory = scoped_session(sessionmaker(bind=Database.get().engine))
     LocalSession.session = flask_scoped_session(LocalSession.Factory, app)

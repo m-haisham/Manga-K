@@ -1,20 +1,23 @@
+from database import Database
 from database.models import PageModel
-from database.models.chapter import ChapterModel
 
-from store import chapter_path
+db = Database.get()
 
 
-class DownloadModel(ChapterModel):
+class DownloadModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    manga = db.relationship('MangaModel', lazy=True)
+    chapter = db.relationship('ChapterModel', backref=db.backref('download', uselist=False), lazy=True)
+
+    manga_id = db.Column(db.Integer, db.ForeignKey('manga_model.id'), nullable=False)
+    chapter_id = db.Column(db.Integer, db.ForeignKey('chapter_model.id'), nullable=False)
+
     def __init__(self):
         super(DownloadModel, self).__init__()
 
         self.value = -1
         self.max = 1
-
-        self.manga_title = ''
-        self.manga_url = ''
-
-        self.pages = []
 
     def todict(self):
         model = vars(self).copy()
@@ -34,16 +37,10 @@ class DownloadModel(ChapterModel):
         return new
 
     @staticmethod
-    def create(manga, chapter, pages):
+    def create(manga_id, chapter_id):
         model = DownloadModel()
 
-        for key, value in chapter.items():
-            setattr(model, key, value)
-
-        model.path = str(chapter_path(manga['title'], chapter['title']))
-
-        model.manga_title = manga['title']
-        model.manga_url = manga['url']
-        model.pages = pages
+        model.manga_id = manga_id
+        model.chapter_id = chapter_id
 
         return model

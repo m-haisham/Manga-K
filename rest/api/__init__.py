@@ -22,9 +22,9 @@ def setup():
     api.add_resource(Manga, '/manga/<int:manga_id>')
     api.add_resource(Updates, '/updates/<int:manga_id>')
     api.add_resource(Thumbnail, '/thumbnail/<int:manga_id>')
-    api.add_resource(Chapter, '/manga/<manga_slug>/<chapter_slug>')
-    api.add_resource(PageList, '/manga/<manga_slug>/<chapter_slug>/pages')
-    api.add_resource(Page, '/manga/<manga_slug>/<chapter_slug>/<int:i>')
+    api.add_resource(Chapter, '/chapter/<manga_id>/<chapter_id>')
+    api.add_resource(PageList, '/pages/<manga_id>/<chapter_id>')
+    api.add_resource(Page, '/page/<manga_id>/<chapter_id>/<int:i>')
 
     api.add_resource(FavouriteList, '/favourites')
     api.add_resource(RecentList, '/recents')

@@ -15,7 +15,7 @@ class Thumbnail(Resource):
     def get(self, manga_id):
 
         model = MangaAccess(manga_id).get_or_404()
-        thumbnail = model.thumbnail[0]
+        thumbnail = model.thumbnail
 
         if thumbnail is None:
             abort(status.HTTP_404_NOT_FOUND)

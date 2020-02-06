@@ -6,10 +6,9 @@ from threading import Lock
 from tinydb import Query
 from tinyrecord import transaction
 
-from background.models import DownloadModel
+from database.models import DownloadModel
 from rest.encoding import page_link
 from . import MangaAccess
-from .. import mainbase, mangabase
 
 from background import BackgroundDownload
 
@@ -21,8 +20,6 @@ dbmodel = Query()
 
 
 class DownloadAccess:
-    maindb = mainbase.get()
-    mangadb = mangabase.get()
     dthread = BackgroundDownload.get()
 
     mutex = Lock()
@@ -74,19 +71,17 @@ class DownloadAccess:
         """
         return self.downloads
 
-    def remove(self, url):
+    def remove(self, id):
         """
         Remove matching url from downloads database table
 
         :param url: url to be removed
         :return: None
         """
-        with transaction(self.maindb.downloads):
-            self.maindb.downloads.remove(dbmodel.url == url)
-            for i, download in enumerate(self.downloads):
-                if download.url == url:
-                    del self.downloads[i]
-                    break
+        for i, download in enumerate(self.downloads):
+            if download['chapter_id'] == id:
+                del self.downloads[i]
+                break
 
     def remove_from_queue(self, i):
         """
