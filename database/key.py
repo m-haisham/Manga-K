@@ -1,4 +1,5 @@
 from tinydb import TinyDB, where
+from tinyrecord import transaction
 
 
 class KeyDB(TinyDB):
@@ -18,7 +19,9 @@ class KeyDB(TinyDB):
         :param table: data table to insert
         :return: None
         """
-        self.table(table).upsert(dict(key=key, value=value), where('key') == key)
+        table = self.table(table)
+        with transaction(table):
+            table.upsert(dict(key=key, value=value), where('key') == key)
 
     def get_key(self, key, table=TinyDB.DEFAULT_TABLE):
         """
@@ -27,11 +30,13 @@ class KeyDB(TinyDB):
 
         :returns: array of values if single is false else returns first value
         """
-        item = self.table(table).get(where('key') == key)
-        if item is None:
-            raise KeyError
+        table = self.table(table)
+        with transaction(table):
+            item = table.get(where('key') == key)
+            if item is None:
+                raise KeyError
 
-        return item['value']
+            return item['value']
 
     def remove_key(self, key, table=TinyDB.DEFAULT_TABLE):
         """
@@ -41,4 +46,6 @@ class KeyDB(TinyDB):
         :param table: table to remove in
         :return: None
         """
-        self.table(table).remove(where('key') == key)
+        table = self.table(table)
+        with transaction(table):
+            table.remove(where('key') == key)

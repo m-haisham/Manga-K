@@ -8,6 +8,10 @@ Flask API to download and store manga
 
 - Manganel
 
+## Database
+
+Flask Sqlalchemy
+
 ## API
 
 ### GET _All mangas_
@@ -21,7 +25,7 @@ Used to get all the current mangas in the database
 ### GET _specific manga_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Goblin_Slayer'
+curl --location --request GET 'http://127.0.0.1:5000/manga/1'
 ```
 
 #### KEYS
@@ -35,7 +39,7 @@ With every call to this Uri updates are added to database, so a second call to t
 ### GET _thumbnail_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Goblin_Slayer/thumbnail'
+curl --location --request GET 'http://127.0.0.1:5000/thumbnail/1'
 ```
 
 Employs a caching mechanism so it is recommended to use this over direct url.
@@ -58,14 +62,14 @@ curl --location --request POST 'http://127.0.0.1:5000/mangas' \
 
 ```json
 {
-  "url": "https://mangakakalot.com/manga/martial_peak"
+  "url": "https://mangakakalot.com/manga/1"
 }
 ```
 
 ### POST _change manga settings_
 
 ```bash
-curl --location --request POST 'http://127.0.0.1:5000/manga/Fukushuu_o_Koinegau_Saikyou_Yuusha_wa,_Yami_no_Chikara_de_Senmetsu_Musou_Suru' \
+curl --location --request POST 'http://127.0.0.1:5000/manga/2' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "manhwa": false,
@@ -89,7 +93,7 @@ curl --location --request POST 'http://127.0.0.1:5000/manga/Fukushuu_o_Koinegau_
 ### GET _specific chapter_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Martial_Peak/Chapter_3'
+curl --location --request GET 'http://127.0.0.1:5000/chapter/1/5'
 ```
 
 Provides information needed to create reader.
@@ -101,7 +105,7 @@ Calling this marks the chapter as read and is added to recents.
 ### GET _page list_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Martial_Peak/Chapter_3/pages'
+curl --location --request GET 'http://127.0.0.1:5000/pages/1/2'
 ```
 
 Calling this marks the chapter as read and is added to recents.
@@ -109,7 +113,7 @@ Calling this marks the chapter as read and is added to recents.
 ### GET _page image_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Martial_Peak/Chapter_3/1'
+curl --location --request GET 'http://127.0.0.1:5000/page/1/2/5'
 ```
 
 Returns a jpeg image as attachment.
@@ -133,7 +137,7 @@ returns the recently read list
 ### GET _manga updates_
 
 ```bash
-curl --location --request GET 'http://127.0.0.1:5000/manga/Goblin_Slayer/updates'
+curl --location --request GET 'http://127.0.0.1:5000/updates/1'
 ```
 
 updates arent added to the database chapter list, so consecutive calls will give the same result.
@@ -196,10 +200,8 @@ Where 0 is the index of download.
 curl --location --request POST 'http://127.0.0.1:5000/downloads' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-	"manga_url": "https://mangakakalot.com/manga/martial_peak",
-    "urls": [
-    	"https://mangakakalot.com/chapter/martial_peak/chapter_3"
-    ]
+	"manga_id": 1,
+    "chapter_ids": [1, 2]
 }'
 ```
 
@@ -207,9 +209,9 @@ Returns information of chapters set to download
 
 #### REQUIRES
 
-manga_url url of the manga being added to download
+manga_id id of the manga being added to download
 
-urls list of urls belonging to chapters to be downloaded
+chapter_ids list of ids belonging to chapters to be downloaded
 
 #### Headers
 
@@ -219,8 +221,8 @@ urls list of urls belonging to chapters to be downloaded
 
 ```json
 {
-  "manga_url": "https://mangakakalot.com/manga/martial_peak",
-  "urls": ["https://mangakakalot.com/chapter/martial_peak/chapter_3"]
+  "manga_id": 1,
+  "chapter_ids": [1, 2]
 }
 ```
 
@@ -230,10 +232,7 @@ urls list of urls belonging to chapters to be downloaded
 curl --location --request POST 'http://127.0.0.1:5000/downloads/delete' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-	"manga_url": "https://mangakakalot.com/manga/martial_peak",
-    "urls": [
-    	"https://mangakakalot.com/chapter/martial_peak/chapter_3"
-    ]
+    "ids": [1, 2]
 }'
 ```
 
@@ -241,9 +240,7 @@ Returns information of chapters set to delete
 
 #### REQUIRES
 
-manga_url url of the manga being added to download
-
-urls list of urls belonging to chapters to be downloaded
+chapter ids to delete
 
 #### Headers
 
@@ -253,8 +250,7 @@ urls list of urls belonging to chapters to be downloaded
 
 ```json
 {
-  "manga_url": "https://mangakakalot.com/manga/martial_peak",
-  "urls": ["https://mangakakalot.com/chapter/martial_peak/chapter_3"]
+    "ids": [1, 2]
 }
 ```
 

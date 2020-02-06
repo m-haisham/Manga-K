@@ -1,18 +1,33 @@
 from datetime import datetime
 
 from network import Manga
+from store import manga_path
+from ..database import Database
+from ..types import ArrayType, PathType
 
 DATETIME_FORMAT = '%D %T'
 
+db = Database.get()
 
-class MangaModel(Manga):
-    def __init__(self):
-        super(MangaModel, self).__init__()
 
-        self.manhwa = False
-        self.favourite = False
-        self.last_accessed = datetime.utcnow().strftime(DATETIME_FORMAT)
-        self.added = datetime.utcnow().strftime(DATETIME_FORMAT)
+class MangaModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(), nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.String())
+    genres = db.Column(ArrayType())
+    url = db.Column(db.String(), unique=True, nullable=False)
+    path = db.Column(PathType())
+
+    thumbnail_url = db.Column(db.String())
+
+    manhwa = db.Column(db.Boolean, default=False)
+    favourite = db.Column(db.Boolean, default=False)
+    added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    chapters = db.relationship('ChapterModel', backref='manga', lazy=True)
+    map = db.relationship('MangaMap', backref='manga', lazy=True)
 
     def persist(self, previous):
         """
@@ -20,7 +35,6 @@ class MangaModel(Manga):
         """
         self.manhwa = previous['manhwa']
         self.favourite = previous['favourite']
-        self.last_accessed = datetime.utcnow().strftime(DATETIME_FORMAT)
         self.added = previous['added']
 
     def to_dict(self):
@@ -39,8 +53,10 @@ class MangaModel(Manga):
             setattr(new, key, getattr(manga, key))
 
         for key, value in kwargs.items():
-            if value:
+            if value is not None:
                 setattr(new, key, value)
+
+        new.path = manga_path(manga.title)
 
         return new
 
@@ -56,3 +72,6 @@ class MangaModel(Manga):
             setattr(new, key, j[key])
 
         return new
+
+    def __repr__(self):
+        return f"Manga('{self.title}', '{self.url}')"

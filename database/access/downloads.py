@@ -1,27 +1,23 @@
 import shutil
-
 from pathlib import Path
 from threading import Lock
-
-from tinydb import Query
-
-from background.models import DownloadModel
-from rest.encoding import page_link
-from . import MangaAccess
-from .. import mainbase, mangabase
-
-from background import BackgroundDownload
-
 from typing import List
 
+from tinydb import Query
+from tinyrecord import transaction
+
+from background import BackgroundDownload
+from database.models import DownloadModel
+from rest.encoding import page_link
+from . import MangaAccess
+from .. import LocalSession
 from ..models import ChapterModel
+from ..schema import download_schema
 
 dbmodel = Query()
 
 
 class DownloadAccess:
-    maindb = mainbase.get()
-    mangadb = mangabase.get()
     dthread = BackgroundDownload.get()
 
     mutex = Lock()
@@ -35,26 +31,31 @@ class DownloadAccess:
         :param model: model to download
         :return: true if added else false
         """
-        access = MangaAccess(model.manga_title)
+        chapter = LocalSession.session.query(ChapterModel).get(model.chapter_id)
+
+        if chapter.manga_id != model.manga_id:
+            return False
 
         # already in progress
-        if any([download.url == model.url for download in self.downloads]):
+        if any([download['chapter_id'] == model.chapter_id for download in self.downloads]):
             return False
 
         # already downloaded
-        if access.get_chapter_by_url(model.url)['downloaded']:
+        if chapter.downloaded:
             return False
 
-        self.maindb.downloads.upsert(model.todict(), dbmodel.url == model.url)
+        LocalSession.session.add(model)
+        LocalSession.session.flush()
 
-        self.dthread.queue.put(model)
-        self.downloads.append(model)
+        model_dict = download_schema.dump(model)
+        self.dthread.queue.put(model_dict)
+        self.downloads.append(model_dict)
 
-        for i, page in enumerate(model.pages):
-            page.path = str(model.path / Path(f'{i + 1}.jpg'))
-            page.link = page_link(model.manga_title, model.title, i+1)
+        for i, page in enumerate(chapter.pages):
+            page.path = chapter.path / Path(f'{i + 1}.jpg')
+            page.link = page_link(model.manga_id, model.chapter_id, i+1)
 
-        access.update_pages([model.todict()])
+        LocalSession.session.commit()
         return True
 
     def get(self, i):
@@ -72,16 +73,15 @@ class DownloadAccess:
         """
         return self.downloads
 
-    def remove(self, url):
+    def remove(self, id):
         """
         Remove matching url from downloads database table
 
         :param url: url to be removed
         :return: None
         """
-        self.maindb.downloads.remove(dbmodel.url == url)
         for i, download in enumerate(self.downloads):
-            if download.url == url:
+            if download['chapter_id'] == id:
                 del self.downloads[i]
                 break
 
@@ -119,23 +119,9 @@ class DownloadAccess:
 
         return flags
 
-    async def delete(self, access: MangaAccess, chapters: List[dict]):
-        for chapter in chapters:
-            info = access.get_chapter_by_url(chapter)
-
-            if info['downloaded']:
-                info['downloaded'] = False
-
-                pages = info['pages']
-                for page in pages:
-                    page['path'] = ''
-                    page['link'] = ''
-
-                shutil.rmtree(info['path'])
-
-                chapter_model = ChapterModel.fromdict(info)
-                access.update_chapters_downloaded([chapter_model])
-                access.update_pages([info])
+    async def delete(self, paths):
+        for path in paths:
+            shutil.rmtree(path)
 
     @staticmethod
     def load_from_database():
@@ -144,7 +130,7 @@ class DownloadAccess:
 
         :return:
         """
-        models = [DownloadModel.fromdict(model) for model in DownloadAccess.maindb.downloads.all()]
+        models = LocalSession.session.query(DownloadModel).all()
         access = DownloadAccess()
 
         for model in models:

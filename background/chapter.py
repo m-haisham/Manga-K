@@ -4,9 +4,11 @@ import requests
 
 
 class ChapterDownload:
-    def __init__(self, m_download, pause, exit):
-        self.model = m_download
-        self.path = Path(self.model.path)
+    def __init__(self, model, chapter, pages, pause, exit):
+        self.model = model
+        self.chapter = chapter
+        self.pages = pages
+        self.path = Path(self.chapter.path)
 
         self.pause = pause
         self.exit = exit
@@ -18,9 +20,8 @@ class ChapterDownload:
         total_length = 0
 
         model_pages = []
-
         # full length
-        for page in self.model.pages:
+        for page in self.pages:
             url = page.url
             response = requests.head(url)
 
@@ -32,8 +33,8 @@ class ChapterDownload:
                 responses.append(response)
                 model_pages.append(page)
 
-        self.model.max = total_length
-        self.model.value = 0
+        self.model['max'] = total_length
+        self.model['value'] = 0
 
         # download stream
         for i, page in enumerate(model_pages):
@@ -43,10 +44,10 @@ class ChapterDownload:
             with path.open('wb') as f:
                 chunksize = int(total_length / 100)
                 for data in response.iter_content(chunk_size=chunksize):
-                    self.model.value += len(data)
+                    self.model['value'] += len(data)
                     f.write(data)
 
-                    print(self.model.value / self.model.max)
+                    print(self.model['value'] / self.model['max'])
 
                     while self.pause.value:
                         if self.exit.value:

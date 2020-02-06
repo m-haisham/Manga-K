@@ -1,15 +1,13 @@
-from tinydb import Query
+from datetime import datetime
 
-from database import mainbase
+from database import LocalSession
 from database.models import RecentModel
-
-_recent = Query()
 
 
 class RecentsAccess:
-    recents = mainbase.get().recents
 
-    def add(self, recent_model: RecentModel):
+    @staticmethod
+    def upsert(recent, commit=True):
         """
         Adds model to recents
         Non repeating
@@ -17,10 +15,22 @@ class RecentsAccess:
         :param recent_model: model to add
         :return: None
         """
-        self.recents.upsert(recent_model.to_dict(), _recent.manga_title == recent_model.manga_title)
+        old = LocalSession.session.query(RecentModel).filter_by(manga_id=recent.manga_id).first()
+        if old is None:
+            LocalSession.session.add(recent)
+        else:
+            old.chapter_id = recent.chapter_id
+            old.time = datetime.utcnow()
+            recent = old
 
-    def all(self):
+        if commit:
+            LocalSession.session.commit()
+
+        return recent
+
+    @staticmethod
+    def all():
         """
         :return: all recents
         """
-        return self.recents.all()
+        pass

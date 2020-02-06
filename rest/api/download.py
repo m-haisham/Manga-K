@@ -1,116 +1,113 @@
 import asyncio
 
-from flask_api import status
 from flask_restful import Resource, reqparse
 
-from database.models import ChapterModel, PageModel
+from background import BackgroundDownload
+from database import LocalSession
 from database.access import DownloadAccess, MangaAccess
-
-from background.models import DownloadModel
+from database.models import DownloadModel, ChapterModel, PageModel
+from database.schema import download_schema, downloads_schema, nodownload_schema, chapters_schema
 from network.scrapers import Mangakakalot
-from rest.error import error_message
 
 download_access = DownloadAccess()
 
-parser = reqparse.RequestParser()
-parser.add_argument('manga_url', required=True)
-parser.add_argument('urls', action='append', required=True)
-
 
 class DownloadsList(Resource):
+    download_parser = reqparse.RequestParser()
+    download_parser.add_argument('manga_id', required=True)
+    download_parser.add_argument('chapter_ids', action='append', required=True)
+
     def get(self):
-        downloads = download_access.get_all()
-
-        models = []
-        for model in downloads:
-            d_model = model.todict()
-
-            del d_model['path']
-            del d_model['pages']
-
-            models.append(d_model)
-
-        return models
+        return DownloadAccess.downloads
 
     def post(self):  # add download
-        args = parser.parse_args()
+        args = self.download_parser.parse_args()
 
-        mangakakalot = Mangakakalot()
+        BackgroundDownload.paused.value = True
 
-        manga_access = MangaAccess.map(args['manga_url'])
-        if manga_access is None:
-            return error_message('Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
+        additions = []
 
-        info = manga_access.get_info()
+        manga_access = MangaAccess(args['manga_id'])
+        for chapter_id in args['chapter_ids']:
+            chapter = LocalSession.session.query(ChapterModel).get(chapter_id)
+            if chapter is None:
+                continue
 
-        models = []
-        for url in args['urls']:
-            d_chapter = manga_access.get_chapter_by_url(url)
+            # get pages
+            mangakakalot = Mangakakalot()
+            pages = mangakakalot.get_page_list(chapter)
 
-            pages = [PageModel.from_page(page) for page in mangakakalot.get_page_list(ChapterModel.fromdict(d_chapter))]
-            model = DownloadModel.create(info, d_chapter, pages)
+            page_models = [PageModel(page.url, chapter_id) for page in pages]
+
+            for page_model in page_models:
+                old = LocalSession.session.query(PageModel).filter_by(url=page_model.url).first()
+                if old is None:
+                    LocalSession.session.add(page_model)
+
+            model = DownloadModel.create(manga_access.id, chapter_id)
             response = download_access.add(model)
 
-            d_model = model.todict()
-            del d_model['path']
-            del d_model['pages']
+            LocalSession.session.flush()
+            if response:
+                additions.append(download_schema.dump(model))
+            else:
+                download_id = None
+                for download in DownloadAccess.downloads:
+                    if download['chapter_id'] == model.chapter_id:
+                        download_id = download['id']
 
-            # no progress checks if download adding failed
-            if not response:
-                del d_model['value']
-                del d_model['max']
+                model.id = download_id
+                additions.append(nodownload_schema.dump(model))
 
-            models.append(d_model)
-
-        return models
+        LocalSession.session.commit()
+        BackgroundDownload.paused.value = False
+        return additions
 
 
 class Download(Resource):
     def get(self, i):
-        download = download_access.get(i)
-        if download is None:
-            return error_message('Model of index does not exist', length=len(download_access.get_all())), \
-                   status.HTTP_404_NOT_FOUND
-
-        d_model = download.todict()
-        del d_model['path']
-        del d_model['pages']
-
-        return d_model
+        # return DownloadAccess.downloads[i - 1]
+        return downloads_schema.dump(LocalSession.session.query(DownloadModel).all())
 
 
 class DownloadStatus(Resource):
     status_parser = reqparse.RequestParser()
-    status_parser.add_argument('pause', type=bool)
+    status_parser.add_argument('paused', type=bool)
     status_parser.add_argument('clear', type=bool)
 
     def get(self):
-        return download_access.get_status()
+        return {
+            "paused": BackgroundDownload.paused.value
+        }
 
     def post(self):
         args = self.status_parser.parse_args()
 
-        return download_access.set_status(args['pause'], args['clear'])
+        if args['paused'] is not None:
+            BackgroundDownload.paused.value = args['paused']
+
+        if args['clear'] is not None:
+            BackgroundDownload.clear.value = args['clear']
+
+        return {
+            "paused": BackgroundDownload.paused.value
+        }
 
 
 class DownloadDelete(Resource):
+    delete_parser = reqparse.RequestParser()
+    delete_parser.add_argument('ids', action='append', required=True)
+
     def post(self):
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
-        manga_access = MangaAccess.map(args['manga_url'])
-        if manga_access is None:
-            return error_message('Manga not found in database', url=args['manga_url']), status.HTTP_404_NOT_FOUND
+        chapters = LocalSession.session.query(ChapterModel).filter(ChapterModel.id.in_(args['ids'])).all()
 
-        # async operation, as deleting folders can take time
-        asyncio.run(download_access.delete(manga_access, args['urls']))
+        asyncio.run(download_access.delete([chapter.path for chapter in chapters]))
 
-        # prepare output
-        chapters = []
-        for url in args['urls']:
-            chapter_model = manga_access.get_chapter_by_url(url)
-            chapter_model['downloaded'] = False
-            del chapter_model['pages']
+        for chapter in chapters:
+            chapter.downloaded = False
 
-            chapters.append(chapter_model)
+        LocalSession.session.commit()
 
-        return chapters
+        return chapters_schema.dump(chapters)

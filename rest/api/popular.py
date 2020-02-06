@@ -1,9 +1,12 @@
 from flask_api import status
 from flask_restful import Resource
 
-from database.access import ThumbnailAccess
+from database import LocalSession
+from database.access import ThumbnailAccess, MangaAccess
+from database.models import MangaModel
+from database.models.thumbnail import Thumbnail
+from database.schema import discover_schema
 from network.scrapers import Mangakakalot
-from rest.encoding import manga_link, thumbnail_link
 from rest.error import error_message
 
 
@@ -16,20 +19,22 @@ class Popular(Resource):
         if mangas is None:
             return error_message(f'Popular at index {i} not found'), status.HTTP_404_NOT_FOUND
 
-        popular = []
+        models = []
         for manga in mangas:
-            d_manga = vars(manga)
+            # Arrange
+            manga_model = MangaModel.from_manga(manga)
 
-            del d_manga['description']
-            del d_manga['status']
-            del d_manga['genres']
+            # Insert and modify
+            access, inserted = MangaAccess.gesert(manga_model)
+            if not inserted:
+                # update and persist
+                manga_model = access.update(**vars(manga))
 
-            d_manga['link'] = manga_link(manga.title)
-            d_manga['thumbnail_link'] = thumbnail_link(manga.title)
+            thumbnail = Thumbnail(manga_model)
+            ThumbnailAccess.upsert(thumbnail, commit=False)
 
-            # set thumbnail
-            ThumbnailAccess(manga.title, manga.thumbnail_url)
+            models.append(manga_model)
 
-            popular.append(d_manga)
+        LocalSession.session.commit()
 
-        return popular
+        return discover_schema.dump(models)

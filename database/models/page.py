@@ -1,12 +1,23 @@
-from network import Page
+from database import Database
+from database.types import PathType
+
+db = Database.get()
 
 
-class PageModel(Page):
-    def __init__(self):
-        super(PageModel, self).__init__()
+class PageModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
-        self.link = ''
-        self.path = ''
+    url = db.Column(db.String(), unique=True)
+    link = db.Column(db.String())
+    path = db.Column(PathType())
+
+    chapter_id = db.Column(db.Integer, db.ForeignKey('chapter_model.id'), nullable=False)
+
+    def __init__(self, url, chapter_id, **kwargs):
+        super(PageModel, self).__init__(**kwargs)
+
+        self.url = url
+        self.chapter_id = chapter_id
 
     def clean_dict(self) -> dict:
         model = vars(self).copy()

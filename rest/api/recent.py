@@ -1,6 +1,8 @@
 from flask_restful import Resource
 
-from database.access import RecentsAccess
+from database import LocalSession
+from database.models import RecentModel
+from database.schema import recents_schema
 
 
 class RecentList(Resource):
@@ -8,10 +10,6 @@ class RecentList(Resource):
         """
         :return: all recents
         """
-        # arrange
-        recents = RecentsAccess().all()
-        for recent in recents:
-            del recent['pages']
-            del recent['path']
+        recents = LocalSession.session.query(RecentModel).all()
 
-        return recents
+        return recents_schema.dump(recents)
