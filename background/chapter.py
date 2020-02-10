@@ -38,20 +38,23 @@ class ChapterDownload:
 
         # download stream
         for i, page in enumerate(model_pages):
-            path = self.path / Path(f'{i + 1}.jpg')
+            byte_string = b''
 
             response = requests.get(page.url, stream=True)
-            with path.open('wb') as f:
-                chunksize = int(total_length / 100)
-                for data in response.iter_content(chunk_size=chunksize):
-                    self.model['value'] += len(data)
-                    f.write(data)
+            chunksize = int(total_length / 100)
+            for data in response.iter_content(chunk_size=chunksize):
+                self.model['value'] += len(data)
+                byte_string += data
 
-                    print(self.model['value'] / self.model['max'])
+                print(self.model['value'] / self.model['max'])
 
-                    while self.pause.value:
-                        if self.exit.value:
-                            return
-
+                while self.pause.value:
                     if self.exit.value:
                         return
+
+                if self.exit.value:
+                    return
+
+            path = self.path / Path(f'{i + 1}.jpg')
+            with path.open('wb') as f:
+                f.write(byte_string)
