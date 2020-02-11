@@ -25,7 +25,8 @@ class RecentList(Resource):
 
             recently.append({
                 'manga': manga_schema.dump(manga),
-                'chapter': chapter_schema.dump(chapter)
+                'chapter': chapter_schema.dump(chapter),
+                'time': str(recent.time)
             })
 
         LocalSession.session.commit()

@@ -53,6 +53,10 @@ class Manga(Resource):
         else:
             info['updates'] = []
 
+        try:
+            info['recent'] = model.recent.chapter_id
+        except AttributeError:
+            pass
         info['chapters'] = chapters_schema.dump(access.get_chapters())
         return info
 

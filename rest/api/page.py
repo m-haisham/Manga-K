@@ -8,7 +8,7 @@ from flask_restful import Resource
 from database import LocalSession
 from database.access import MangaAccess, RecentsAccess
 from database.models import PageModel, RecentModel
-from database.schema import pages_schema
+from database.schema import pages_schema, pages_downloaded_schema
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from rest.error import error_message
@@ -30,7 +30,7 @@ class PageList(Resource):
 
         # arrange information
         if chapter_model.downloaded:  # give link to pages if downloaded
-            pages = chapter_model.pages
+            pages = pages_downloaded_schema.dump(chapter_model.pages)
 
         elif NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
