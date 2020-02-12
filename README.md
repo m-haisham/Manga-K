@@ -73,9 +73,17 @@ curl --location --request POST 'http://127.0.0.1:5000/manga/2' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "manhwa": false,
-    "favourite": true
+    "favourite": true,
+    "style": "rtl"
 }'
 ```
+
+Style refers to reading style
+options:
+* rtl (right to left)
+* ltr (left to right)
+* vertical
+* webtoon
 
 #### Headers
 
@@ -86,7 +94,8 @@ curl --location --request POST 'http://127.0.0.1:5000/manga/2' \
 ```json
 {
   "manhwa": false,
-  "favourite": true
+  "favourite": true,
+  "style": "rtl"
 }
 ```
 

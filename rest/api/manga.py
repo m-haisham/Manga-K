@@ -3,6 +3,7 @@ from flask_restful import Resource, reqparse
 
 from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel
+from database.models.pref import ReadingStyle
 from database.models.thumbnail import Thumbnail
 from database.schema import mangas_schema, manga_schema, chapters_schema, recent_schema
 from network import NetworkHelper
@@ -12,6 +13,7 @@ from store import chapter_path
 pref_parser = reqparse.RequestParser()
 pref_parser.add_argument('manhwa', type=bool)
 pref_parser.add_argument('favourite', type=bool)
+pref_parser.add_argument('style', type=str)
 
 
 class Manga(Resource):
@@ -59,6 +61,9 @@ class Manga(Resource):
 
     def post(self, manga_id):
         args = pref_parser.parse_args()
+
+        if args['style'] not in ['rtl', 'ltr', 'vertical', 'webtoon']:
+            args['style'] = None
 
         access = MangaAccess(manga_id)
 

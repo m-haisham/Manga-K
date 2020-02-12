@@ -4,7 +4,7 @@ import marshmallow
 class MangaSchema(marshmallow.Schema):
     class Meta:
         fields = (
-            'id', 'title', 'status', 'description', 'genres', 'url', 'thumbnail_url', 'manhwa', 'favourite', 'added')
+            'id', 'title', 'status', 'description', 'genres', 'url', 'thumbnail_url', 'manhwa', 'favourite', 'added', 'style')
 
 class DiscoverSchema(marshmallow.Schema):
     class Meta:

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from network import Manga
 from store import manga_path
+from .pref import ReadingStyle
 from ..database import Database
 from ..types import ArrayType, PathType
 
@@ -23,7 +24,9 @@ class MangaModel(db.Model):
     thumbnail_url = db.Column(db.String())
 
     manhwa = db.Column(db.Boolean, default=False)
+    style = db.Column(db.String(10), default=ReadingStyle.RTL)
     favourite = db.Column(db.Boolean, default=False)
+
     added = db.Column(db.DateTime, default=datetime.utcnow)
 
     chapters = db.relationship('ChapterModel', backref='manga', lazy=True)
