@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel
 from database.models.thumbnail import Thumbnail
-from database.schema import mangas_schema, manga_schema, chapters_schema
+from database.schema import mangas_schema, manga_schema, chapters_schema, recent_schema
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from store import chapter_path
@@ -53,10 +53,7 @@ class Manga(Resource):
         else:
             info['updates'] = []
 
-        try:
-            info['recent'] = model.recent.chapter_id
-        except AttributeError:
-            pass
+        info['recent'] = recent_schema.dump(model.recent)
         info['chapters'] = chapters_schema.dump(access.get_chapters())
         return info
 
