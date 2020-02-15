@@ -11,7 +11,7 @@ class RecentList(Resource):
         """
         :return: all recents
         """
-        recents = LocalSession.session.query(RecentModel).all()
+        recents = LocalSession.session.query(RecentModel).order_by(RecentModel.time.desc()).all()
 
         recently = []
         for recent in recents:

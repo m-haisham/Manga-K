@@ -9,7 +9,7 @@ from .popular import Popular
 from .latest import Latest
 from .download import Download, DownloadsList, DownloadStatus, DownloadDelete
 from .recent import RecentList
-from .update import Updates
+from .update import Updates, UpdatesList
 from .thumbnail import Thumbnail
 
 
@@ -20,6 +20,7 @@ def setup():
     # setup
     api.add_resource(MangaList, '/mangas')
     api.add_resource(Manga, '/manga/<int:manga_id>')
+    api.add_resource(UpdatesList, '/updates')
     api.add_resource(Updates, '/updates/<int:manga_id>')
     api.add_resource(Thumbnail, '/thumbnail/<int:manga_id>')
     api.add_resource(Chapter, '/chapter/<manga_id>/<chapter_id>')

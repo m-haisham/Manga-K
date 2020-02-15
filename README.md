@@ -28,13 +28,10 @@ Used to get all the current mangas in the database
 curl --location --request GET 'http://127.0.0.1:5000/manga/1'
 ```
 
-#### KEYS
-
-chapters all chapters including the updates
-
 #### NOTE
 
-With every call to this Uri updates are added to database, so a second call to this would not give the updates. If you need to get updates more than once goto **manga updates**.
+Update status of a chapter is marked by `update_status` key.
+The first population of would not be marked as updates
 
 ### GET _thumbnail_
 
@@ -133,7 +130,7 @@ Returns a jpeg image as attachment.
 curl --location --request GET 'http://127.0.0.1:5000/favourites'
 ```
 
-Returns all the mangas that have been favourited
+Returns all the mangas that have been favoured
 
 ### GET _all recents_
 
@@ -141,15 +138,25 @@ Returns all the mangas that have been favourited
 curl --location --request GET 'http://127.0.0.1:5000/recents'
 ```
 
+`order` descending
+
 returns the recently read list
+
+### GET _all updates_
+
+```bash
+curl --location --request GET 'http://127.0.0.1:5000/updates'
+```
+
+`returns` The full update history in
+
+`order` descending
 
 ### GET _manga updates_
 
 ```bash
 curl --location --request GET 'http://127.0.0.1:5000/updates/1'
 ```
-
-updates arent added to the database chapter list, so consecutive calls will give the same result.
 
 ### POST search
 

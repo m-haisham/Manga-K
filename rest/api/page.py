@@ -23,6 +23,7 @@ class PageList(Resource):
 
         chapter_model = access.chapter_or_404(chapter_id)
         chapter_model.read = True
+        chapter_model.update_status = False
 
         # add to recents
         recent = RecentModel.create(manga_id, chapter_id)

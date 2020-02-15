@@ -12,6 +12,7 @@ class ChapterModel(db.Model):
     title = db.Column(db.String(), nullable=False)
     url = db.Column(db.String(), unique=True, nullable=False)
 
+    update_status = db.Column(db.Boolean, default=False)
     read = db.Column(db.Boolean, default=False)
     downloaded = db.Column(db.Boolean, default=False)
     path = db.Column(PathType())

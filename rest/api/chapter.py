@@ -22,6 +22,7 @@ class Chapter(Resource):
 
         chapter_info = chapter_schema.dump(chapter_model)
         chapter_model.read = True
+        chapter_model.update_status = False
 
         # add to recents
         recent = RecentModel.create(manga_id, chapter_id)
@@ -56,7 +57,10 @@ class Chapter(Resource):
         access = MangaAccess(manga_id)
         chapter_model = access.chapter_or_404(chapter_id)
 
-        chapter_model.read = args['read']
-        LocalSession.session.commit()
+        if args['read'] is not None:
+            chapter_model.read = args['read']
+            chapter_model.update_status = False
+
+            LocalSession.session.commit()
 
         return chapter_schema.dump(chapter_model)

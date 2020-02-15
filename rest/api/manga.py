@@ -1,8 +1,9 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 
+from database import LocalSession
 from database.access import MangaAccess, ThumbnailAccess
-from database.models import MangaModel, ChapterModel
+from database.models import MangaModel, ChapterModel, UpdateModel
 from database.models.pref import ReadingStyle
 from database.models.thumbnail import Thumbnail
 from database.schema import mangas_schema, manga_schema, chapters_schema, recent_schema
@@ -39,6 +40,7 @@ class Manga(Resource):
             saved_urls = [chapter.url for chapter in access.get_chapters()]
             parsed = mangakakalot.get_chapter_list(model.url)
 
+            is_update = len(access.get_chapters()) > 0
             updates = []
             for chapter in parsed:
                 if chapter.url in saved_urls:
@@ -47,13 +49,18 @@ class Manga(Resource):
                     updates.append(ChapterModel.from_chapter(
                         chapter,
                         manga_id=model.id,
+                        update_status=is_update,
                         path=chapter_path(model.title, chapter.title)
                     ))
 
             access.insert_chapters(updates)
-            info['updates'] = chapters_schema.dump(updates)
-        else:
-            info['updates'] = []
+
+            if is_update:
+                for chapter in updates:
+                    update = UpdateModel.create(manga_model.id, chapter.id)
+                    LocalSession.session.add(update)
+
+                LocalSession.session.commit()
 
         info['recent'] = recent_schema.dump(model.recent)
         info['chapters'] = chapters_schema.dump(access.get_chapters())
