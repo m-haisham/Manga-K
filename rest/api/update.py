@@ -6,6 +6,7 @@ from database.models import UpdateModel
 
 from database.schema.update.many import updates_schema
 
+from ..request import limit_parser
 
 class Updates(Resource):
     def get(self, manga_id):
@@ -19,6 +20,10 @@ class Updates(Resource):
 
 class UpdatesList(Resource):
     def get(self):
-        updates = LocalSession.session.query(UpdateModel).order_by(UpdateModel.time.desc()).all()
+        args = limit_parser.parse_args()
+        if args['limit'] is None:
+            updates = LocalSession.session.query(UpdateModel).order_by(UpdateModel.time.desc()).all()
+        else:
+            updates = LocalSession.session.query(UpdateModel).order_by(UpdateModel.time.desc()).limit(args['limit']).all()
 
         return updates_schema.dump(updates)

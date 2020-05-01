@@ -4,12 +4,13 @@ from flask_restful import Resource, reqparse
 from database import LocalSession
 from database.access import MangaAccess, ThumbnailAccess
 from database.models import MangaModel, ChapterModel, UpdateModel
-from database.models.pref import ReadingStyle
 from database.models.thumbnail import Thumbnail
 from database.schema import mangas_schema, manga_schema, chapters_schema, recent_schema
 from network import NetworkHelper
 from network.scrapers import Mangakakalot
 from store import chapter_path
+
+from ..request import offline_parser
 
 pref_parser = reqparse.RequestParser()
 pref_parser.add_argument('manhwa', type=bool)
@@ -19,13 +20,15 @@ pref_parser.add_argument('style', type=str)
 
 class Manga(Resource):
     def get(self, manga_id):
+        args = offline_parser.parse_args()
+
         access = MangaAccess(manga_id)
 
         model = access.get_or_404()
         info = manga_schema.dump(model)
 
         # update chapters
-        if NetworkHelper.is_connected():
+        if not args['offline'] and NetworkHelper.is_connected():
             mangakakalot = Mangakakalot()
 
             manga = mangakakalot.get_manga_info(model.url)
@@ -55,7 +58,7 @@ class Manga(Resource):
 
             access.insert_chapters(updates)
 
-            if is_update:
+            if model.favourite and is_update:
                 for chapter in updates:
                     update = UpdateModel.create(manga_model.id, chapter.id)
                     LocalSession.session.add(update)

@@ -8,4 +8,8 @@ class FavouriteList(Resource):
     def get(self):
         favourites = MangaAccess.filter(favourite=True)
 
-        return mangas_schema.dump(favourites)
+        f_dicts = mangas_schema.dump(favourites)
+        for i, favourite in enumerate(favourites):
+            f_dicts[i]['updates'] = len([chapter for chapter in favourite.chapters if chapter.update_status])
+
+        return f_dicts
